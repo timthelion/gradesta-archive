@@ -1,0 +1,45 @@
+message Slot{
+  string name = 1;
+  string type = 2;
+  int64 id = 3;
+}
+
+message Slots{
+  repeated Slot slot= 1;
+}
+
+message Appliance{
+  string url = 1;
+}
+
+message Button{
+  Appliance appliance = 1;
+  int64 button = 2;
+}
+
+message SlotContents{
+  bool empty = 1;
+  bool bool = 2;
+  int32 int32 = 3;
+  int64 int64 = 4;
+  string string = 5;
+  bytes bytes = 6;
+  float float = 7;
+  timestamp timestamp = 8;
+  Appliance appliance = 9;
+  Slot slot = 10;
+}
+
+message Command{
+  enum CommandType{
+    SET = 1;
+    GET = 2;
+    MKSLOT = 3;
+    DELSLOT = 4;
+    GETSLOTS = 5;
+  }
+  CommandType commandtype = 1;
+  int64 slotid = 2;
+  SlotContents slotcontents = 3;
+  Slot newslot = 4;
+}
