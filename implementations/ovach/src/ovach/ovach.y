@@ -12,6 +12,7 @@ _ > b GTK WidgetType ; b GTK Widget > h Widget, _ > h Widget LabelText, _ > h Wi
 --
 
 Some of this stuff is stolen from https://github.com/golang-samples/yacc/blob/master/simple/calc.y Thanks!
+And from https://golang.org/src/cmd/yacc/testdata/expr/expr.y?m=text
 
 */
 %{
@@ -19,14 +20,14 @@ Some of this stuff is stolen from https://github.com/golang-samples/yacc/blob/ma
 package main
 
 import (
-	"bufio"
 	"bytes"
 	"fmt"
 	"io"
 	"log"
-	"os"
 	"unicode/utf8"
+	"unicode"
         "strconv"
+	"gopkg.in/readline.v1"
 )
 
 const (
@@ -40,6 +41,9 @@ const (
        TYPE_TIMESTAMP
        TYPE_APPLIANCE
        TYPE_SLOT
+       TYPE_LOWERCASE
+       TYPE_UPPERCASE
+       TYPE_BUILT_IN_COMMAND
 )
 
 var (
@@ -49,6 +53,8 @@ var (
 type Value struct{
   value_type int32
   value_int32 int32
+  value_bool bool
+  value_lowercase string
 }
 
 %}
@@ -63,12 +69,12 @@ type Value struct{
 %start line
 %type  <val> keyword_arguments symbols symbol literal slot_identifier expr
 %type  <values> table_body_columns
-%token <val> STATEMENT TABLE_HEADING TABLE_BODY LOWERCASE UPPERCASE STRING NUMBER BUILT_IN_COMMAND HOLE
+%token <val> STATEMENT TABLE_HEADING TABLE_BODY LOWERCASE UPPERCASE STRING NUMBER BOOL BUILT_IN_COMMAND HOLE
 %left ','
 %left '.'
 %left TO
 %left AND OR
-%left GT LT LTEQ GTEQ EQ NEQ
+%left '>' '<' LTEQ GTEQ EQ NEQ
 %left '+' '-'
 %left '/'
 %left '*'
@@ -76,8 +82,17 @@ type Value struct{
 %% /* Rules section */
 line
     : TABLE_HEADING sentences ',' table_heading_columns ',' sentences
+    {
+      fmt.Println("TABLE_HEADING")
+    }
     | TABLE_BODY table_body_columns
+    {
+      fmt.Println("TABLE_BODY")
+    }
     | STATEMENT sentences
+    {
+      fmt.Println("STATEMENT")
+    }
     ;
 table_heading_columns
     : potentially_holy_sentences
@@ -108,7 +123,7 @@ sentence
     : BUILT_IN_COMMAND keyword_arguments
     | expr
     {
-      fmt.Println("%v",$1.value_int32)
+      fmt.Println("",$1)
     }
     | expr TO slot_identifier
     ;
@@ -143,6 +158,7 @@ symbol
 literal
     : STRING
     | NUMBER
+    | BOOL
     ;
 slot_identifier
     : symbols
@@ -150,31 +166,69 @@ slot_identifier
 expr
     : '(' expr ')'
     {
-      $$ = NULL
+      $$ = $2
     }
-    | expr GT expr
+    | expr AND expr
     {
-      $$ = NULL
+      if($1.value_type == TYPE_BOOL && $1.value_type == TYPE_BOOL) {
+        $1.value_bool = $1.value_bool && $3.value_bool
+      }
+      $$ = $1
     }
-    | expr LT expr
+    | expr OR expr
     {
-      $$ = NULL
+      if($1.value_type == TYPE_BOOL && $1.value_type == TYPE_BOOL) {
+        $1.value_bool = $1.value_bool || $3.value_bool
+      }
+      $$ = $1
+    }
+    | expr '>' expr
+    {
+      if($1.value_type == TYPE_INT32 && $1.value_type == TYPE_INT32) {
+        $1.value_bool = $1.value_int32 > $3.value_int32
+      }
+      $1.value_type = TYPE_BOOL
+      $$ = $1
+    }
+    | expr '<' expr
+    {
+      if($1.value_type == TYPE_INT32 && $1.value_type == TYPE_INT32) {
+        $1.value_bool = $1.value_int32 < $3.value_int32
+      }
+      $1.value_type = TYPE_BOOL
+      $$ = $1
     }
     | expr LTEQ expr
     {
-      $$ = NULL
+      if($1.value_type == TYPE_INT32 && $1.value_type == TYPE_INT32) {
+        $1.value_bool = $1.value_int32 >= $3.value_int32
+      }
+      $1.value_type = TYPE_BOOL
+      $$ = $1
     }
     | expr GTEQ expr
     {
-      $$ = NULL
+      if($1.value_type == TYPE_INT32 && $1.value_type == TYPE_INT32) {
+        $1.value_bool = $1.value_int32 >= $3.value_int32
+      }
+      $1.value_type = TYPE_BOOL
+      $$ = $1
     }
     | expr EQ expr
     {
-      $$ = NULL
+      if($1.value_type == TYPE_INT32 && $1.value_type == TYPE_INT32) {
+        $1.value_bool = $1.value_int32 == $3.value_int32
+      }
+      $1.value_type = TYPE_BOOL
+      $$ = $1
     }
     | expr NEQ expr
     {
-      $$ = NULL
+      if($1.value_type == TYPE_INT32 && $1.value_type == TYPE_INT32) {
+        $1.value_bool = $1.value_int32 != $3.value_int32
+      }
+      $1.value_type = TYPE_BOOL
+      $$ = $1
     }
     | expr '+' expr
     {
@@ -224,7 +278,7 @@ const eof = 0
 // The parser uses the type <prefix>Lex as a lexer.  It must provide
 // the methods Lex(*<prefix>SymType) int and Error(string).
 type OvachLex struct {
-	line []byte
+	line string
 	peek rune
 }
 
@@ -250,6 +304,8 @@ func (x *OvachLex) Lex(yylval *OvachSymType) int {
 		case eof:
 		        parse_mode = STATEMENT_MODE
 			return eof
+		case '#':
+			return eof
 		case '0', '1', '2', '3', '4', '5', '6', '7', '8', '9':
 			return x.num(c, yylval)
 		case '+', '-', '*', '/', '(', ')':
@@ -264,7 +320,13 @@ func (x *OvachLex) Lex(yylval *OvachSymType) int {
 
 		case ' ', '\t', '\n', '\r':
 		default:
-			log.Printf("unrecognized character %q", c)
+		        if unicode.IsLower(c) {
+			    return x.lowercase(c, yylval)
+			} else if unicode.IsSymbol(c) || unicode.IsPunct(c) {
+			    return x.operator(c, yylval)
+			} else {
+			  log.Printf("unrecognized character %q", c)
+			}
 		}
 	}
 }
@@ -300,6 +362,83 @@ func (x *OvachLex) num(c rune, yylval *OvachSymType) int {
 	return NUMBER
 }
 
+func (x *OvachLex) lowercase(c rune, yylval *OvachSymType) int {
+	add := func(b *bytes.Buffer, c rune) {
+		if _, err := b.WriteRune(c); err != nil {
+			log.Fatalf("WriteRune: %s", err)
+		}
+	}
+	var b bytes.Buffer
+	add(&b, c)
+	L: for {
+		c = x.next()
+		if unicode.IsLower(c) || unicode.IsUpper(c){
+			add(&b, c)
+		} else {
+			break L
+		}
+	}
+	if c != eof {
+		x.peek = c
+	}
+	s := b.String()
+	switch s {
+	  case "true":
+	    yylval.val.value_type = TYPE_BOOL
+	    yylval.val.value_bool = true
+	    return BOOL
+	  case "false":
+	    yylval.val.value_type = TYPE_BOOL
+	    yylval.val.value_bool = false
+	    return BOOL
+	  default:
+            yylval.val.value_type = TYPE_LOWERCASE
+            yylval.val.value_lowercase = s
+	    return LOWERCASE
+	}
+}
+
+func (x *OvachLex) operator(c rune, yylval *OvachSymType) int {
+	add := func(b *bytes.Buffer, c rune) {
+		if _, err := b.WriteRune(c); err != nil {
+			log.Fatalf("WriteRune: %s", err)
+		}
+	}
+	var b bytes.Buffer
+	add(&b, c)
+	L: for {
+		c = x.next()
+		if unicode.IsSymbol(c) || unicode.IsPunct(c) {
+			add(&b, c)
+		} else {
+			break L
+		}
+	}
+	if c != eof {
+		x.peek = c
+	}
+	s := b.String()
+	switch s {
+	  case "&&":
+	    return AND
+	  case "||":
+	    return OR
+	  case "==":
+	    return EQ
+	  case "!=":
+	    return NEQ
+	  case ">=":
+	    return GTEQ
+	  case "<=":
+	    return LTEQ
+	  case ">" , "<":
+	    return int(s[0])
+	  default:
+	    log.Printf("unrecognized operator %s", s)
+	}
+	return 0
+}
+
 // Return the next rune for the lexer.
 func (x *OvachLex) next() rune {
 	if x.peek != eof {
@@ -310,7 +449,7 @@ func (x *OvachLex) next() rune {
 	if len(x.line) == 0 {
 		return eof
 	}
-	c, size := utf8.DecodeRune(x.line)
+	c, size := utf8.DecodeRuneInString(x.line)
 	x.line = x.line[size:]
 	if c == utf8.RuneError && size == 1 {
 		log.Print("invalid utf8")
@@ -325,19 +464,19 @@ func (x *OvachLex) Error(s string) {
 }
 
 func main() {
-	in := bufio.NewReader(os.Stdin)
+        rl, err := readline.New("> ")
+        if err != nil {
+          panic(err)
+        }
+        defer rl.Close()
 	for {
-		if _, err := os.Stdout.WriteString("> "); err != nil {
-			log.Fatalf("WriteString: %s", err)
-		}
-		line, err := in.ReadBytes('\n')
+                line, err := rl.Readline()
+                if err != nil { // io.EOF, readline.ErrInterrupt
+                  break
+                }
 		if err == io.EOF {
 			return
 		}
-		if err != nil {
-			log.Fatalf("ReadBytes: %s", err)
-		}
-
 		OvachParse(&OvachLex{line: line})
 	}
 }
