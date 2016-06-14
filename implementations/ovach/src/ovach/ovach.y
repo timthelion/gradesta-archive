@@ -45,15 +45,15 @@ const (
        TYPE_SLOT
 )
 
-var (
-       NULL = Value{}
-)
-
 type Value struct{
   value_type int32
   value_int32 int32
   value_bool bool
 }
+
+type Expr func() (ret Value)
+type Hole func(fill Expr) ()
+type Statement func()
 
 type TableFormat struct {
   head Statement
@@ -63,11 +63,9 @@ type TableFormat struct {
 
 var (
      table_format TableFormat
+     hand map[string]Value
 )
 
-type Expr func() (ret Value)
-type Hole func(fill Expr) ()
-type Statement func()
 %}
 
 // fields inside this union end up as the fields in a structure known
@@ -150,24 +148,27 @@ table_heading_column
     : holy_sentence
     | sentences '.' holy_sentence '.' sentences
     {
+      s1, s2, s3 := $1, $3, $5
       $$ = func(expr Expr){
-	$1()
-	$3(expr)
-	$5()
+	s1()
+	s2(expr)
+	s3()
       }
     }
     | holy_sentence '.' sentences
     {
+      s1, s2 := $1, $3
       $$ = func(expr Expr){
-	$1(expr)
-	$3()
+	s1(expr)
+	s2()
       }
     }
     | sentences '.' holy_sentence
     {
+      s1, s2 := $1, $3
       $$ = func(expr Expr){
-	$1()
-	$3(expr)
+	s1()
+	s2(expr)
       }
     }
 table_body_columns
@@ -195,17 +196,19 @@ sentences
     }
     | sentences '.' sentence
     {
+      s1, s2 := $1, $3
       $$ = func(){
-	$1()
-	$3()
+	s1()
+	s2()
       }
     }
     ;
 sentence
     : BUILT_IN_COMMAND keyword_arguments
     {
+      command := $1
       $$ = func(){
-        if $1 == "exit"{
+        if command == "exit"{
           fmt.Println("Bye...")
 	  os.Exit(0)
 	}
@@ -213,15 +216,16 @@ sentence
     }
     | expr
     {
+      expr := $1
       $$ = func(){
-        fmt.Println("",$1())
+        fmt.Println("",expr())
       }
     }
     | expr TO slot_identifier
     {
       expr, si := $1, $3
       $$ = func(){
-	fmt.Println("",expr(),si)
+	set_slot(expr(),si)
       }
     }
     ;
@@ -230,7 +234,7 @@ holy_sentence
     {
       si := $3
       $$ = func(expr Expr){
-	fmt.Println("",expr(),si)
+	set_slot(expr(),si)
       }
     }
     ;
@@ -422,7 +426,14 @@ expr
     }
     | slot_identifier
     {
+      si := $1
       $$ = func() (value Value){
+	if si[0] == "h"{
+	    val, ok := hand[si[1]]
+	    if ok{
+	      return val
+	    }
+	}
 	return Value{}
       }
     }
@@ -558,8 +569,8 @@ func (x *OvachLex) lowercase(c rune, yylval *OvachSymType) int {
 	    yylval.val.value_type = TYPE_BOOL
 	    yylval.val.value_bool = false
 	    return BOOL
-	  case "exit":
-            yylval.symbol = "exit"
+	  case "exit", "ls", "mkslt", "cd":
+            yylval.symbol = s
 	    return BUILT_IN_COMMAND
 	  case "to":
 	    return TO
@@ -602,7 +613,7 @@ func (x *OvachLex) operator(c rune, yylval *OvachSymType) int {
 	    return GTEQ
 	  case "<=":
 	    return LTEQ
-	  case ">", "<", "+", "-", "*", "/", "(", ")", ",", "_":
+	  case ">", "<", "+", "-", "*", "/", "(", ")", ",", "_", ".":
 	    return int(s[0])
           // Recognize Unicode multiplication and division
           // symbols, returning what the parser expects.
@@ -656,6 +667,10 @@ func main() {
           panic(err)
         }
         defer rl.Close()
+	/*
+	  Init runtime
+	 */
+	hand = make(map[string]Value)
 	for {
 	        switch parse_mode{
 		    case TABLE_HEADING_MODE:
@@ -674,4 +689,16 @@ func main() {
 		}
 		OvachParse(&OvachLex{line: line})
 	}
+}
+
+/*
+  Execution
+*/
+func set_slot(val Value, slot_identifier []string){
+  if slot_identifier[0] == "h"{
+      val_in_slot,ok := hand[slot_identifier[1]]
+      if !ok || val_in_slot.value_type == val.value_type {
+	    hand[slot_identifier[1]] = val
+      }
+  }
 }
