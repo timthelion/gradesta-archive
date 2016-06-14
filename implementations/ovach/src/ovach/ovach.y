@@ -81,7 +81,6 @@ type Statement func()
   val Value
   symbol string
   symbols []string
-  marker string
 }
 
 %start line
@@ -95,7 +94,7 @@ type Statement func()
 %type  <statement> sentences sentence
 %type  <hole> holy_sentence table_heading_column
 %type  <holes> table_heading_columns
-%token <marker> STATEMENT_MARKER TABLE_HEADING_MARKER TABLE_BODY_MARKER TABLE_MODE_TRANSITION
+%token STATEMENT_MARKER TABLE_HEADING_MARKER TABLE_BODY_MARKER TABLE_MODE_TRANSITION
 %left ','
 %left '.'
 %left TO
@@ -178,11 +177,11 @@ table_body_columns
     }
     | expr
     {
-      $$ = []Expr{}
+      $$ = []Expr{$1}
     }
     | table_body_columns ',' expr
     {
-      $$ = []Expr{}
+      $$ = append($1,$3)
     }
     ;
 sentences
@@ -220,13 +219,18 @@ sentence
     }
     | expr TO slot_identifier
     {
-      $$ = func(){}
+      expr, si := $1, $3
+      $$ = func(){
+	fmt.Println("",expr(),si)
+      }
     }
     ;
 holy_sentence
     : '_' TO slot_identifier
     {
+      si := $3
       $$ = func(expr Expr){
+	fmt.Println("",expr(),si)
       }
     }
     ;
@@ -545,7 +549,6 @@ func (x *OvachLex) lowercase(c rune, yylval *OvachSymType) int {
 		x.peek = c
 	}
 	s := b.String()
-        fmt.Println(s)
 	switch s {
 	  case "true":
 	    yylval.val.value_type = TYPE_BOOL
@@ -558,6 +561,8 @@ func (x *OvachLex) lowercase(c rune, yylval *OvachSymType) int {
 	  case "exit":
             yylval.symbol = "exit"
 	    return BUILT_IN_COMMAND
+	  case "to":
+	    return TO
 	  default:
             yylval.symbol = s
 	    return LOWERCASE
@@ -597,7 +602,7 @@ func (x *OvachLex) operator(c rune, yylval *OvachSymType) int {
 	    return GTEQ
 	  case "<=":
 	    return LTEQ
-	  case ">" , "<", "+", "-", "*", "/", "(", ")", ",":
+	  case ">", "<", "+", "-", "*", "/", "(", ")", ",", "_":
 	    return int(s[0])
           // Recognize Unicode multiplication and division
           // symbols, returning what the parser expects.
@@ -652,6 +657,14 @@ func main() {
         }
         defer rl.Close()
 	for {
+	        switch parse_mode{
+		    case TABLE_HEADING_MODE:
+		      rl.SetPrompt("||")
+		    case TABLE_BODY_MODE:
+		      rl.SetPrompt("| ")
+		    case STATEMENT_MODE:
+		      rl.SetPrompt("> ")
+		}
                 line, err := rl.Readline()
                 if err != nil { // io.EOF, readline.ErrInterrupt
                   break
