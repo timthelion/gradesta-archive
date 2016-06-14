@@ -28,6 +28,8 @@ import (
 	"unicode"
         "strconv"
 	"gopkg.in/readline.v1"
+	"os"
+	"strings"
 )
 
 const (
@@ -41,9 +43,6 @@ const (
        TYPE_TIMESTAMP
        TYPE_APPLIANCE
        TYPE_SLOT
-       TYPE_LOWERCASE
-       TYPE_UPPERCASE
-       TYPE_BUILT_IN_COMMAND
 )
 
 var (
@@ -54,22 +53,49 @@ type Value struct{
   value_type int32
   value_int32 int32
   value_bool bool
-  value_lowercase string
 }
 
+type TableFormat struct {
+  head Statement
+  columns []Hole
+  foot Statement
+}
+
+var (
+     table_format TableFormat
+)
+
+type Expr func() (ret Value)
+type Hole func(fill Expr) ()
+type Statement func()
 %}
 
 // fields inside this union end up as the fields in a structure known
 // as ${PREFIX}SymType, of which a reference is passed to the lexer.
 %union{
+  statement Statement
+  exprs []Expr
+  expr Expr
+  hole Hole
+  holes []Hole
   val Value
-  values []Value
+  symbol string
+  symbols []string
+  marker string
 }
 
 %start line
-%type  <val> keyword_arguments symbols symbol literal slot_identifier expr
-%type  <values> table_body_columns
-%token <val> STATEMENT TABLE_HEADING TABLE_BODY LOWERCASE UPPERCASE STRING NUMBER BOOL BUILT_IN_COMMAND HOLE
+%type  <val> literal
+%token <val> STRING NUMBER BOOL
+%type  <symbol> symbol
+%token <symbol> BUILT_IN_COMMAND LOWERCASE UPPERCASE
+%type  <symbols> keyword_arguments symbols slot_identifier
+%type  <expr> expr
+%type  <exprs> table_body_columns
+%type  <statement> sentences sentence
+%type  <hole> holy_sentence table_heading_column
+%type  <holes> table_heading_columns
+%token <marker> STATEMENT_MARKER TABLE_HEADING_MARKER TABLE_BODY_MARKER TABLE_MODE_TRANSITION
 %left ','
 %left '.'
 %left TO
@@ -81,79 +107,152 @@ type Value struct{
 %left UMINUS
 %% /* Rules section */
 line
-    : TABLE_HEADING sentences ',' table_heading_columns ',' sentences
+    : TABLE_HEADING_MARKER sentences ',' table_heading_columns ',' sentences
     {
+      table_format = TableFormat{
+	head: $2,
+	columns: $4,
+	foot: $6,
+      }
       fmt.Println("TABLE_HEADING")
     }
-    | TABLE_BODY table_body_columns
+    | TABLE_BODY_MARKER table_body_columns
     {
+      table_format.head()
+      for i :=0 ; i < len($2); i++ {
+	if $2[i] != nil {
+	  table_format.columns[i]($2[i])
+	}
+      }
+      table_format.foot()
       fmt.Println("TABLE_BODY")
     }
-    | STATEMENT sentences
+    | STATEMENT_MARKER sentences
     {
+      $2()
       fmt.Println("STATEMENT")
     }
+    | TABLE_HEADING_MARKER TABLE_MODE_TRANSITION
+    | TABLE_BODY_MARKER TABLE_MODE_TRANSITION
+    | STATEMENT_MARKER TABLE_MODE_TRANSITION
+    | TABLE_MODE_TRANSITION
     ;
 table_heading_columns
-    : potentially_holy_sentences
-    | table_heading_columns ',' potentially_holy_sentences
-    ;
-potentially_holy_sentences
-    : sentence
-    | holy_sentence
-    | potentially_holy_sentences '.' holy_sentence
-    | potentially_holy_sentences '.' sentence
-    ;
-table_body_columns
-    : expr
+    : table_heading_column
     {
-      $$ = []Value{}
+      $$ = []Hole{$1}
+    }
+    | table_heading_columns ',' table_heading_column
+    {
+      $$ = append($1,$3)
+    }
+    ;
+table_heading_column
+    : holy_sentence
+    | sentences '.' holy_sentence '.' sentences
+    {
+      $$ = func(expr Expr){
+	$1()
+	$3(expr)
+	$5()
+      }
+    }
+    | holy_sentence '.' sentences
+    {
+      $$ = func(expr Expr){
+	$1(expr)
+	$3()
+      }
+    }
+    | sentences '.' holy_sentence
+    {
+      $$ = func(expr Expr){
+	$1()
+	$3(expr)
+      }
+    }
+table_body_columns
+    :
+    {
+      $$ = nil
+    }
+    | expr
+    {
+      $$ = []Expr{}
     }
     | table_body_columns ',' expr
     {
-      $$ = []Value{}
+      $$ = []Expr{}
     }
     ;
 sentences
     : sentence
+    {
+      $$ = $1
+    }
     | sentences '.'
+    {
+      $$ = $1
+    }
     | sentences '.' sentence
+    {
+      $$ = func(){
+	$1()
+	$3()
+      }
+    }
     ;
 sentence
     : BUILT_IN_COMMAND keyword_arguments
+    {
+      $$ = func(){
+        if $1 == "exit"{
+          fmt.Println("Bye...")
+	  os.Exit(0)
+	}
+      }
+    }
     | expr
     {
-      fmt.Println("",$1)
+      $$ = func(){
+        fmt.Println("",$1())
+      }
     }
     | expr TO slot_identifier
+    {
+      $$ = func(){}
+    }
     ;
 holy_sentence
     : '_' TO slot_identifier
+    {
+      $$ = func(expr Expr){
+      }
+    }
     ;
 keyword_arguments
     :
     {
-      $$ = NULL
+      $$ = []string{}
     }
     | keyword_arguments symbol
     {
-      $$ = NULL
+      $$ = append($1,$2)
     }
     ;
 symbols
     :
     {
-      $$ = NULL
+      $$ = []string{}
     }
     | symbols symbol
     {
-      $$ = NULL
+      $$ = append($1,$2)
     }
     ;
 symbol
     : UPPERCASE
     | LOWERCASE
-    | literal
     ;
 literal
     : STRING
@@ -170,103 +269,166 @@ expr
     }
     | expr AND expr
     {
-      if($1.value_type == TYPE_BOOL && $1.value_type == TYPE_BOOL) {
-        $1.value_bool = $1.value_bool && $3.value_bool
+      expr1, expr2 := $1, $3
+      $$ = func() (value Value){
+	val1, val2 := expr1(), expr2()
+        if(val1.value_type == TYPE_BOOL && val2.value_type == TYPE_BOOL) {
+           val1.value_bool = val1.value_bool && val2.value_bool
+        }
+	return val1
       }
-      $$ = $1
     }
     | expr OR expr
     {
-      if($1.value_type == TYPE_BOOL && $1.value_type == TYPE_BOOL) {
-        $1.value_bool = $1.value_bool || $3.value_bool
+      expr1, expr2 := $1, $3
+      $$ = func() (value Value){
+	val1, val2 := expr1(), expr2()
+        if(val1.value_type == TYPE_BOOL && val2.value_type == TYPE_BOOL) {
+           val1.value_bool = val1.value_bool || val2.value_bool
+        }
+	return val1
       }
-      $$ = $1
     }
     | expr '>' expr
     {
-      if($1.value_type == TYPE_INT32 && $1.value_type == TYPE_INT32) {
-        $1.value_bool = $1.value_int32 > $3.value_int32
+      expr1, expr2 := $1, $3
+      $$ = func()  (value Value){
+	val1, val2 := expr1(), expr2()
+        if(val1.value_type == TYPE_INT32 && val2.value_type == TYPE_INT32) {
+           val1.value_bool = val1.value_int32 > val2.value_int32
+           val1.value_type = TYPE_BOOL
+        }
+	return val1
       }
-      $1.value_type = TYPE_BOOL
-      $$ = $1
     }
     | expr '<' expr
     {
-      if($1.value_type == TYPE_INT32 && $1.value_type == TYPE_INT32) {
-        $1.value_bool = $1.value_int32 < $3.value_int32
+      expr1, expr2 := $1, $3
+      $$ = func() (value Value){
+	val1, val2 := expr1(), expr2()
+        if(val1.value_type == TYPE_INT32 && val2.value_type == TYPE_INT32) {
+           val1.value_bool = val1.value_int32 > val2.value_int32
+           val1.value_type = TYPE_BOOL
+        }
+	return val1
       }
-      $1.value_type = TYPE_BOOL
-      $$ = $1
     }
     | expr LTEQ expr
     {
-      if($1.value_type == TYPE_INT32 && $1.value_type == TYPE_INT32) {
-        $1.value_bool = $1.value_int32 >= $3.value_int32
+      expr1, expr2 := $1, $3
+      $$ = func() (value Value){
+	val1, val2 := expr1(), expr2()
+        if(val1.value_type == TYPE_INT32 && val2.value_type == TYPE_INT32) {
+           val1.value_bool = val1.value_int32 < val2.value_int32
+           val1.value_type = TYPE_BOOL
+        }
+	return val1
       }
-      $1.value_type = TYPE_BOOL
-      $$ = $1
     }
     | expr GTEQ expr
     {
-      if($1.value_type == TYPE_INT32 && $1.value_type == TYPE_INT32) {
-        $1.value_bool = $1.value_int32 >= $3.value_int32
+      expr1, expr2 := $1, $3
+      $$ = func() (value Value){
+	val1, val2 := expr1(), expr2()
+        if(val1.value_type == TYPE_INT32 && val2.value_type == TYPE_INT32) {
+           val1.value_bool = val1.value_int32 >= val2.value_int32
+           val1.value_type = TYPE_BOOL
+        }
+	return val1
       }
-      $1.value_type = TYPE_BOOL
-      $$ = $1
     }
     | expr EQ expr
     {
-      if($1.value_type == TYPE_INT32 && $1.value_type == TYPE_INT32) {
-        $1.value_bool = $1.value_int32 == $3.value_int32
+      expr1, expr2 := $1, $3
+      $$ = func() (value Value){
+	val1, val2 := expr1(), expr2()
+        if(val1.value_type == TYPE_INT32 && val2.value_type == TYPE_INT32) {
+           val1.value_bool = val1.value_int32 == val2.value_int32
+           val1.value_type = TYPE_BOOL
+        }
+	return val1
       }
-      $1.value_type = TYPE_BOOL
-      $$ = $1
     }
     | expr NEQ expr
     {
-      if($1.value_type == TYPE_INT32 && $1.value_type == TYPE_INT32) {
-        $1.value_bool = $1.value_int32 != $3.value_int32
+      expr1, expr2 := $1, $3
+      $$ = func() (value Value){
+	val1, val2 := expr1(), expr2()
+        if(val1.value_type == TYPE_INT32 && val2.value_type == TYPE_INT32) {
+           val1.value_bool = val1.value_int32 != val2.value_int32
+           val1.value_type = TYPE_BOOL
+        }
+	return val1
       }
-      $1.value_type = TYPE_BOOL
-      $$ = $1
     }
     | expr '+' expr
     {
-      if($1.value_type == TYPE_INT32 && $1.value_type == TYPE_INT32) {
-        $1.value_int32 = $1.value_int32 + $3.value_int32
+      expr1, expr2 := $1, $3
+      $$ = func() (value Value){
+	val1, val2 := expr1(), expr2()
+        if(val1.value_type == TYPE_INT32 && val2.value_type == TYPE_INT32) {
+           val1.value_int32 = val1.value_int32 + val2.value_int32
+        }
+	return val1
       }
-      $$ = $1
     }
     | expr '-' expr
     {
-      if($1.value_type == TYPE_INT32 && $1.value_type == TYPE_INT32) {
-        $1.value_int32 = $1.value_int32 - $3.value_int32
+      expr1, expr2 := $1, $3
+      $$ = func() (value Value){
+	val1, val2 := expr1(), expr2()
+        if(val1.value_type == TYPE_INT32 && val2.value_type == TYPE_INT32) {
+           val1.value_int32 = val1.value_int32 - val2.value_int32
+        }
+	return val1
       }
-      $$ = $1
     }
     | expr '/' expr
     {
-      if($1.value_type == TYPE_INT32 && $1.value_type == TYPE_INT32) {
-        $1.value_int32 = $1.value_int32 / $3.value_int32
+      expr1, expr2 := $1, $3
+      $$ = func() (value Value){
+	val1, val2 := expr1(), expr2()
+        if(val1.value_type == TYPE_INT32 && val2.value_type == TYPE_INT32) {
+           val1.value_int32 = val1.value_int32 / val2.value_int32
+        }
+	return val1
       }
-      $$ = $1
     }
     | expr '*' expr
     {
-      if($1.value_type == TYPE_INT32 && $1.value_type == TYPE_INT32) {
-        $1.value_int32 = $1.value_int32 * $3.value_int32
+      expr1, expr2 := $1, $3
+      $$ = func() (value Value){
+	val1, val2 := expr1(), expr2()
+        if(val1.value_type == TYPE_INT32 && val2.value_type == TYPE_INT32) {
+           val1.value_int32 = val1.value_int32 * val2.value_int32
+        }
+	return val1
       }
-      $$ = $1
     }
     | '-' expr %prec UMINUS
     {
-      if($2.value_type == TYPE_INT32) {
-        $2.value_int32 = -($2.value_int32)
+      expr1 := $2
+      $$ = func() (value Value){
+	val1 := expr1()
+        if val1.value_type == TYPE_INT32 {
+           val1.value_int32 = -val1.value_int32
+        }
+	return val1
       }
-      $$ = $2
     }
     | slot_identifier
+    {
+      $$ = func() (value Value){
+	return Value{}
+      }
+    }
     | literal
+    {
+      val := $1
+      $$ = func() (value Value){
+	return val
+      }
+    }
     ;
 
 %% /* Program section */
@@ -286,39 +448,40 @@ const(
       STATEMENT_MODE = iota
       TABLE_HEADING_MODE
       TABLE_BODY_MODE
-      CONT
 )
 
 var(
     parse_mode int = STATEMENT_MODE
+    within_line bool = false
 )
 
 func (x *OvachLex) Lex(yylval *OvachSymType) int {
 	for {
-	        if parse_mode == STATEMENT_MODE {
-		    parse_mode = CONT
-		    return STATEMENT
+	        if !within_line{
+		  within_line = true
+                  switch parse_mode{
+                     case STATEMENT_MODE:
+		        return STATEMENT_MARKER
+		     case TABLE_HEADING_MODE:
+		        return TABLE_HEADING_MARKER
+		     case TABLE_BODY_MODE:
+		        return TABLE_BODY_MARKER
+		  }
 		}
 		c := x.next()
 		switch c {
 		case eof:
-		        parse_mode = STATEMENT_MODE
+		        within_line = false
 			return eof
 		case '#':
 			return eof
+		case '(',')':
+		        return int(c)
 		case '0', '1', '2', '3', '4', '5', '6', '7', '8', '9':
 			return x.num(c, yylval)
-		case '+', '-', '*', '/', '(', ')':
-			return int(c)
-
-		// Recognize Unicode multiplication and division
-		// symbols, returning what the parser expects.
-		case '×':
-			return '*'
-		case '÷':
-			return '/'
-
-		case ' ', '\t', '\n', '\r':
+		case '\n':
+		  within_line = false
+		case ' ', '\t', '\r':
 		default:
 		        if unicode.IsLower(c) {
 			    return x.lowercase(c, yylval)
@@ -382,6 +545,7 @@ func (x *OvachLex) lowercase(c rune, yylval *OvachSymType) int {
 		x.peek = c
 	}
 	s := b.String()
+        fmt.Println(s)
 	switch s {
 	  case "true":
 	    yylval.val.value_type = TYPE_BOOL
@@ -391,9 +555,11 @@ func (x *OvachLex) lowercase(c rune, yylval *OvachSymType) int {
 	    yylval.val.value_type = TYPE_BOOL
 	    yylval.val.value_bool = false
 	    return BOOL
+	  case "exit":
+            yylval.symbol = "exit"
+	    return BUILT_IN_COMMAND
 	  default:
-            yylval.val.value_type = TYPE_LOWERCASE
-            yylval.val.value_lowercase = s
+            yylval.symbol = s
 	    return LOWERCASE
 	}
 }
@@ -408,7 +574,7 @@ func (x *OvachLex) operator(c rune, yylval *OvachSymType) int {
 	add(&b, c)
 	L: for {
 		c = x.next()
-		if unicode.IsSymbol(c) || unicode.IsPunct(c) {
+		if c != '(' && unicode.IsSymbol(c) || unicode.IsPunct(c) {
 			add(&b, c)
 		} else {
 			break L
@@ -431,10 +597,26 @@ func (x *OvachLex) operator(c rune, yylval *OvachSymType) int {
 	    return GTEQ
 	  case "<=":
 	    return LTEQ
-	  case ">" , "<":
+	  case ">" , "<", "+", "-", "*", "/", "(", ")", ",":
 	    return int(s[0])
+          // Recognize Unicode multiplication and division
+          // symbols, returning what the parser expects.
+	  case "×":
+	    return '*'
+	  case "÷":
+	    return '/'
+
 	  default:
-	    log.Printf("unrecognized operator %s", s)
+	    if strings.HasPrefix(s,"---"){
+		switch parse_mode{
+		  case TABLE_HEADING_MODE: parse_mode = TABLE_BODY_MODE
+		  case TABLE_BODY_MODE:    parse_mode = STATEMENT_MODE
+		  case STATEMENT_MODE:     parse_mode = TABLE_HEADING_MODE
+		}
+		return TABLE_MODE_TRANSITION
+	    } else {
+	      log.Printf("unrecognized operator %s", s)
+	    }
 	}
 	return 0
 }
