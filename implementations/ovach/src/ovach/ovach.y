@@ -1,10 +1,10 @@
 /*
 This is the single file source code for the ovach binary, parser, well, everything.
 
-This compiles to a binary, which can be used to either run an interactive ovach repl, or to execute ovach script files or to execute ovachograph script files.
+This compiles to a binary, which can be used to either run an interactive ovach repl, or to execute graphovach script files.
 
 --
-_ > b GTK WidgetType ; b GTK Widget > h Widget, _ > h Widget LabelText, _ > h Widget OnPressed, h Widget > h WidgetStack Widgets
+_ to b GTK WidgetType. b GTK Widget to h Widget, _ to h Widget LabelText, _ to h Widget OnPressed, h Widget to h WidgetStack Widgets
 --
 # Widget type, label text   , on pressed
   "Label"    , "Hello World",
@@ -31,41 +31,59 @@ import (
 	"os"
 	"strings"
 )
-
-const (
-       TYPE_EMPTY = iota
-       TYPE_BOOL
-       TYPE_INT32
-       TYPE_INT64
-       TYPE_STRING
-       TYPE_BYTES
-       TYPE_FLOAT
-       TYPE_TIMESTAMP
-       TYPE_APPLIANCE
-       TYPE_SLOT
-)
-
-type Value struct{
-  value_type int32
-  value_int32 int32
-  value_bool bool
+/*
+  Types
+*/
+type Value interface{
+  Eq(Value) Value
+  Neq(Value) Value
+  And(Value) Value
+  Or(Value) Value
+  Gt(Value) Value
+  Lt(Value) Value
+  Lte(Value) Value
+  Gte(Value) Value
+  Add(Value) Value
+  Subtract(Value) Value
+  Multiply(Value) Value
+  Divide(Value) Value
+  Negate() Value
 }
-
+type Slot struct{
+  slot_identifier SlotIdentifier
+  value_type int32
+}
+type SlotListing []Slot
 type Expr func() (ret Value)
 type Hole func(fill Expr) ()
 type Statement func()
-
+type SlotIdentifier []string
+type MapovachValue struct{
+  mapovach Mapovach
+  slot Value
+}
+type Mapovach map[string]MapovachValue
+type Provider interface{
+  Ls(appliance SlotIdentifier) (SlotListing, bool)
+  Set(slot SlotIdentifier, value Value) SlotError
+  Get(slot SlotIdentifier) (Value, bool)
+  Delete(slot SlotIdentifier) bool
+}
 type TableFormat struct {
   head Statement
   columns []Hole
   foot Statement
 }
 
+/*
+  Globals
+*/
 var (
      table_format TableFormat
-     hand map[string]Value
+     localProvider int
+     currentProvider int
+     providers []Provider
 )
-
 %}
 
 // fields inside this union end up as the fields in a structure known
@@ -206,11 +224,22 @@ sentences
 sentence
     : BUILT_IN_COMMAND keyword_arguments
     {
-      command := $1
+      command, args := $1, $2
       $$ = func(){
-        if command == "exit"{
-          fmt.Println("Bye...")
-	  os.Exit(0)
+        switch command{
+	  case "exit":
+            fmt.Println("Bye...")
+	    os.Exit(0)
+	  case "ls":
+	    if len(args) > 0{
+	      root := args[0]
+	      if root == "h" || root == "b" {
+                localProvider.Ls(args)
+              } else {
+                currentProvider.Ls(args)
+              }
+	    }
+
 	}
       }
     }
@@ -569,7 +598,7 @@ func (x *OvachLex) lowercase(c rune, yylval *OvachSymType) int {
 	    yylval.val.value_type = TYPE_BOOL
 	    yylval.val.value_bool = false
 	    return BOOL
-	  case "exit", "ls", "mkslt", "cd":
+	  case "exit", "ls", "cd":
             yylval.symbol = s
 	    return BUILT_IN_COMMAND
 	  case "to":
@@ -692,8 +721,66 @@ func main() {
 }
 
 /*
+  Type interfaces
+*/
+type Value interface{
+  Eq(Value) Value
+  Neq(Value) Value
+  And(Value) Value
+  Or(Value) Value
+  Gt(Value) Value
+  Lt(Value) Value
+  Lte(Value) Value
+  Gte(Value) Value
+  Add(Value) Value
+  Subtract(Value) Value
+  Multiply(Value) Value
+  Divide(Value) Value
+  Negate() Value
+}
+const (
+       TYPE_BOOL = iota
+       TYPE_INT8
+       TYPE_INT16
+       TYPE_INT32
+       TYPE_INT64
+       TYPE_UINT8
+       TYPE_UINT16
+       TYPE_UINT32
+       TYPE_UINT64
+       TYPE_FLOAT32
+       TYPE_FLOAT64
+       TYPE_TEXT
+       TYPE_DATA
+       TYPE_APPLIANCE
+       TYPE_SLOT
+)
+
+
+/*
   Execution
 */
+func (m *Mapovach) Ls(appliance SlotIdentifier) (listing SlotListing, ok){
+  for i := 0; i < len(appliance); i++{
+    m, ok = m[appliance[i]]
+    if !ok{
+      log.Printf("%s does not exist.",appliance)
+    }
+  }
+  for i := 0; i < len(m); i++{
+    fmt.Println("%s : %s", key(m, i), m[i].value_type.Description())
+  }
+}
+
+func (m *Mapovach) Set
+type Mapovach map[string]Value
+type Provider interface{
+  Ls(appliance SlotIdentifier) (SlotListing, bool)
+  Set(slot SlotIdentifier, value Value) SlotError
+  Get(slot SlotIdentifier) (Value, bool)
+  Delete(slot SlotIdentifier) bool
+}
+
 func set_slot(val Value, slot_identifier []string){
   if slot_identifier[0] == "h"{
       val_in_slot,ok := hand[slot_identifier[1]]
