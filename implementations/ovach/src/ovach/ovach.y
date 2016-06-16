@@ -26,16 +26,18 @@ import (
 	"log"
 	"unicode/utf8"
 	"unicode"
-        "strconv"
+        //"strconv"
 	"gopkg.in/readline.v1"
 	"os"
 	"strings"
+	"reflect"
 )
 /*
   Types
 */
 type Value interface{
   Eq(Value) Value
+    /*
   Neq(Value) Value
   And(Value) Value
   Or(Value) Value
@@ -48,12 +50,41 @@ type Value interface{
   Multiply(Value) Value
   Divide(Value) Value
   Negate() Value
+  */
 }
-type Slot struct{
+type BoolValue struct{
+  empty bool
+  value bool
+}
+func (b1 BoolValue) Eq(b2 Value) (result Value){
+  switch v := b2.(type){
+      case BoolValue:
+        return BoolValue{empty:false, value: b1.value == v.value}
+  }
+  return BoolValue{empty:true,value:false}
+}
+
+  /*
+type Int8Value        int8
+type Int16Value       int16
+type Int32Value       int32
+type Int64Value       int64
+type UInt8Value       uint8
+type UInt16Value      uint16
+type UInt32Value      uint32
+type UInt64Value      uint64
+type Float32Value     float32
+type Float64Value     float64
+type TextValue        string
+type DataValue        []byte
+type SlotValue        Slot
+type ApplianceValue   Appliance
+  */
+type SlotListing struct{
   slot_identifier SlotIdentifier
   value_type int32
 }
-type SlotListing []Slot
+type SlotListings []SlotListing
 type Expr func() (ret Value)
 type Hole func(fill Expr) ()
 type Statement func()
@@ -65,7 +96,7 @@ type MapovachValue struct{
 type Mapovach map[string]MapovachValue
 type Provider interface{
   Ls(appliance SlotIdentifier) (SlotListing, bool)
-  Set(slot SlotIdentifier, value Value) SlotError
+  Set(slot SlotIdentifier, value Value) Value
   Get(slot SlotIdentifier) (Value, bool)
   Delete(slot SlotIdentifier) bool
 }
@@ -224,13 +255,13 @@ sentences
 sentence
     : BUILT_IN_COMMAND keyword_arguments
     {
-      command, args := $1, $2
+      command, _ /*args*/ := $1, $2
       $$ = func(){
         switch command{
 	  case "exit":
             fmt.Println("Bye...")
 	    os.Exit(0)
-	  case "ls":
+	  /*case "ls":
 	    if len(args) > 0{
 	      root := args[0]
 	      if root == "h" || root == "b" {
@@ -239,7 +270,7 @@ sentence
                 currentProvider.Ls(args)
               }
 	    }
-
+*/
 	}
       }
     }
@@ -252,18 +283,18 @@ sentence
     }
     | expr TO slot_identifier
     {
-      expr, si := $1, $3
+      //expr, si := $1, $3
       $$ = func(){
-	set_slot(expr(),si)
+	//set_slot(expr(),si)
       }
     }
     ;
 holy_sentence
     : '_' TO slot_identifier
     {
-      si := $3
+      //si := $3
       $$ = func(expr Expr){
-	set_slot(expr(),si)
+	//set_slot(expr(),si)
       }
     }
     ;
@@ -304,6 +335,7 @@ expr
     {
       $$ = $2
     }
+/*
     | expr AND expr
     {
       expr1, expr2 := $1, $3
@@ -374,19 +406,23 @@ expr
 	return val1
       }
     }
+    */
     | expr EQ expr
     {
       expr1, expr2 := $1, $3
-      $$ = func() (value Value){
-	val1, val2 := expr1(), expr2()
-        if(val1.value_type == TYPE_INT32 && val2.value_type == TYPE_INT32) {
-           val1.value_bool = val1.value_int32 == val2.value_int32
-           val1.value_type = TYPE_BOOL
+      if reflect.TypeOf(expr1) == reflect.TypeOf(expr2){
+        $$ = func() (value Value){
+          val1, val2 := expr1(), expr2()
+          return val1.Eq(val2)
+	}
+      }else{
+        $$ = func() (value Value){
+	  log.Printf("Type error, types do not match.")
+	  return expr1()
         }
-	return val1
       }
     }
-    | expr NEQ expr
+/*    | expr NEQ expr
     {
       expr1, expr2 := $1, $3
       $$ = func() (value Value){
@@ -465,7 +501,7 @@ expr
 	}
 	return Value{}
       }
-    }
+    }*/
     | literal
     {
       val := $1
@@ -559,6 +595,7 @@ func (x *OvachLex) num(c rune, yylval *OvachSymType) int {
 	if c != eof {
 		x.peek = c
 	}
+/*
 	integer, err := strconv.ParseInt(b.String(),10,32)
 	if err != nil {
 		log.Printf("bad number %q", b.String())
@@ -566,6 +603,7 @@ func (x *OvachLex) num(c rune, yylval *OvachSymType) int {
 	}
 	yylval.val.value_type = TYPE_INT32
 	yylval.val.value_int32 = int32(integer)
+	*/
 	return NUMBER
 }
 
@@ -591,12 +629,10 @@ func (x *OvachLex) lowercase(c rune, yylval *OvachSymType) int {
 	s := b.String()
 	switch s {
 	  case "true":
-	    yylval.val.value_type = TYPE_BOOL
-	    yylval.val.value_bool = true
+	    yylval.val = BoolValue{empty:false,value:true}
 	    return BOOL
 	  case "false":
-	    yylval.val.value_type = TYPE_BOOL
-	    yylval.val.value_bool = false
+	    yylval.val = BoolValue{empty:false,value:false}
 	    return BOOL
 	  case "exit", "ls", "cd":
             yylval.symbol = s
@@ -699,7 +735,7 @@ func main() {
 	/*
 	  Init runtime
 	 */
-	hand = make(map[string]Value)
+	//hand = make(map[string]Value)
 	for {
 	        switch parse_mode{
 		    case TABLE_HEADING_MODE:
@@ -722,7 +758,7 @@ func main() {
 
 /*
   Type interfaces
-*/
+
 type Value interface{
   Eq(Value) Value
   Neq(Value) Value
@@ -755,11 +791,27 @@ const (
        TYPE_APPLIANCE
        TYPE_SLOT
 )
+*/
 
+/*
+  Neq(Value) Value
+  And(Value) Value
+  Or(Value) Value
+  Gt(Value) Value
+  Lt(Value) Value
+  Lte(Value) Value
+  Gte(Value) Value
+  Add(Value) Value
+  Subtract(Value) Value
+  Multiply(Value) Value
+  Divide(Value) Value
+  Negate() Value
+*/
 
 /*
   Execution
 */
+/*
 func (m *Mapovach) Ls(appliance SlotIdentifier) (listing SlotListing, ok){
   for i := 0; i < len(appliance); i++{
     m, ok = m[appliance[i]]
@@ -789,3 +841,4 @@ func set_slot(val Value, slot_identifier []string){
       }
   }
 }
+*/
