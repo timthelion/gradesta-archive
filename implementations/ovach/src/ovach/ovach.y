@@ -26,7 +26,7 @@ import (
 	"log"
 	"unicode/utf8"
 	"unicode"
-        //"strconv"
+        "strconv"
 	"gopkg.in/readline.v1"
 	"os"
 	"strings"
@@ -35,51 +35,35 @@ import (
 /*
   Types
 */
-type Value interface{
-  Eq(Value) Value
-    /*
-  Neq(Value) Value
-  And(Value) Value
-  Or(Value) Value
-  Gt(Value) Value
-  Lt(Value) Value
-  Lte(Value) Value
-  Gte(Value) Value
-  Add(Value) Value
-  Subtract(Value) Value
-  Multiply(Value) Value
-  Divide(Value) Value
-  Negate() Value
-  */
-}
-type BoolValue struct{
+type Value struct{
   empty bool
-  value bool
+  v ValueContents
 }
-func (b1 BoolValue) Eq(b2 Value) (result Value){
-  switch v := b2.(type){
-      case BoolValue:
-        return BoolValue{empty:false, value: b1.value == v.value}
-  }
-  return BoolValue{empty:true,value:false}
+type ValueContents interface{
+  Eq(ValueContents) ValueContents
+  Neq(ValueContents) ValueContents
+  And(ValueContents) ValueContents
+  Or(ValueContents) ValueContents
+  Gt(ValueContents) ValueContents
+  Lt(ValueContents) ValueContents
+  Lte(ValueContents) ValueContents
+  Gte(ValueContents) ValueContents
+  Add(ValueContents) ValueContents
+  Subtract(ValueContents) ValueContents
+  Multiply(ValueContents) ValueContents
+  Divide(ValueContents) ValueContents
+  Negate() ValueContents
 }
-
-  /*
-type Int8Value        int8
-type Int16Value       int16
-type Int32Value       int32
+//Value Types
+type BoolValue        bool
 type Int64Value       int64
-type UInt8Value       uint8
-type UInt16Value      uint16
-type UInt32Value      uint32
 type UInt64Value      uint64
-type Float32Value     float32
 type Float64Value     float64
 type TextValue        string
 type DataValue        []byte
-type SlotValue        Slot
-type ApplianceValue   Appliance
-  */
+//type SlotValue        Slot
+//type ApplianceValue   Appliance
+
 type SlotListing struct{
   slot_identifier SlotIdentifier
   value_type int32
@@ -335,7 +319,24 @@ expr
     {
       $$ = $2
     }
-/*
+    | expr EQ expr
+    {
+      expr1, expr2 := $1, $3
+      $$ = func() (value Value){
+        val1, val2 := expr1(), expr2()
+        if reflect.TypeOf(val1.v) == reflect.TypeOf(val2.v){
+          return Value{empty:false,v: val1.v.Eq(val2.v)}
+        } else {
+          log.Printf("Type error, types do not match.")
+	  return Value{empty:true,v: BoolValue(false)}
+        }
+      }
+    }
+/*    | expr NEQ expr
+    {
+
+    }
+
     | expr AND expr
     {
       expr1, expr2 := $1, $3
@@ -401,34 +402,6 @@ expr
 	val1, val2 := expr1(), expr2()
         if(val1.value_type == TYPE_INT32 && val2.value_type == TYPE_INT32) {
            val1.value_bool = val1.value_int32 >= val2.value_int32
-           val1.value_type = TYPE_BOOL
-        }
-	return val1
-      }
-    }
-    */
-    | expr EQ expr
-    {
-      expr1, expr2 := $1, $3
-      if reflect.TypeOf(expr1) == reflect.TypeOf(expr2){
-        $$ = func() (value Value){
-          val1, val2 := expr1(), expr2()
-          return val1.Eq(val2)
-	}
-      }else{
-        $$ = func() (value Value){
-	  log.Printf("Type error, types do not match.")
-	  return expr1()
-        }
-      }
-    }
-/*    | expr NEQ expr
-    {
-      expr1, expr2 := $1, $3
-      $$ = func() (value Value){
-	val1, val2 := expr1(), expr2()
-        if(val1.value_type == TYPE_INT32 && val2.value_type == TYPE_INT32) {
-           val1.value_bool = val1.value_int32 != val2.value_int32
            val1.value_type = TYPE_BOOL
         }
 	return val1
@@ -581,6 +554,7 @@ func (x *OvachLex) num(c rune, yylval *OvachSymType) int {
 			log.Fatalf("WriteRune: %s", err)
 		}
 	}
+        float := false
 	var b bytes.Buffer
 	add(&b, c)
 	L: for {
@@ -588,6 +562,9 @@ func (x *OvachLex) num(c rune, yylval *OvachSymType) int {
 		switch c {
 		case '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', '.', 'e', 'E':
 			add(&b, c)
+		        if c == '.'{
+		          float = true
+			}
 		default:
 			break L
 		}
@@ -595,15 +572,22 @@ func (x *OvachLex) num(c rune, yylval *OvachSymType) int {
 	if c != eof {
 		x.peek = c
 	}
-/*
-	integer, err := strconv.ParseInt(b.String(),10,32)
-	if err != nil {
+
+	if !float {
+	  n, err := strconv.ParseInt(b.String(),10,64)
+	  if err != nil {
 		log.Printf("bad number %q", b.String())
 		return eof
+	  }
+	  yylval.val = Value{empty:false,v:Int64Value(n)}
+	} else {
+	  n, err := strconv.ParseFloat(b.String(),64)
+	  if err != nil {
+		log.Printf("bad number %q", b.String())
+		return eof
+	  }
+	  yylval.val = Value{empty:false,v:Float64Value(n)}
 	}
-	yylval.val.value_type = TYPE_INT32
-	yylval.val.value_int32 = int32(integer)
-	*/
 	return NUMBER
 }
 
@@ -629,10 +613,10 @@ func (x *OvachLex) lowercase(c rune, yylval *OvachSymType) int {
 	s := b.String()
 	switch s {
 	  case "true":
-	    yylval.val = BoolValue{empty:false,value:true}
+	    yylval.val = Value{empty:false,v:BoolValue(true)}
 	    return BOOL
 	  case "false":
-	    yylval.val = BoolValue{empty:false,value:false}
+	    yylval.val = Value{empty:false,v:BoolValue(false)}
 	    return BOOL
 	  case "exit", "ls", "cd":
             yylval.symbol = s
@@ -758,56 +742,244 @@ func main() {
 
 /*
   Type interfaces
+*/
+// Helpers
+func testEqSlice(a, b []byte) bool {
+    // http://stackoverflow.com/questions/15311969/checking-the-equality-of-two-slices
+    if a == nil && b == nil {
+        return true;
+    }
 
-type Value interface{
-  Eq(Value) Value
-  Neq(Value) Value
-  And(Value) Value
-  Or(Value) Value
-  Gt(Value) Value
-  Lt(Value) Value
-  Lte(Value) Value
-  Gte(Value) Value
-  Add(Value) Value
-  Subtract(Value) Value
-  Multiply(Value) Value
-  Divide(Value) Value
-  Negate() Value
+    if a == nil || b == nil {
+        return false;
+    }
+
+    if len(a) != len(b) {
+        return false
+    }
+
+    for i := range a {
+        if a[i] != b[i] {
+            return false
+        }
+    }
+
+    return true
 }
-const (
-       TYPE_BOOL = iota
-       TYPE_INT8
-       TYPE_INT16
-       TYPE_INT32
-       TYPE_INT64
-       TYPE_UINT8
-       TYPE_UINT16
-       TYPE_UINT32
-       TYPE_UINT64
-       TYPE_FLOAT32
-       TYPE_FLOAT64
-       TYPE_TEXT
-       TYPE_DATA
-       TYPE_APPLIANCE
-       TYPE_SLOT
-)
-*/
-
-/*
-  Neq(Value) Value
-  And(Value) Value
-  Or(Value) Value
-  Gt(Value) Value
-  Lt(Value) Value
-  Lte(Value) Value
-  Gte(Value) Value
-  Add(Value) Value
-  Subtract(Value) Value
-  Multiply(Value) Value
-  Divide(Value) Value
-  Negate() Value
-*/
-
+////////////////////////////////////////////////////////////////
+func (b1 BoolValue) Eq(b2 ValueContents) (result ValueContents){
+ switch v := b2.(type){case BoolValue:return BoolValue(b1 == v)}
+ return BoolValue(false)}
+func (b1 Int64Value) Eq(b2 ValueContents) (result ValueContents){
+  switch v := b2.(type){ case Int64Value: return BoolValue(b1 == v)}
+  return BoolValue(false)}
+func (b1 UInt64Value) Eq(b2 ValueContents) (result ValueContents){
+  switch v := b2.(type){case UInt64Value:return BoolValue(b1 == v)}
+  return BoolValue(false)}
+func (b1 Float64Value) Eq(b2 ValueContents) (result ValueContents){
+  switch v := b2.(type){case Float64Value:return BoolValue(b1 == v)}
+  return BoolValue(false)}
+func (b1 TextValue) Eq(b2 ValueContents) (result ValueContents){
+  switch v := b2.(type){case TextValue:return BoolValue(b1 == v)}
+  return BoolValue(false)}
+func (b1 DataValue) Eq(b2 ValueContents) (result ValueContents){
+  switch v := b2.(type){case DataValue: return BoolValue(testEqSlice(b1,v))}
+  return BoolValue(false)}
+//type SlotValue        Slot
+//type ApplianceValue   Appliance
+////////////////////////////////////////////////////////////////
+func (b1 BoolValue) Neq(b2 ValueContents) (result ValueContents){
+ switch v := b2.(type){case BoolValue:return BoolValue(b1 != v)}
+ return BoolValue(false)}
+func (b1 Int64Value) Neq(b2 ValueContents) (result ValueContents){
+  switch v := b2.(type){ case Int64Value: return BoolValue(b1 != v)}
+  return BoolValue(false)}
+func (b1 UInt64Value) Neq(b2 ValueContents) (result ValueContents){
+  switch v := b2.(type){case UInt64Value:return BoolValue(b1 != v)}
+  return BoolValue(false)}
+func (b1 Float64Value) Neq(b2 ValueContents) (result ValueContents){
+  switch v := b2.(type){case Float64Value:return BoolValue(b1 != v)}
+  return BoolValue(false)}
+func (b1 TextValue) Neq(b2 ValueContents) (result ValueContents){
+  switch v := b2.(type){case TextValue:return BoolValue(b1 != v)}
+  return BoolValue(false)}
+func (b1 DataValue) Neq(b2 ValueContents) (result ValueContents){
+  switch v := b2.(type){case DataValue: return BoolValue(!testEqSlice(b1,v))}
+  return BoolValue(false)}
+////////////////////////////////////////////////////////////////
+func (b1 BoolValue) And(b2 ValueContents) (result ValueContents){
+ switch v := b2.(type){case BoolValue:return BoolValue(b1 && v)}
+ return BoolValue(false)}
+func (b1 Int64Value) And(b2 ValueContents) (result ValueContents){
+  return BoolValue(false)}
+func (b1 UInt64Value) And(b2 ValueContents) (result ValueContents){
+  return BoolValue(false)}
+func (b1 Float64Value) And(b2 ValueContents) (result ValueContents){
+  return BoolValue(false)}
+func (b1 TextValue) And(b2 ValueContents) (result ValueContents){
+  return BoolValue(false)}
+func (b1 DataValue) And(b2 ValueContents) (result ValueContents){
+  return BoolValue(false)}
+////////////////////////////////////////////////////////////////
+func (b1 BoolValue) Or(b2 ValueContents) (result ValueContents){
+ switch v := b2.(type){case BoolValue:return BoolValue(b1 || v)}
+ return BoolValue(false)}
+func (b1 Int64Value) Or(b2 ValueContents) (result ValueContents){
+  return BoolValue(false)}
+func (b1 UInt64Value) Or(b2 ValueContents) (result ValueContents){
+  return BoolValue(false)}
+func (b1 Float64Value) Or(b2 ValueContents) (result ValueContents){
+  return BoolValue(false)}
+func (b1 TextValue) Or(b2 ValueContents) (result ValueContents){
+  return BoolValue(false)}
+func (b1 DataValue) Or(b2 ValueContents) (result ValueContents){
+  return BoolValue(false)}
+////////////////////////////////////////////////////////////////
+func (b1 BoolValue) Gt(b2 ValueContents) (result ValueContents){
+ return BoolValue(false)}
+func (b1 Int64Value) Gt(b2 ValueContents) (result ValueContents){
+  switch v := b2.(type){ case Int64Value: return BoolValue(b1 > v)}
+  return BoolValue(false)}
+func (b1 UInt64Value) Gt(b2 ValueContents) (result ValueContents){
+  switch v := b2.(type){case UInt64Value:return BoolValue(b1 > v)}
+  return BoolValue(false)}
+func (b1 Float64Value) Gt(b2 ValueContents) (result ValueContents){
+  switch v := b2.(type){case Float64Value:return BoolValue(b1 > v)}
+  return BoolValue(false)}
+func (b1 TextValue) Gt(b2 ValueContents) (result ValueContents){
+  switch v := b2.(type){case TextValue:return BoolValue(b1 > v)}
+  return BoolValue(false)}
+func (b1 DataValue) Gt(b2 ValueContents) (result ValueContents){
+  return BoolValue(false)}
+////////////////////////////////////////////////////////////////
+func (b1 BoolValue) Lt(b2 ValueContents) (result ValueContents){
+ return BoolValue(false)}
+func (b1 Int64Value) Lt(b2 ValueContents) (result ValueContents){
+  switch v := b2.(type){ case Int64Value: return BoolValue(b1 < v)}
+  return BoolValue(false)}
+func (b1 UInt64Value) Lt(b2 ValueContents) (result ValueContents){
+  switch v := b2.(type){case UInt64Value:return BoolValue(b1 < v)}
+  return BoolValue(false)}
+func (b1 Float64Value) Lt(b2 ValueContents) (result ValueContents){
+  switch v := b2.(type){case Float64Value:return BoolValue(b1 < v)}
+  return BoolValue(false)}
+func (b1 TextValue) Lt(b2 ValueContents) (result ValueContents){
+  switch v := b2.(type){case TextValue:return BoolValue(b1 < v)}
+  return BoolValue(false)}
+func (b1 DataValue) Lt(b2 ValueContents) (result ValueContents){
+  return BoolValue(false)}
+////////////////////////////////////////////////////////////////
+func (b1 BoolValue) Gte(b2 ValueContents) (result ValueContents){
+ return BoolValue(false)}
+func (b1 Int64Value) Gte(b2 ValueContents) (result ValueContents){
+  switch v := b2.(type){ case Int64Value: return BoolValue(b1 >= v)}
+  return BoolValue(false)}
+func (b1 UInt64Value) Gte(b2 ValueContents) (result ValueContents){
+  switch v := b2.(type){case UInt64Value:return BoolValue(b1 >= v)}
+  return BoolValue(false)}
+func (b1 Float64Value) Gte(b2 ValueContents) (result ValueContents){
+  switch v := b2.(type){case Float64Value:return BoolValue(b1 >= v)}
+  return BoolValue(false)}
+func (b1 TextValue) Gte(b2 ValueContents) (result ValueContents){
+  switch v := b2.(type){case TextValue:return BoolValue(b1 >= v)}
+  return BoolValue(false)}
+func (b1 DataValue) Gte(b2 ValueContents) (result ValueContents){
+  return BoolValue(false)}
+////////////////////////////////////////////////////////////////
+func (b1 BoolValue) Lte(b2 ValueContents) (result ValueContents){
+ return BoolValue(false)}
+func (b1 Int64Value) Lte(b2 ValueContents) (result ValueContents){
+  switch v := b2.(type){ case Int64Value: return BoolValue(b1 <= v)}
+  return BoolValue(false)}
+func (b1 UInt64Value) Lte(b2 ValueContents) (result ValueContents){
+  switch v := b2.(type){case UInt64Value:return BoolValue(b1 <= v)}
+  return BoolValue(false)}
+func (b1 Float64Value) Lte(b2 ValueContents) (result ValueContents){
+  switch v := b2.(type){case Float64Value:return BoolValue(b1 <= v)}
+  return BoolValue(false)}
+func (b1 TextValue) Lte(b2 ValueContents) (result ValueContents){
+  switch v := b2.(type){case TextValue:return BoolValue(b1 <= v)}
+  return BoolValue(false)}
+func (b1 DataValue) Lte(b2 ValueContents) (result ValueContents){
+  return BoolValue(false)}
+////////////////////////////////////////////////////////////////
+func (b1 BoolValue) Add(b2 ValueContents) (result ValueContents){
+ return BoolValue(false)}
+func (b1 Int64Value) Add(b2 ValueContents) (result ValueContents){
+  switch v := b2.(type){ case Int64Value: return Int64Value(b1 + v)}
+  return Int64Value(0)}
+func (b1 UInt64Value) Add(b2 ValueContents) (result ValueContents){
+  switch v := b2.(type){case UInt64Value:return UInt64Value(b1 + v)}
+  return UInt64Value(0)}
+func (b1 Float64Value) Add(b2 ValueContents) (result ValueContents){
+  switch v := b2.(type){case Float64Value:return Float64Value(b1 + v)}
+  return Float64Value(0)}
+func (b1 TextValue) Add(b2 ValueContents) (result ValueContents){
+  switch v := b2.(type){case TextValue:return TextValue(b1 + v)}
+  return TextValue("")}
+func (b1 DataValue) Add(b2 ValueContents) (result ValueContents){
+  return DataValue(nil)}
+////////////////////////////////////////////////////////////////
+func (b1 BoolValue) Subtract(b2 ValueContents) (result ValueContents){
+ return BoolValue(false)}
+func (b1 Int64Value) Subtract(b2 ValueContents) (result ValueContents){
+  switch v := b2.(type){ case Int64Value: return Int64Value(b1 - v)}
+  return Int64Value(0)}
+func (b1 UInt64Value) Subtract(b2 ValueContents) (result ValueContents){
+  switch v := b2.(type){case UInt64Value:return UInt64Value(b1 - v)}
+  return UInt64Value(0)}
+func (b1 Float64Value) Subtract(b2 ValueContents) (result ValueContents){
+  switch v := b2.(type){case Float64Value:return Float64Value(b1 - v)}
+  return Float64Value(0)}
+func (b1 TextValue) Subtract(b2 ValueContents) (result ValueContents){
+  return TextValue("")}
+func (b1 DataValue) Subtract(b2 ValueContents) (result ValueContents){
+  return DataValue(nil)}
+////////////////////////////////////////////////////////////////
+func (b1 BoolValue) Multiply(b2 ValueContents) (result ValueContents){
+ return BoolValue(false)}
+func (b1 Int64Value) Multiply(b2 ValueContents) (result ValueContents){
+  switch v := b2.(type){ case Int64Value: return Int64Value(b1 * v)}
+  return Int64Value(0)}
+func (b1 UInt64Value) Multiply(b2 ValueContents) (result ValueContents){
+  switch v := b2.(type){case UInt64Value:return UInt64Value(b1 * v)}
+  return UInt64Value(0)}
+func (b1 Float64Value) Multiply(b2 ValueContents) (result ValueContents){
+  switch v := b2.(type){case Float64Value:return Float64Value(b1 * v)}
+  return Float64Value(0)}
+func (b1 TextValue) Multiply(b2 ValueContents) (result ValueContents){
+  return TextValue("")}
+func (b1 DataValue) Multiply(b2 ValueContents) (result ValueContents){
+  return DataValue(nil)}
+////////////////////////////////////////////////////////////////
+func (b1 BoolValue) Divide(b2 ValueContents) (result ValueContents){
+ return BoolValue(false)}
+func (b1 Int64Value) Divide(b2 ValueContents) (result ValueContents){
+  switch v := b2.(type){ case Int64Value: return Int64Value(b1 / v)}
+  return Int64Value(0)}
+func (b1 UInt64Value) Divide(b2 ValueContents) (result ValueContents){
+  switch v := b2.(type){case UInt64Value:return UInt64Value(b1 / v)}
+  return UInt64Value(0)}
+func (b1 Float64Value) Divide(b2 ValueContents) (result ValueContents){
+  switch v := b2.(type){case Float64Value:return Float64Value(b1 / v)}
+  return Float64Value(0)}
+func (b1 TextValue) Divide(b2 ValueContents) (result ValueContents){
+  return TextValue("")}
+func (b1 DataValue) Divide(b2 ValueContents) (result ValueContents){
+  return DataValue(nil)}
+////////////////////////////////////////////////////////////////
+func (b1 BoolValue) Negate() (result ValueContents){
+ return BoolValue(!b1)}
+func (b1 Int64Value) Negate() (result ValueContents){
+  return Int64Value(-b1)}
+func (b1 UInt64Value) Negate() (result ValueContents){
+  return UInt64Value(-b1)}
+func (b1 Float64Value) Negate() (result ValueContents){
+  return Float64Value(-b1)}
+func (b1 TextValue) Negate() (result ValueContents){
+  return TextValue("")}
+func (b1 DataValue) Negate() (result ValueContents){
+  return DataValue(nil)}
 /*
   Execution
 */
