@@ -31,6 +31,7 @@ import (
 	"os"
 	"strings"
 	"reflect"
+	"encoding/json"
 )
 /*
   Types
@@ -332,137 +333,174 @@ expr
         }
       }
     }
-/*    | expr NEQ expr
+    | expr NEQ expr
     {
-
+      expr1, expr2 := $1, $3
+      $$ = func() (value Value){
+        val1, val2 := expr1(), expr2()
+        if reflect.TypeOf(val1.v) == reflect.TypeOf(val2.v){
+          return Value{empty:false,v: val1.v.Neq(val2.v)}
+        } else {
+          log.Printf("Type error, types do not match.")
+	  return Value{empty:true,v: BoolValue(false)}
+        }
+      }
     }
-
     | expr AND expr
     {
       expr1, expr2 := $1, $3
       $$ = func() (value Value){
-	val1, val2 := expr1(), expr2()
-        if(val1.value_type == TYPE_BOOL && val2.value_type == TYPE_BOOL) {
-           val1.value_bool = val1.value_bool && val2.value_bool
+        val1, val2 := expr1(), expr2()
+	t1, t2, tb := reflect.TypeOf(val1.v), reflect.TypeOf(val2.v), reflect.TypeOf(BoolValue(true))
+        if t1 == tb && t2 == tb {
+          return Value{empty:false,v: val1.v.And(val2.v)}
+        } else {
+          log.Printf("Type error: && operator can only be applied to the bool type.")
+	  return Value{empty:true,v: BoolValue(false)}
         }
-	return val1
       }
     }
     | expr OR expr
     {
       expr1, expr2 := $1, $3
       $$ = func() (value Value){
-	val1, val2 := expr1(), expr2()
-        if(val1.value_type == TYPE_BOOL && val2.value_type == TYPE_BOOL) {
-           val1.value_bool = val1.value_bool || val2.value_bool
+        val1, val2 := expr1(), expr2()
+	t1, t2, tb := reflect.TypeOf(val1.v), reflect.TypeOf(val2.v), reflect.TypeOf(BoolValue(true))
+        if t1 == tb && t2 == tb {
+          return Value{empty:false,v: val1.v.Or(val2.v)}
+        } else {
+          log.Printf("Type error: || operator can only be applied to the bool type.")
+	  return Value{empty:true,v: BoolValue(false)}
         }
-	return val1
       }
     }
     | expr '>' expr
     {
       expr1, expr2 := $1, $3
-      $$ = func()  (value Value){
-	val1, val2 := expr1(), expr2()
-        if(val1.value_type == TYPE_INT32 && val2.value_type == TYPE_INT32) {
-           val1.value_bool = val1.value_int32 > val2.value_int32
-           val1.value_type = TYPE_BOOL
+      $$ = func() (value Value){
+        val1, val2 := expr1(), expr2()
+	t1, t2, tbool, tdata := reflect.TypeOf(val1.v), reflect.TypeOf(val2.v), reflect.TypeOf(BoolValue(true)), reflect.TypeOf(DataValue(nil))
+        if t1 == t2 && t1 != tbool && t1 != tdata {
+          return Value{empty:false,v: val1.v.Gt(val2.v)}
+        } else {
+          log.Printf("Type error: > only takes sortable types. Both values must be of the same type.")
+	  return Value{empty:true,v: BoolValue(false)}
         }
-	return val1
       }
     }
     | expr '<' expr
     {
       expr1, expr2 := $1, $3
       $$ = func() (value Value){
-	val1, val2 := expr1(), expr2()
-        if(val1.value_type == TYPE_INT32 && val2.value_type == TYPE_INT32) {
-           val1.value_bool = val1.value_int32 > val2.value_int32
-           val1.value_type = TYPE_BOOL
+        val1, val2 := expr1(), expr2()
+	t1, t2, tbool, tdata := reflect.TypeOf(val1.v), reflect.TypeOf(val2.v), reflect.TypeOf(BoolValue(true)), reflect.TypeOf(DataValue(nil))
+        if t1 == t2 && t1 != tbool && t1 != tdata {
+          return Value{empty:false,v: val1.v.Lt(val2.v)}
+        } else {
+          log.Printf("Type error: < only takes sortable types. Both values must be of the same type.")
+	  return Value{empty:true,v: BoolValue(false)}
         }
-	return val1
       }
     }
     | expr LTEQ expr
     {
       expr1, expr2 := $1, $3
       $$ = func() (value Value){
-	val1, val2 := expr1(), expr2()
-        if(val1.value_type == TYPE_INT32 && val2.value_type == TYPE_INT32) {
-           val1.value_bool = val1.value_int32 < val2.value_int32
-           val1.value_type = TYPE_BOOL
+        val1, val2 := expr1(), expr2()
+	t1, t2, tbool, tdata := reflect.TypeOf(val1.v), reflect.TypeOf(val2.v), reflect.TypeOf(BoolValue(true)), reflect.TypeOf(DataValue(nil))
+        if t1 == t2 && t1 != tbool && t1 != tdata {
+          return Value{empty:false,v: val1.v.Lte(val2.v)}
+        } else {
+          log.Printf("Type error: <= only takes sortable types. Both values must be of the same type.")
+	  return Value{empty:true,v: BoolValue(false)}
         }
-	return val1
       }
     }
     | expr GTEQ expr
     {
       expr1, expr2 := $1, $3
       $$ = func() (value Value){
-	val1, val2 := expr1(), expr2()
-        if(val1.value_type == TYPE_INT32 && val2.value_type == TYPE_INT32) {
-           val1.value_bool = val1.value_int32 >= val2.value_int32
-           val1.value_type = TYPE_BOOL
+        val1, val2 := expr1(), expr2()
+	t1, t2, tbool, tdata := reflect.TypeOf(val1.v), reflect.TypeOf(val2.v), reflect.TypeOf(BoolValue(true)), reflect.TypeOf(DataValue(nil))
+        if t1 == t2 && t1 != tbool && t1 != tdata {
+          return Value{empty:false,v: val1.v.Gte(val2.v)}
+        } else {
+          log.Printf("Type error: >= only takes sortable types. Both values must be of the same type.")
+	  return Value{empty:true,v: BoolValue(false)}
         }
-	return val1
       }
     }
     | expr '+' expr
     {
       expr1, expr2 := $1, $3
       $$ = func() (value Value){
-	val1, val2 := expr1(), expr2()
-        if(val1.value_type == TYPE_INT32 && val2.value_type == TYPE_INT32) {
-           val1.value_int32 = val1.value_int32 + val2.value_int32
+        val1, val2 := expr1(), expr2()
+	t1, t2, tbool, tdata := reflect.TypeOf(val1.v), reflect.TypeOf(val2.v), reflect.TypeOf(BoolValue(true)), reflect.TypeOf(DataValue(nil))
+        if t1 == t2 && t1 != tbool && t1 != tdata {
+          return Value{empty:false,v: val1.v.Add(val2.v)}
+        } else {
+          log.Printf("Type error: + only takes addable types. Both values must be of the same type.")
+	  return Value{empty:true,v: BoolValue(false)}
         }
-	return val1
       }
     }
     | expr '-' expr
     {
-      expr1, expr2 := $1, $3
+     expr1, expr2 := $1, $3
       $$ = func() (value Value){
-	val1, val2 := expr1(), expr2()
-        if(val1.value_type == TYPE_INT32 && val2.value_type == TYPE_INT32) {
-           val1.value_int32 = val1.value_int32 - val2.value_int32
+        val1, val2 := expr1(), expr2()
+	t1, t2, tbool, tdata, tstring := reflect.TypeOf(val1.v), reflect.TypeOf(val2.v), reflect.TypeOf(BoolValue(true)), reflect.TypeOf(DataValue(nil)),  reflect.TypeOf(TextValue(""))
+        if t1 == t2 && t1 != tbool && t1 != tdata && t1 != tstring {
+          return Value{empty:false,v: val1.v.Subtract(val2.v)}
+        } else {
+          log.Printf("Type error: - only takes number types. Both values must be of the same type.")
+	  return Value{empty:true,v: BoolValue(false)}
         }
-	return val1
       }
     }
     | expr '/' expr
     {
-      expr1, expr2 := $1, $3
+     expr1, expr2 := $1, $3
       $$ = func() (value Value){
-	val1, val2 := expr1(), expr2()
-        if(val1.value_type == TYPE_INT32 && val2.value_type == TYPE_INT32) {
-           val1.value_int32 = val1.value_int32 / val2.value_int32
+        val1, val2 := expr1(), expr2()
+	t1, t2, tbool, tdata, tstring := reflect.TypeOf(val1.v), reflect.TypeOf(val2.v), reflect.TypeOf(BoolValue(true)), reflect.TypeOf(DataValue(nil)),  reflect.TypeOf(TextValue(""))
+        if t1 == t2 && t1 != tbool && t1 != tdata && t1 != tstring {
+          return Value{empty:false,v: val1.v.Divide(val2.v)}
+        } else {
+          log.Printf("Type error: / only takes number types. Both values must be of the same type.")
+	  return Value{empty:true,v: BoolValue(false)}
         }
-	return val1
       }
     }
     | expr '*' expr
     {
-      expr1, expr2 := $1, $3
+     expr1, expr2 := $1, $3
       $$ = func() (value Value){
-	val1, val2 := expr1(), expr2()
-        if(val1.value_type == TYPE_INT32 && val2.value_type == TYPE_INT32) {
-           val1.value_int32 = val1.value_int32 * val2.value_int32
+        val1, val2 := expr1(), expr2()
+	t1, t2, tbool, tdata, tstring := reflect.TypeOf(val1.v), reflect.TypeOf(val2.v), reflect.TypeOf(BoolValue(true)), reflect.TypeOf(DataValue(nil)),  reflect.TypeOf(TextValue(""))
+        if t1 == t2 && t1 != tbool && t1 != tdata && t1 != tstring {
+          return Value{empty:false,v: val1.v.Multiply(val2.v)}
+        } else {
+          log.Printf("Type error: * only takes number types. Both values must be of the same type.")
+	  return Value{empty:true,v: BoolValue(false)}
         }
-	return val1
       }
     }
     | '-' expr %prec UMINUS
     {
-      expr1 := $2
+      expr := $2
       $$ = func() (value Value){
-	val1 := expr1()
-        if val1.value_type == TYPE_INT32 {
-           val1.value_int32 = -val1.value_int32
+        val := expr()
+	t, tdata, tstring := reflect.TypeOf(val.v), reflect.TypeOf(DataValue(nil)),  reflect.TypeOf(TextValue(""))
+        if t != tdata && t != tstring {
+          return Value{empty:false,v: val.v.Negate()}
+        } else {
+          log.Printf("Type error: Can only negate bool and number types.")
+	  return Value{empty:true,v: BoolValue(false)}
         }
-	return val1
       }
     }
-    | slot_identifier
+/*    | slot_identifier
     {
       si := $1
       $$ = func() (value Value){
@@ -532,6 +570,8 @@ func (x *OvachLex) Lex(yylval *OvachSymType) int {
 		        return int(c)
 		case '0', '1', '2', '3', '4', '5', '6', '7', '8', '9':
 			return x.num(c, yylval)
+		case '"':
+			return x.string(c, yylval)
 		case '\n':
 		  within_line = false
 		case ' ', '\t', '\r':
@@ -629,6 +669,33 @@ func (x *OvachLex) lowercase(c rune, yylval *OvachSymType) int {
 	}
 }
 
+func (x *OvachLex) string(c rune, yylval *OvachSymType) int {
+	add := func(b *bytes.Buffer, c rune) {
+		if _, err := b.WriteRune(c); err != nil {
+			log.Fatalf("WriteRune: %s", err)
+		}
+	}
+	var b bytes.Buffer
+	add(&b, c)
+	L: for {
+		c = x.next()
+		if c != '"' && c != eof{
+			add(&b, c)
+		} else {
+		        if c == eof {
+			  log.Fatalf("Parse error: EOF while reading string.")
+			} else {
+			  add(&b, '"')
+			  break L
+			}
+		}
+	}
+	var s string
+        json.Unmarshal(b.Bytes(),&s)
+	yylval.val = Value{empty:false,v:TextValue(s)}
+	return STRING
+}
+
 func (x *OvachLex) operator(c rune, yylval *OvachSymType) int {
 	add := func(b *bytes.Buffer, c rune) {
 		if _, err := b.WriteRune(c); err != nil {
@@ -639,7 +706,7 @@ func (x *OvachLex) operator(c rune, yylval *OvachSymType) int {
 	add(&b, c)
 	L: for {
 		c = x.next()
-		if c != '(' && unicode.IsSymbol(c) || unicode.IsPunct(c) {
+		if c != '(' && c != '"' && (unicode.IsSymbol(c) || unicode.IsPunct(c)) {
 			add(&b, c)
 		} else {
 			break L
@@ -742,6 +809,8 @@ func main() {
 
 /*
   Type interfaces
+
+  Lots of boiler plate. :( . At least it's easy to understand.
 */
 // Helpers
 func testEqSlice(a, b []byte) bool {
