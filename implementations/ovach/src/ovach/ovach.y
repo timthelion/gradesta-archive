@@ -54,8 +54,20 @@ type ValueContents interface{
   Multiply(ValueContents) ValueContents
   Divide(ValueContents) ValueContents
   Negate() ValueContents
+  Type() int32
+  TypeName() string
 }
 //Value Types
+const( //Number literals used, as these numbers should not change due to their presense "on the wire" in the protocol.
+      BOOL_TYPE = 0
+      TEXT_TYPE = 1
+      DATA_TYPE = 2
+      SLOT_TYPE = 3
+      APPLIANCE_TYPE = 4
+      INT64_TYPE = 5
+      UINT64_TYPE = 6
+      FLOAT64_TYPE = 7
+)
 type BoolValue        bool
 type Int64Value       int64
 type UInt64Value      uint64
@@ -63,27 +75,26 @@ type Float64Value     float64
 type TextValue        string
 type DataValue        []byte
 //type SlotValue        Slot
-//type ApplianceValue   Appliance
+type ApplianceValue   Appliance
 
 type SlotListing struct{
-  slot_identifier SlotIdentifier
+  slot_name string
   value_type int32
 }
 type SlotListings []SlotListing
 type Expr func() (ret Value)
 type Hole func(fill Expr) ()
 type Statement func()
-type SlotIdentifier []string
-type MapovachValue struct{
-  mapovach Mapovach
-  slot Value
+type Mapovach map[string]Value
+type Appliance interface{
+  Ls() (SlotListings, bool)
+  Set(slot string, value Value) *Value
+  Get(slot string) (Value, bool)
+  Delete(slot string) bool
 }
-type Mapovach map[string]MapovachValue
-type Provider interface{
-  Ls(appliance SlotIdentifier) (SlotListing, bool)
-  Set(slot SlotIdentifier, value Value) Value
-  Get(slot SlotIdentifier) (Value, bool)
-  Delete(slot SlotIdentifier) bool
+type Slot struct {
+  slot_name string
+  appliance Appliance
 }
 type TableFormat struct {
   head Statement
@@ -96,9 +107,9 @@ type TableFormat struct {
 */
 var (
      table_format TableFormat
-     localProvider int
-     currentProvider int
-     providers []Provider
+     current Appliance
+     hand Appliance
+     bag Appliance
 )
 %}
 
@@ -113,20 +124,22 @@ var (
   val Value
   symbol string
   symbols []string
+  appliance func() Appliance
 }
 
 %start line
 %type  <val> literal
 %token <val> STRING NUMBER BOOL
+%type  <appliance> appliance
 %type  <symbol> symbol
 %token <symbol> BUILT_IN_COMMAND LOWERCASE UPPERCASE
-%type  <symbols> keyword_arguments symbols slot_identifier
-%type  <expr> expr
+%type  <symbols> keyword_arguments
+%type  <expr> expr slot
 %type  <exprs> table_body_columns
 %type  <statement> sentences sentence
 %type  <hole> holy_sentence table_heading_column
 %type  <holes> table_heading_columns
-%token STATEMENT_MARKER TABLE_HEADING_MARKER TABLE_BODY_MARKER TABLE_MODE_TRANSITION
+%token STATEMENT_MARKER TABLE_HEADING_MARKER TABLE_BODY_MARKER TABLE_MODE_TRANSITION HAND BAG
 %left ','
 %left '.'
 %left TO
@@ -220,7 +233,11 @@ table_body_columns
     }
     ;
 sentences
-    : sentence
+    :
+    {
+      $$ = func(){}
+    }
+    | sentence
     {
       $$ = $1
     }
@@ -266,20 +283,22 @@ sentence
         fmt.Println("",expr())
       }
     }
-    | expr TO slot_identifier
+    | expr TO appliance UPPERCASE
     {
-      //expr, si := $1, $3
+      expr, appliance, slot_name := $1, $3, $4
       $$ = func(){
-	//set_slot(expr(),si)
+	appliance().Set(slot_name, expr())
       }
     }
     ;
 holy_sentence
-    : '_' TO slot_identifier
+    : '_' TO appliance UPPERCASE
     {
-      //si := $3
+      appliance, slot_name := $3, $4
       $$ = func(expr Expr){
-	//set_slot(expr(),si)
+        v := expr()
+	fmt.Println(v)
+	appliance().Set(slot_name,v)
       }
     }
     ;
@@ -293,14 +312,44 @@ keyword_arguments
       $$ = append($1,$2)
     }
     ;
-symbols
-    :
+appliance
+    : HAND
     {
-      $$ = []string{}
+      $$ = func() Appliance{
+        return hand
+      }
     }
-    | symbols symbol
+    | BAG
     {
-      $$ = append($1,$2)
+      $$ = func() Appliance{
+        return bag
+      }
+    }
+    | slot
+    {
+      slot := $1
+      $$ = func() Appliance {
+	switch app := slot().v.(type) {
+	    case ApplianceValue:
+	      return app
+	    default:
+	      log.Printf("Slot is not an appliance.")
+	      return nil
+	}
+      }
+    }
+    ;
+slot
+    : appliance UPPERCASE
+    {
+      appliance, slot_name := $1, $2
+      $$ = func() Value {
+	v, ok := appliance().Get(slot_name)
+	if !ok{
+	  log.Printf("Slot %s does not exist.", slot_name)
+	}
+	return v
+      }
     }
     ;
 symbol
@@ -311,9 +360,6 @@ literal
     : STRING
     | NUMBER
     | BOOL
-    ;
-slot_identifier
-    : symbols
     ;
 expr
     : '(' expr ')'
@@ -500,19 +546,10 @@ expr
         }
       }
     }
-/*    | slot_identifier
+    | slot
     {
-      si := $1
-      $$ = func() (value Value){
-	if si[0] == "h"{
-	    val, ok := hand[si[1]]
-	    if ok{
-	      return val
-	    }
-	}
-	return Value{}
-      }
-    }*/
+      $$ = $1
+    }
     | literal
     {
       val := $1
@@ -578,7 +615,9 @@ func (x *OvachLex) Lex(yylval *OvachSymType) int {
 		default:
 		        if unicode.IsLower(c) {
 			    return x.lowercase(c, yylval)
-			} else if unicode.IsSymbol(c) || unicode.IsPunct(c) {
+			} else if unicode.IsUpper(c) {
+			    return x.uppercase(c, yylval)
+                        } else if unicode.IsSymbol(c) || unicode.IsPunct(c) {
 			    return x.operator(c, yylval)
 			} else {
 			  log.Printf("unrecognized character %q", c)
@@ -631,6 +670,30 @@ func (x *OvachLex) num(c rune, yylval *OvachSymType) int {
 	return NUMBER
 }
 
+func (x *OvachLex) uppercase(c rune, yylval *OvachSymType) int {
+	add := func(b *bytes.Buffer, c rune) {
+		if _, err := b.WriteRune(c); err != nil {
+			log.Fatalf("WriteRune: %s", err)
+		}
+	}
+	var b bytes.Buffer
+	add(&b, c)
+	L: for {
+		c = x.next()
+		if unicode.IsLower(c) || unicode.IsUpper(c){
+			add(&b, c)
+		} else {
+			break L
+		}
+	}
+	if c != eof {
+		x.peek = c
+	}
+	s := b.String()
+        yylval.symbol = s
+        return UPPERCASE
+}
+
 func (x *OvachLex) lowercase(c rune, yylval *OvachSymType) int {
 	add := func(b *bytes.Buffer, c rune) {
 		if _, err := b.WriteRune(c); err != nil {
@@ -663,6 +726,10 @@ func (x *OvachLex) lowercase(c rune, yylval *OvachSymType) int {
 	    return BUILT_IN_COMMAND
 	  case "to":
 	    return TO
+	  case "h":
+	    return HAND
+	  case "b":
+	    return BAG
 	  default:
             yylval.symbol = s
 	    return LOWERCASE
@@ -706,7 +773,7 @@ func (x *OvachLex) operator(c rune, yylval *OvachSymType) int {
 	add(&b, c)
 	L: for {
 		c = x.next()
-		if c != '(' && c != '"' && (unicode.IsSymbol(c) || unicode.IsPunct(c)) {
+		if c != '(' && c != '"' && c != '_' && (unicode.IsSymbol(c) || unicode.IsPunct(c)) {
 			add(&b, c)
 		} else {
 			break L
@@ -786,7 +853,8 @@ func main() {
 	/*
 	  Init runtime
 	 */
-	//hand = make(map[string]Value)
+	hand = make(Mapovach)
+	bag = make(Mapovach)
 	for {
 	        switch parse_mode{
 		    case TABLE_HEADING_MODE:
@@ -1049,37 +1117,57 @@ func (b1 TextValue) Negate() (result ValueContents){
   return TextValue("")}
 func (b1 DataValue) Negate() (result ValueContents){
   return DataValue(nil)}
+////////////////////////////////////////////////////////////////
+func (b1 BoolValue) Type() (result int32){
+ return BOOL_TYPE}
+func (b1 Int64Value) Type() (result int32){
+  return INT64_TYPE}
+func (b1 UInt64Value) Type() (result int32){
+  return UINT64_TYPE}
+func (b1 Float64Value) Type() (result int32){
+  return FLOAT64_TYPE}
+func (b1 TextValue) Type() (result int32){
+  return TEXT_TYPE}
+func (b1 DataValue) Type() (result int32){
+  return DATA_TYPE}
+////////////////////////////////////////////////////////////////
+func (b1 BoolValue) TypeName() (result string){
+ return "bool"}
+func (b1 Int64Value) TypeName() (result string){
+  return "int64"}
+func (b1 UInt64Value) TypeName() (result string){
+  return "uint64"}
+func (b1 Float64Value) TypeName() (result string){
+  return "float64"}
+func (b1 TextValue) TypeName() (result string){
+  return "value"}
+func (b1 DataValue) TypeName() (result string){
+  return "data"}
 /*
   Execution
 */
-/*
-func (m *Mapovach) Ls(appliance SlotIdentifier) (listing SlotListing, ok){
-  for i := 0; i < len(appliance); i++{
-    m, ok = m[appliance[i]]
-    if !ok{
-      log.Printf("%s does not exist.",appliance)
-    }
+func (m Mapovach) Ls() (listing SlotListings, ok bool){
+  var listings = make([]SlotListing,len(m))
+  i := 0
+  for key, value := range m{
+    listings[i] = SlotListing{key, value.v.Type()}
+    i++
   }
-  for i := 0; i < len(m); i++{
-    fmt.Println("%s : %s", key(m, i), m[i].value_type.Description())
-  }
+  return listings, true
 }
 
-func (m *Mapovach) Set
-type Mapovach map[string]Value
-type Provider interface{
-  Ls(appliance SlotIdentifier) (SlotListing, bool)
-  Set(slot SlotIdentifier, value Value) SlotError
-  Get(slot SlotIdentifier) (Value, bool)
-  Delete(slot SlotIdentifier) bool
+func (m Mapovach) Set(slot string, value Value) *Value{
+  m[slot] = value
+  return nil
 }
 
-func set_slot(val Value, slot_identifier []string){
-  if slot_identifier[0] == "h"{
-      val_in_slot,ok := hand[slot_identifier[1]]
-      if !ok || val_in_slot.value_type == val.value_type {
-	    hand[slot_identifier[1]] = val
-      }
-  }
+func (m Mapovach) Get(slot string) (Value, bool){
+  v,ok := m[slot]
+  return v,ok
 }
-*/
+
+func (m Mapovach) Delete(slot string) bool{
+  _, ok := m[slot]
+  delete(m,slot)
+  return ok
+}
