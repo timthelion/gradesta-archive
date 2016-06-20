@@ -20,9 +20,11 @@ And from https://golang.org/src/cmd/yacc/testdata/expr/expr.y?m=text
 package main
 
 import (
+	"flag"
 	"bytes"
 	"fmt"
 	"io"
+	"bufio"
 	"log"
 	"unicode/utf8"
 	"unicode"
@@ -101,12 +103,24 @@ type TableFormat struct {
   columns []Hole
   foot Statement
 }
+type Program map[int64]Block
+type Block struct{
+  tags map[string]Goto
+  gotos []Goto
+  statements []Statement
+}
+type Goto struct{
+  cond Expr
+  block int64
+}
 
 /*
   Globals
 */
 var (
      table_format TableFormat
+     this_statement func()
+     this_expr Expr
      current Appliance
      hand Appliance
      bag Appliance
@@ -117,7 +131,7 @@ var (
 // as ${PREFIX}SymType, of which a reference is passed to the lexer.
 %union{
   statement Statement
-  exprs []Expr
+  exprs []*Expr
   expr Expr
   hole Hole
   holes []Hole
@@ -139,7 +153,7 @@ var (
 %type  <statement> sentences sentence
 %type  <hole> holy_sentence table_heading_column
 %type  <holes> table_heading_columns
-%token STATEMENT_MARKER TABLE_HEADING_MARKER TABLE_BODY_MARKER TABLE_MODE_TRANSITION HAND BAG
+%token STATEMENT_MARKER EXPR_MARKER TABLE_HEADING_MARKER TABLE_BODY_MARKER TABLE_MODE_TRANSITION HAND BAG
 %left ','
 %left '.'
 %left TO
@@ -158,28 +172,46 @@ line
 	columns: $4,
 	foot: $6,
       }
-      fmt.Println("TABLE_HEADING")
+      this_statement = func() {}
     }
     | TABLE_BODY_MARKER table_body_columns
     {
-      table_format.head()
-      for i :=0 ; i < len($2); i++ {
-	if $2[i] != nil {
-	  table_format.columns[i]($2[i])
-	}
+      current_table_format := table_format
+      body_columns := $2
+      this_statement = func(){
+        current_table_format.head()
+        for i :=0 ; i < len(body_columns); i++ {
+          if body_columns[i] != nil {
+             current_table_format.columns[i](*body_columns[i])
+          }
+        }
+        current_table_format.foot()
       }
-      table_format.foot()
-      fmt.Println("TABLE_BODY")
     }
     | STATEMENT_MARKER sentences
     {
-      $2()
-      fmt.Println("STATEMENT")
+      this_statement = $2
+    }
+    | EXPR_MARKER expr
+    {
+      this_expr = $2
     }
     | TABLE_HEADING_MARKER TABLE_MODE_TRANSITION
+    {
+      this_statement = func() {}
+    }
     | TABLE_BODY_MARKER TABLE_MODE_TRANSITION
+    {
+      this_statement = func() {}
+    }
     | STATEMENT_MARKER TABLE_MODE_TRANSITION
+    {
+      this_statement = func() {}
+    }
     | TABLE_MODE_TRANSITION
+    {
+      this_statement = func() {}
+    }
     ;
 table_heading_columns
     : table_heading_column
@@ -221,15 +253,27 @@ table_heading_column
 table_body_columns
     :
     {
-      $$ = nil
+      $$ = []*Expr{}
     }
     | expr
     {
-      $$ = []Expr{$1}
+      $$ = []*Expr{&$1}
+    }
+    | ',' expr
+    {
+      $$ = []*Expr{nil,&$2}
+    }
+    | table_body_columns ',' ','
+    {
+      $$ = append($1,nil)
+    }
+    | table_body_columns ','
+    {
+      $$ = append($1,nil)
     }
     | table_body_columns ',' expr
     {
-      $$ = append($1,$3)
+      $$ = append($1,&$3)
     }
     ;
 sentences
@@ -280,7 +324,7 @@ sentence
     {
       expr := $1
       $$ = func(){
-        fmt.Println("",expr())
+        fmt.Println("",expr().v)
       }
     }
     | expr TO appliance UPPERCASE
@@ -297,7 +341,7 @@ holy_sentence
       appliance, slot_name := $3, $4
       $$ = func(expr Expr){
         v := expr()
-	fmt.Println(v)
+	fmt.Println(v.v)
 	appliance().Set(slot_name,v)
       }
     }
@@ -576,6 +620,7 @@ const(
       STATEMENT_MODE = iota
       TABLE_HEADING_MODE
       TABLE_BODY_MODE
+      EXPR_MODE
 )
 
 var(
@@ -594,6 +639,8 @@ func (x *OvachLex) Lex(yylval *OvachSymType) int {
 		        return TABLE_HEADING_MARKER
 		     case TABLE_BODY_MODE:
 		        return TABLE_BODY_MARKER
+	             case EXPR_MODE:
+		        return EXPR_MARKER
 		  }
 		}
 		c := x.next()
@@ -602,6 +649,7 @@ func (x *OvachLex) Lex(yylval *OvachSymType) int {
 		        within_line = false
 			return eof
 		case '#':
+		        within_line = false
 			return eof
 		case '(',')':
 		        return int(c)
@@ -845,16 +893,54 @@ func (x *OvachLex) Error(s string) {
 }
 
 func main() {
-        rl, err := readline.New("> ")
-        if err != nil {
-          panic(err)
-        }
-        defer rl.Close()
 	/*
 	  Init runtime
 	 */
 	hand = make(Mapovach)
 	bag = make(Mapovach)
+	ovach_script := flag.String("ovach-script","","The ovach script to run.")
+	print_lines := flag.Bool("print-lines",false,"Print out each line of the ovach script as it is run for debugging purposes. Note: does not work with govach scripts.")
+	govach_script := flag.String("govach-script","","The govach script to run.")
+	flag.Parse()
+	if *ovach_script != "" {
+	  run_ovach_script(*ovach_script,*print_lines)
+	} else if *govach_script != ""{
+        } else {
+	  repl()
+        }
+}
+
+func run_ovach_script(script string, print_lines bool){
+    // http://stackoverflow.com/questions/8757389/reading-file-line-by-line-in-go
+    file, err := os.Open(script)
+    if err != nil {
+        log.Fatal(err)
+    }
+    defer file.Close()
+
+    scanner := bufio.NewScanner(file)
+    line_number := 0
+    for scanner.Scan() {
+	line := scanner.Text()
+	if print_lines{
+	  fmt.Println(line_number,line)
+	}
+	line_number++
+	OvachParse(&OvachLex{line: line})
+	this_statement()
+    }
+
+    if err := scanner.Err(); err != nil {
+        log.Fatal(err)
+    }
+}
+
+func repl() {
+        rl, err := readline.New("> ")
+        if err != nil {
+          panic(err)
+        }
+        defer rl.Close()
 	for {
 	        switch parse_mode{
 		    case TABLE_HEADING_MODE:
@@ -872,6 +958,7 @@ func main() {
 			return
 		}
 		OvachParse(&OvachLex{line: line})
+	        this_statement()
 	}
 }
 
