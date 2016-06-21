@@ -344,7 +344,7 @@ class TextGraph(collections.abc.MutableMapping):
         if square.squareId in markedSquares:
           for attr,value in markedSquares[square.squareId].items():
             markings += "," + attr + " = " + value
-        labels += str(square.squareId)+"[label="+json.dumps(square.text).replace("\\n","\\l")+markings+"]\n"
+        labels += str(square.squareId)+"[shape=rect label="+json.dumps(square.text+"\n").replace("\\n","\\l")+markings+"]\n"
         n = 0
         for street in square.streets:
           edges += str(square.squareId)+" -> "+str(street.destination)+" [label="+json.dumps(str(n)+":"+street.name)+"]\n"
