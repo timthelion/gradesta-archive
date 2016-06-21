@@ -103,15 +103,15 @@ type TableFormat struct {
   columns []Hole
   foot Statement
 }
-type Program map[int64]Block
+type GovachProgram map[int64]Block
 type Block struct{
-  tags map[string]Goto
+  //tags map[string]Goto
   gotos []Goto
   statements []Statement
 }
 type Goto struct{
   cond Expr
-  block int64
+  dest int64
 }
 
 /*
@@ -305,7 +305,6 @@ sentence
       $$ = func(){
         switch command{
 	  case "exit":
-            fmt.Println("Bye...")
 	    os.Exit(0)
 	  /*case "ls":
 	    if len(args) > 0{
@@ -905,9 +904,115 @@ func main() {
 	if *ovach_script != "" {
 	  run_ovach_script(*ovach_script,*print_lines)
 	} else if *govach_script != ""{
+	  run_govach_script(*govach_script)
         } else {
 	  repl()
         }
+}
+type BlockFromJson struct {
+	id int64
+	code string
+	streets []json.RawMessage
+}
+type StreetFromJson struct{
+       name string
+       destination int64
+}
+
+func (b *BlockFromJson) UnmarshalJSON(buf []byte) error {
+	// THANKS! http://eagain.net/articles/go-json-array-to-struct/
+	tmp := []interface{}{&b.id, &b.code, &b.streets}
+	wantLen := len(tmp)
+	if err := json.Unmarshal(buf, &tmp); err != nil {
+		return err
+	}
+	if g, e := len(tmp), wantLen; g != e {
+		return fmt.Errorf("wrong number of fields in Block: %d != %d", g, e)
+	}
+	return nil
+}
+
+func (s *StreetFromJson) UnmarshalJSON(buf []byte) error {
+	// THANKS! http://eagain.net/articles/go-json-array-to-struct/
+	tmp := []interface{}{&s.name, &s.destination}
+	wantLen := len(tmp)
+	if err := json.Unmarshal(buf, &tmp); err != nil {
+		return err
+	}
+	if g, e := len(tmp), wantLen; g != e {
+		return fmt.Errorf("wrong number of fields in Street: %d != %d", g, e)
+	}
+	return nil
+}
+
+func run_govach_script(script string){
+    // http://stackoverflow.com/questions/8757389/reading-file-line-by-line-in-go
+    /*
+      Compile
+    */
+    file, err := os.Open(script)
+    if err != nil {
+        log.Fatal(err)
+    }
+    defer file.Close()
+
+    p := make(GovachProgram)
+    var json_block BlockFromJson
+    scanner := bufio.NewScanner(file)
+    for scanner.Scan() {
+	line := scanner.Text()
+	if err := json.Unmarshal([]byte(line), &json_block); err != nil {
+		log.Fatal(err)
+	}
+	statements := []Statement{}
+	blockscanner := bufio.NewScanner(bytes.NewBufferString(json_block.code))
+	for blockscanner.Scan() {
+	  codeline := blockscanner.Text()
+	  OvachParse(&OvachLex{line: codeline})
+	  statements = append(statements,this_statement)
+	}
+	gotos := []Goto{}
+        var json_street StreetFromJson
+	parse_mode = EXPR_MODE
+	for _,raw_json_street := range json_block.streets{
+	  if err := json.Unmarshal(raw_json_street, &json_street); err != nil {
+		log.Fatal(err)
+	  }
+	  OvachParse(&OvachLex{line: json_street.name})
+	  gotos = append(gotos, Goto{cond: this_expr, dest: json_street.destination})
+        }
+	parse_mode = STATEMENT_MODE
+	p[json_block.id] = Block{gotos:gotos,statements:statements}
+    }
+
+    if err := scanner.Err(); err != nil {
+        log.Fatal(err)
+    }
+    /*
+      Run
+    */
+    b := int64(0)
+    L: for {
+	for _,s := range p[b].statements{
+	  s()
+	}
+	for _,cond := range p[b].gotos{
+	  c := cond.cond()
+	  if !c.empty{
+	    switch v := c.v.(type){
+	      case BoolValue:
+	        if v {
+	          b = cond.dest
+	          continue L
+                }
+              default:
+	        b = cond.dest
+	        continue L
+	    }
+          }
+	}
+        return
+    }
 }
 
 func run_ovach_script(script string, print_lines bool){

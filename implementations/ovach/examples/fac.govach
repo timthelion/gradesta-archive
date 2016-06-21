@@ -1,0 +1,3 @@
+[0, "10 to b Num. 1 to b Fac.\n", [["true", 1]]]
+[1, "b Fac * b Num to b Fac. b Num - 1 to b Num.", [["b Num == 1", 2], ["true", 1]]]
+[2, "b Fac. exit.\n", []]
