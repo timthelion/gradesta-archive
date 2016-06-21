@@ -77,10 +77,6 @@ class MultiTabEditor(urwid.Frame):
         self.focus_position = 'body'
       else:
         return super(MultiTabEditor,self).keypress(size,key)
-    elif key in keybindings['jump-to-command-bar'] and self.focus_position != 'footer':
-      self.focus_position = 'footer'
-    elif key in keybindings['jump-to-stack-area'] and self.focus_position == 'body':
-      self.focus_position = 'header'
     else:
       value = super(MultiTabEditor,self).keypress(size,key)
     return value
@@ -245,9 +241,13 @@ class GraphView(urwid.WidgetPlaceholder):
         if key in keybindings['insert-mode']:
           self.mode = 'insert'
           return None
-        if key in keybindings["back"]:
+        elif key in keybindings["back"]:
           if self.history:
             self._selection = self.history.pop()
+        elif key in keybindings['jump-to-command-bar']:
+          self.tabbedEditor.focus_position = 'footer'
+        elif key in keybindings['jump-to-stack-area']:
+          self.tabbedEditor.focus_position = 'header'
         elif key in keybindings['search-mode']:
           self.mode = 'search'
           self.searchBox.searchEdit.edit_text = ""
@@ -705,6 +705,8 @@ class SearchBox(urwid.ListBox):
       return super(SearchBox,self).keypress(size,'down')
     elif key in keybindings['jump-to-command-bar']:
       self.view.focus_position = 'footer'
+    elif key in keybindings['jump-to-stack-area']:
+      self.view.focus_position = 'header'
     elif key == 'enter':
       self.view.selection = self.focused_square
       self.view.mode = 'command'
