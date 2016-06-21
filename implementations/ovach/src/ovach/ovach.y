@@ -196,6 +196,10 @@ line
     {
       this_expr = $2
     }
+    | EXPR_MARKER
+    {
+      this_expr = func () Value {return Value{empty: false,v: BoolValue(true)}}
+    }
     | TABLE_HEADING_MARKER TABLE_MODE_TRANSITION
     {
       this_statement = func() {}
@@ -528,7 +532,7 @@ expr
         if t1 == t2 && t1 != tbool && t1 != tdata {
           return Value{empty:false,v: val1.v.Add(val2.v)}
         } else {
-          log.Printf("Type error: + only takes addable types. Both values must be of the same type.")
+          log.Printf("Type error: + only takes addable types. Both values must be of the same type. Expected type num + num got %v + %v.",val1.v.TypeName(),val2.v.TypeName())
 	  return Value{empty:true,v: BoolValue(false)}
         }
       }
@@ -542,7 +546,7 @@ expr
         if t1 == t2 && t1 != tbool && t1 != tdata && t1 != tstring {
           return Value{empty:false,v: val1.v.Subtract(val2.v)}
         } else {
-          log.Printf("Type error: - only takes number types. Both values must be of the same type.")
+          log.Printf("Type error: - only takes number types. Both values must be of the same type. Expected type num - num got %v - %v.",val1.v.TypeName(),val2.v.TypeName())
 	  return Value{empty:true,v: BoolValue(false)}
         }
       }
@@ -556,7 +560,7 @@ expr
         if t1 == t2 && t1 != tbool && t1 != tdata && t1 != tstring {
           return Value{empty:false,v: val1.v.Divide(val2.v)}
         } else {
-          log.Printf("Type error: / only takes number types. Both values must be of the same type.")
+          log.Printf("Type error: / only takes number types. Both values must be of the same type. Expected type num / num got %v / %v.",val1.v.TypeName(),val2.v.TypeName())
 	  return Value{empty:true,v: BoolValue(false)}
         }
       }
@@ -570,7 +574,7 @@ expr
         if t1 == t2 && t1 != tbool && t1 != tdata && t1 != tstring {
           return Value{empty:false,v: val1.v.Multiply(val2.v)}
         } else {
-          log.Printf("Type error: * only takes number types. Both values must be of the same type.")
+          log.Printf("Type error: * only takes number types. Both values must be of the same type. Expected type num * num got %v * %v.",val1.v.TypeName(),val2.v.TypeName())
 	  return Value{empty:true,v: BoolValue(false)}
         }
       }
@@ -993,6 +997,8 @@ func run_govach_script(script string){
     */
     b := int64(0)
     L: for {
+	// Clear inner scope with each new block
+	hand = make(Mapovach)
 	for _,s := range p[b].statements{
 	  s()
 	}
