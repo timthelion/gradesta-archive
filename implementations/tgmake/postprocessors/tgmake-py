@@ -1,0 +1,22 @@
+#!/usr/bin/python3
+import json
+import fileinput
+
+print("tgmakepynodes = {}")
+for line in fileinput.input():
+	if line.startswith("#"):
+		continue
+	id,text,streets = json.loads(line)
+	if text.startswith("import"):
+		print(text)
+		continue	
+	print("def tgmakepynode"+str(id)+"():")
+	for streetname,destination in streets:
+		print("\t"+streetname+" = tgmakepynodes["+str(destination)+"]")
+	if not "\n" in text.strip():
+		print("\treturn " + text)
+	else:
+		for codeline in text.split("\n"):
+			print("\t"+codeline)
+	print("tgmakepynodes["+str(id)+"] = tgmakepynode"+str(id)+"()")
+	
