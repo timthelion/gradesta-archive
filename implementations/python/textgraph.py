@@ -315,8 +315,11 @@ class TextGraph(collections.abc.MutableMapping):
     # Build neighborhood
     for _ in range(0,level):
       newEdge = []
+      oldEdge = []
       for square in edge:
-        squareIdsInNeighborhood.add(square.squareId)
+        if not square.squareId in squareIdsInNeighborhood:
+          oldEdge.append(square.squareId)
+          squareIdsInNeighborhood.add(square.squareId)
         for street in square.streets:
           newEdge.append(self[street.destination])
         for street in square.incommingStreets:
@@ -328,13 +331,14 @@ class TextGraph(collections.abc.MutableMapping):
       newSquare = copy.deepcopy(self[squareId])
       newSquare.streets = [street for street in newSquare.streets if street.destination in squareIdsInNeighborhood]
       finalNeighborhood.append(newSquare)
-    return finalNeighborhood
+    return finalNeighborhood, oldEdge
 
   def dot(self,markedSquares={},neighborhoodCenter=None,neighborhoodLevel=4):
     if neighborhoodCenter is None:
       neighborhood = self.values()
+      edge = []
     else:
-      neighborhood = self.__neighborhood(neighborhoodCenter,neighborhoodLevel)
+      neighborhood, edge = self.__neighborhood(neighborhoodCenter,neighborhoodLevel)
     dot = "digraph graphname{\n"
     labels = ""
     edges = ""
@@ -344,10 +348,15 @@ class TextGraph(collections.abc.MutableMapping):
         if square.squareId in markedSquares:
           for attr,value in markedSquares[square.squareId].items():
             markings += "," + attr + " = " + value
+        if square.squareId in edge:
+          markings += ", color=grey"
         labels += str(square.squareId)+"[shape=rect label="+json.dumps(square.text+"\n").replace("\\n","\\l")+markings+"]\n"
         n = 0
         for street in square.streets:
-          edges += str(square.squareId)+" -> "+str(street.destination)+" [label="+json.dumps(str(n)+":"+street.name)+"]\n"
+          edgeColoring = ""
+          if street.destination in edge:
+            edgeColoring = ",style = dotted, color = grey"
+          edges += str(square.squareId)+" -> "+str(street.destination)+" [label="+json.dumps(str(n)+":"+street.name)+edgeColoring+"]\n"
           n += 1
     dot += labels
     dot += edges
