@@ -457,6 +457,7 @@ class StreetNavigator(urwid.ListBox):
     if key in keybindings['new-square-setting-street-name']:
       self.newStreetToNewSquare(useDefaultStreetName=False)
       self.view.mode = 'insert'
+      self.focus_position = len(self.streets) - 1
       return None
     if key in keybindings['set-default-street-name']:
       if self.streets:
