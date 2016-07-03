@@ -124,7 +124,14 @@ class GraphView(urwid.WidgetPlaceholder):
       incommingStreets.append(copy.deepcopy(incommingStreet))
     self.incommingStreets.update(incommingStreets)
     # current square
-    self.currentSquare.edit_text = self.selectedSquare.text
+    try:
+      self.currentSquare.edit_text = self.selectedSquare.text
+    except AttributeError:
+      if not self.graph[self.history[-1]].text is None:
+        self.selection = self.history[-1]
+      else:
+        self.selection = 0
+      self.currentSquare.edit_text = self.selectedSquare.text
     # streets
     self.streets.update(self.selectedSquare.streets)
 
@@ -216,11 +223,11 @@ class GraphView(urwid.WidgetPlaceholder):
     if self.mode == 'search':
       return self.keypressSearchmode(size, key)
     focusedBeforeProcessing = self.focus_item
-    try:
-      value = self.handleKeypress(size,key)
-    except AttributeError as e:
-      self.statusMessage = str(e)
-      value = None
+    #try:
+    value = self.handleKeypress(size,key)
+    #except AttributeError as e:
+    #  self.statusMessage = str(e)
+    #  value = None
     if key in keybindings['command-mode.down'] and focusedBeforeProcessing == self.currentSquareWidget and self.focus_item == self.streets:
       self.streets.focus_position = 0
     self.updateStatusBar()
