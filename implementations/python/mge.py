@@ -388,6 +388,10 @@ class CurrentSquare(urwid.Edit):
       newSquareId = self.view.graph.newLinkedSquare(prevSquare,self.view.defaultStreetName)
       self.view.selection = newSquareId
       self.view.history.append(prevSquare)
+    if key in keybindings['new-square-global']:
+      self.view.selection = self.view.streets.newStreetToNewSquare(useDefaultStreetName=True)
+      self.view.focus_item = self.view.currentSquareWidget
+      self.view.mode = 'insert'
     if self.view.mode =='command':
       if key in keybindings['add-to-stack']:
         self.view.tabbedEditor.clipboard.squares.append((self.view.graph.filename,self.view.selectedSquare))
@@ -453,7 +457,7 @@ class StreetNavigator(urwid.ListBox):
   def keypress(self,size,key):
     if self.view.mode == "insert":
       return super(StreetNavigator,self).keypress(size,key)
-    if key in keybindings['new-square']:
+    if key in keybindings['new-square'] or key in keybindings['new-square-global']:
       self.view.selection = self.newStreetToNewSquare(useDefaultStreetName=True)
       self.view.focus_item = self.view.currentSquareWidget
       self.view.mode = 'insert'
@@ -801,8 +805,9 @@ keybindings = {
  'move-square-up' : ['ctrl up'],
  'move-square-down' : ['ctrl down'],
  'new-square' : ['n'],
+ 'new-square-global' : ['ctrl n'],
  'new-square-with-blank-street-name' : ['meta n'],
- 'new-square-setting-street-name' : ['ctrl n'],
+ 'new-square-setting-street-name' : ['meta i'],
  'new-square-streeted-to-previous-square' : ['meta enter'],
  'remove-street-or-incommingStreet' : ['d'],
  'delete-square' : ['delete'],
