@@ -356,7 +356,7 @@ class TextGraph(collections.abc.MutableMapping):
         n = 0
         for street in square.streets:
           edgeColoring = ""
-          if street.destination in edge:
+          if street.destination in edge or street.origin in edge:
             edgeColoring = ",style = dotted, color = grey"
           edges += str(square.squareId)+" -> "+str(street.destination)+" [label="+json.dumps(str(n)+":"+street.name)+edgeColoring+"]\n"
           n += 1
