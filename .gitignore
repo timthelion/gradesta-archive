@@ -1,1 +1,7 @@
 *~*
+.*.draft
+.*.swp
+*__pycache__*
+.subuser-dev
+*.o
+.#*
