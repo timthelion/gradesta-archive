@@ -67,12 +67,17 @@ class TextGraphServer():
     # A list of squares sets those squares, but also returns a list of the newly set squares. A return code is also returned, listing None if a value can be set/or has been successfully set and a string explaining an error or permissions problem. This is also how you query for squares.
     # Query square 1
     # <- [[1]]
-    # -> [[1,"foo",[["bar St.",2]]]]
+    # -> [[1,"foo",[["bar St.",2]],[3,"incomming St."]]]
     # -> [[1,null,"Read only"]]
     # Set square 1
     # <- [[1,"foobar",[["bar St.",2]]]]
-    # -> [[1,"foobar",[["bar St.",2]]]]
+    # -> [[1,"foobar",[["bar St.",2]],[3,"incomming St."]]]
     # -> [[1,null,null]]
+    # Query non-existant square
+    # <- [[2]]
+    # -> [[2,null,[],[]]]
+    # -> [[1,"Square does not exist.","Square does not exist."]]
+
     for square in squares:
       try:
         squareId = square[0]
@@ -113,6 +118,9 @@ class TextGraphServer():
       if text is None:
         try:
           del self.graph[squareId]
+          del self.streetsByDestination[squareId]
+          for destination in self.streetsByDestination.keys():
+            self.streetsByDestination[destination] = [s for s in self.streetsByDestination[destination] if s[0] != squareId]
         except KeyError:
           resultingSquares.append([squareId,None,[],[]])
           returnValues.append([squareId,"Square does not exist.","Square does not exist."])
@@ -125,7 +133,7 @@ class TextGraphServer():
         for name,destination in streets:
           if not destination in self.streetsByDestination:
             self.streetsByDestination[destination] = []
-          self.streetsByDestination[destination].append([squareId,name,destination])
+          self.streetsByDestination[destination].append([squareId,name])
           self.streetsByDestination[destination].sort()
       if squareId in self.streetsByDestination:
         incommingStreets = self.streetsByDestination[squareId]

@@ -82,6 +82,8 @@ class Square():
       return self.text.splitlines()[0]
     except IndexError:
       return "<blank-text>"
+    except AttributeError:
+      return "Non-existant square: "+str(self.squareId)
 
   def lookupStreet(self,streetName):
     for street in self.streets:
@@ -96,8 +98,8 @@ def getSquareFromList(square,permissions):
   for (name,destination),streetPermission in zip(streetsAsLists,streetPermissions):
     streets.append(Street(name,destination,squareId,streetPermission is not None))
   incommingStreets = []
-  for origin,name,destination in incommingStreetLists:
-    incommingStreets.append(Street(name,destination,origin))
+  for origin,name in incommingStreetLists:
+    incommingStreets.append(Street(name,squareId,origin))
   return Square(squareId,text,streets,readonly = textPermission is not None,incommingStreets = incommingStreets)
 
 class TextGraphServer():

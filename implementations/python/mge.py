@@ -501,9 +501,8 @@ class IncommingStreetsList(StreetNavigator):
 
   def focusLastStreet(self):
     lastStreet = len(self.streets) - 1
-    if lastStreet < 0:
-      lastStreet = 0
-    self.focus_position = lastStreet
+    if lastStreet > 0:
+      self.focus_position = lastStreet
 
   def recordChanges(self):
     if self.view.mode == "insert":
