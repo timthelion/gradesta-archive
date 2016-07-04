@@ -12,6 +12,7 @@ class TextGraphServer():
     self.nextSquareId = 0
     self.lineNo = 0
     self.readonly = False
+    self.debug = False
     if filepath is None:
       pass
     elif filepath.startswith("http://"):
@@ -36,6 +37,8 @@ class TextGraphServer():
       self.nextSquareId = 1
 
   def interpretLine(self,line,outputResult = True,repl=False):
+    if self.debug:
+      print("<<" + line[:-1], file=sys.stderr)
     # Lines starting with # and blank lines are ignored.
     if line.startswith("#") or not line:
       return
@@ -128,7 +131,10 @@ class TextGraphServer():
       else:
         if squareId in self.graph:
           for street in self.graph[squareId][2]:
-            self.streetsByDestination[street[1]] = [street for street in self.streetsByDestination[street[1]] if street[0] != squareId]
+            try:
+              self.streetsByDestination[street[1]] = [incommingStreet for incommingStreet in self.streetsByDestination[street[1]] if incommingStreet[0] != squareId]
+            except KeyError:
+              pass
         self.graph[squareId] = [squareId,text,streets]
         for name,destination in streets:
           if not destination in self.streetsByDestination:
@@ -146,6 +152,10 @@ class TextGraphServer():
       sys.stdout.flush()
       sys.stdout.write(json.dumps(returnValues)+"\n")
       sys.stdout.flush()
+      if self.debug:
+        print(">>" + json.dumps(resultingSquares), file=sys.stderr)
+        print(">>" + json.dumps(returnValues), file=sys.stderr)
+        print("", file=sys.stderr)
 
   def repl(self):
     import readline
@@ -172,12 +182,14 @@ class TextGraphServer():
 if __name__ == "__main__":
   parser = optparse.OptionParser(usage = "tgserve",description = "Dumb server for the textgraph protocol.")
   parser.add_option("--repl", dest="repl",action="store_true",default=False,help="Run in REPL mode, don't exit on errors.")
+  parser.add_option("--debug", dest="debug",action="store_true",default=False,help="Print what is happening at the protocol level.")
   options,args = parser.parse_args(sys.argv[1:])
   if args:
     filepath = args[0]
   else:
     filepath = None
   tgs = TextGraphServer(filepath)
+  tgs.debug = options.debug
   if options.repl:
     tgs.repl()
   else:

@@ -104,15 +104,29 @@ def getSquareFromList(square,permissions):
 
 class TextGraphServer():
   def __init__(self,filename):
-    self.proc = subprocess.Popen(["./tgserve.py",filename],stdin=subprocess.PIPE,stdout=subprocess.PIPE,close_fds=True)
+    self.proc = subprocess.Popen(["./tgserve.py","--debug",filename],stdin=subprocess.PIPE,stdout=subprocess.PIPE,stderr=subprocess.PIPE,close_fds=True)
 
   def send(self,query):
-    queryString = json.dumps(query)
-    queryString += "\n"
+    queryString = json.dumps(query) + "\n"
     self.proc.stdin.write(queryString.encode("utf-8"))
     self.proc.stdin.flush()
-    response = json.loads(self.proc.stdout.readline().decode("utf-8"))
-    returnCodes = json.loads(self.proc.stdout.readline().decode("utf-8"))
+    def nextline():
+      line = self.proc.stdout.readline().decode("utf-8")
+      if line == "": # This is idiotic. Blank lines return "\n" and eof == "".
+        errors = self.proc.stderr.read().decode("utf-8")
+        sys.exit("Sent:"+queryString+"Pipe broken. Backend crashed.\n"+errors)
+      else:
+        return line
+    try:
+      responseString = nextline()
+      response = json.loads(responseString)
+    except ValueError:
+      sys.exit("Malformed response: "+responseString)
+    try:
+      returnCodesString = nextline()
+      returnCodes = json.loads(returnCodesString)
+    except ValueError:
+      sys.exit("Response:"+responseString+"\nMalformed return code: "+returnCodeString)
     return (response,returnCodes)
 
 class TextGraph(collections.abc.MutableMapping):
