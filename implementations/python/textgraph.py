@@ -104,14 +104,18 @@ def getSquareFromList(square,permissions):
 
 class TextGraphServer():
   def __init__(self,filename):
-    self.proc = subprocess.Popen(["./tgserve.py","--debug",filename],stdin=subprocess.PIPE,stdout=subprocess.PIPE,stderr=subprocess.PIPE,close_fds=True)
+    self.proc = subprocess.Popen(["./tgserve.py",filename],stdin=subprocess.PIPE,stdout=subprocess.PIPE,stderr=subprocess.PIPE,close_fds=True)
 
   def send(self,query):
     queryString = json.dumps(query) + "\n"
     self.proc.stdin.write(queryString.encode("utf-8"))
     self.proc.stdin.flush()
     def nextline():
-      line = self.proc.stdout.readline().decode("utf-8")
+      try:
+        line = self.proc.stdout.readline().decode("utf-8")
+      except KeyboardInterrupt:
+        errors = self.proc.stderr.read().decode("utf-8")
+        sys.exit("Sent:"+queryString+"Pipe broken. Backend crashed.\n"+errors)
       if line == "": # This is idiotic. Blank lines return "\n" and eof == "".
         errors = self.proc.stderr.read().decode("utf-8")
         sys.exit("Sent:"+queryString+"Pipe broken. Backend crashed.\n"+errors)
@@ -366,7 +370,10 @@ class TextGraph(collections.abc.MutableMapping):
             markings += "," + attr + " = " + value
         if square.squareId in edge:
           markings += ", color=grey"
-        labels += str(square.squareId)+"[shape=rect label="+json.dumps(square.text+"\n").replace("\\n","\\l")+markings+"]\n"
+        labelstring = list(repr(square.text+"\n").replace("\\n","\\l"))
+        labelstring[0] = '"'
+        labelstring[-1] = '"'
+        labels += str(square.squareId)+"[shape=rect label="+''.join(labelstring)+markings+"]\n"
         n = 0
         for street in square.streets:
           edgeColoring = ""
@@ -380,7 +387,7 @@ class TextGraph(collections.abc.MutableMapping):
     return dot
 
   def showDiagram(self,neighborhoodCenter = None,neighborhoodLevel = 4,markedSquares={}):
-    subprocess.Popen(["dot","-T","xlib","/dev/stdin"],stdin=subprocess.PIPE).communicate(input=self.dot(markedSquares=markedSquares,neighborhoodCenter=neighborhoodCenter,neighborhoodLevel=neighborhoodLevel).encode("ascii"))
+    subprocess.Popen(["dot","-T","xlib","/dev/stdin"],stdin=subprocess.PIPE).communicate(input=self.dot(markedSquares=markedSquares,neighborhoodCenter=neighborhoodCenter,neighborhoodLevel=neighborhoodLevel).encode("utf-8"))
 
   def save(self):
     if self.readonly:
