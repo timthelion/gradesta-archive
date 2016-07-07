@@ -178,7 +178,6 @@ class GraphView(urwid.WidgetPlaceholder):
     self.history.append(self.selection)
     self._selection = value
     self.update()
-    self.incommingStreets.focusLastStreet()
 
   @property
   def selectedSquare(self):
