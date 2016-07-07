@@ -9,14 +9,15 @@ for line in fileinput.input():
 	id,text,streets = json.loads(line)
 	if text.startswith("import"):
 		print(text)
-		continue	
-	print("def tgmakepynode"+str(id)+"():")
-	for streetname,destination in streets:
-		print("\t"+streetname+" = tgmakepynodes["+str(destination)+"]")
-	if not "\n" in text.strip():
-		print("\treturn " + text)
+		continue
 	else:
-		for codeline in text.split("\n"):
-			print("\t"+codeline)
-	print("tgmakepynodes["+str(id)+"] = tgmakepynode"+str(id)+"()")
+		print("def tgmakepynode"+str(id)+"():")
+		for streetname,destination in streets:
+			print("\t"+streetname+" = tgmakepynodes["+str(destination)+"]")
+		if not "\n" in text.strip():
+			print("\treturn " + text)
+		else:
+			for codeline in text.split("\n"):
+				print("\t"+codeline)
+		print("tgmakepynodes["+str(id)+"] = tgmakepynode"+str(id)+"()")
 	
