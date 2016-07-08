@@ -62,7 +62,7 @@ class TextGraphServer():
     if inputObject == []:
       for squareId in self.graph.keys():
         inputObject.append([squareId])
-    # Except either a or a list of squares
+    # Except either one square or a list of squares
     if isinstance(inputObject[0],list):
       squares = inputObject
     else:
