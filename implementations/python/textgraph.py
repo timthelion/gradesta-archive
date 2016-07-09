@@ -370,9 +370,10 @@ class TextGraph(collections.abc.MutableMapping):
             markings += "," + attr + " = " + value
         if square.squareId in edge:
           markings += ", color=grey"
-        labelstring = list(repr(square.text+"\n").replace("\\n","\\l"))
+        labelstring = list(repr(square.text).replace("\\n","\\l"))
         labelstring[0] = '"'
-        labelstring[-1] = '"'
+        labelstring.pop()
+        labelstring = labelstring + ['\\'+'l']+list(str(square.squareId))+['\\','r','"']
         labels += str(square.squareId)+"[shape=rect label="+''.join(labelstring)+markings+"]\n"
         n = 0
         for street in square.streets:
