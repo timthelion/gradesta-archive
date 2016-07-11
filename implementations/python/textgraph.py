@@ -388,7 +388,7 @@ class TextGraph(collections.abc.MutableMapping):
             markings += "," + attr + " = " + value
         if square.squareId in edge:
           markings += ", color=grey"
-        labelstring = list(repr(square.text).replace("\\n","\\l"))
+        labelstring = list(repr(square.text).replace("\\n","\\l").replace("\"","\\\""))
         labelstring[0] = '"'
         labelstring.pop()
         labelstring = labelstring + ['\\'+'l']+list(str(square.squareId))+['\\','r','"']
@@ -409,7 +409,7 @@ class TextGraph(collections.abc.MutableMapping):
     return dot
 
   def showDiagram(self,neighborhoodCenter = None,neighborhoodLevel = 4,markedSquares={}):
-    subprocess.Popen(["dot","-T","xlib","/dev/stdin"],stdin=subprocess.PIPE).communicate(input=self.dot(markedSquares=markedSquares,neighborhoodCenter=neighborhoodCenter,neighborhoodLevel=neighborhoodLevel).encode("utf-8"))
+    stdout,stderr = subprocess.Popen(["dot","-T","xlib","/dev/stdin"],stdin=subprocess.PIPE).communicate(input=self.dot(markedSquares=markedSquares,neighborhoodCenter=neighborhoodCenter,neighborhoodLevel=neighborhoodLevel).encode("utf-8"))
 
   def save(self):
     if self.readonly:
