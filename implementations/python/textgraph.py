@@ -388,11 +388,12 @@ class TextGraph(collections.abc.MutableMapping):
             markings += "," + attr + " = " + value
         if square.squareId in edge:
           markings += ", color=grey"
-        labelstring = list(repr(square.text).replace("\\n","\\l").replace("\"","\\\""))
-        labelstring[0] = '"'
-        labelstring.pop()
-        labelstring = labelstring + ['\\'+'l']+list(str(square.squareId))+['\\','r','"']
-        labels += str(square.squareId)+"[shape=rect label="+''.join(labelstring)+markings+"]\n"
+        if len(square.text) > 200:
+          text = square.text[0:200] + "\n..."
+        else:
+          text = square.text
+        labelstring = '"' + text.replace('\\','\\\\').replace('\n','\\l').replace('"','\\"') + '\\l' + str(square.squareId) + '\\r\"'
+        labels += str(square.squareId)+"[shape=rect label="+labelstring+markings+"]\n"
         n = 0
         for street in square.streets:
           edgeColoring = ""
