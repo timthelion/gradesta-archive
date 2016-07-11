@@ -418,6 +418,8 @@ class CurrentSquare(urwid.Edit):
           self.view.statusMessage = "Cannot delete square 0."
       elif key in keybindings['delete-tree']:
         self.view.graph.deleteTree(self.view.selection)
+      elif key in keybindings['command-mode.delete']:
+        return super(CurrentSquare,self).keypress(size,'delete')
       elif not self.valid_char(key):
         value = super(CurrentSquare,self).keypress(size,key)
         self.cursorCords = self.get_cursor_coords(size)
@@ -485,7 +487,10 @@ class StreetNavigator(urwid.ListBox):
     if key in keybindings['new-square-setting-street-name']:
       self.newStreetToNewSquare(useDefaultStreetName=False,index = self.focus_position + 1)
       self.view.mode = 'insert'
-      self.focus_position = self.focus_position + 1
+      try:
+        self.focus_position = self.focus_position + 1
+      except IndexError:
+        pass
       return None
     if key in keybindings['set-default-street-name']:
       if self.streets:
@@ -885,6 +890,7 @@ keybindings = {
  'command-mode.down' : ['j'],
  'command-mode.left' : ['h'],
  'command-mode.right' : ['l'],
+ 'command-mode.delete' : ['x'],
  'command-mode.undo' : ['u'],
  'command-mode.redo' : ['ctrl r'],
  'next-sibling' : ['meta s'],
