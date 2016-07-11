@@ -100,6 +100,8 @@ class GraphView(urwid.WidgetPlaceholder):
     self.streets = StreetsList(self)
     # search box
     self.searchBox = SearchBox(self)
+    # help
+    self.help = Help(self)
     # main widget
     self.pile = urwid.Pile([self.incommingStreets,self.currentSquareWidget,self.streets])
     super(GraphView,self).__init__(self.pile)
@@ -147,6 +149,8 @@ class GraphView(urwid.WidgetPlaceholder):
         currentSquareId = self.searchBox.focused_square
       except IndexError:
         currentSquareId = 0
+    elif self.mode == 'help':
+        currentSquareId = 0
     elif self.focus_item == self.incommingStreets:
       try:
         currentSquareId = self.incommingStreets.streets[self.incommingStreets.focus_position].origin
@@ -169,6 +173,7 @@ class GraphView(urwid.WidgetPlaceholder):
       self.graph.applyChanges()
     self.streets.recordChanges()
     self.incommingStreets.recordChanges()
+    self.help.recordChanges()
 
   @property
   def selection(self):
@@ -205,6 +210,8 @@ class GraphView(urwid.WidgetPlaceholder):
       self.update()
     elif value == 'search':
       self.original_widget = self.searchBox
+    elif value == 'help':
+      self.original_widget = self.help
     elif value == 'insert':
       self.update()
     else:
@@ -219,8 +226,8 @@ class GraphView(urwid.WidgetPlaceholder):
     self.updateStatusBar()
 
   def keypress(self,size,key):
-    if self.mode == 'search':
-      return self.keypressSearchmode(size, key)
+    if self.mode in ['search', 'help']:
+      return self.keypressDialogmode(size, key)
     focusedBeforeProcessing = self.focus_item
     #try:
     value = self.handleKeypress(size,key)
@@ -258,6 +265,9 @@ class GraphView(urwid.WidgetPlaceholder):
           self.mode = 'search'
           self.searchBox.searchEdit.edit_text = ""
           self.searchBox.update()
+          return None
+        elif key in keybindings['help-mode']:
+          self.mode = 'help'
           return None
         elif key in keybindings['show-map']:
           self.graph.showDiagram(markedSquares={self.selection:{"fontcolor":"white","fillcolor":"black","style":"filled"}})
@@ -298,7 +308,7 @@ class GraphView(urwid.WidgetPlaceholder):
     else:
       return super(GraphView,self).keypress(size,key)
 
-  def keypressSearchmode(self,size,key):
+  def keypressDialogmode(self,size,key):
     if key == 'esc':
       self.mode = 'command'
       self.original_widget = self.pile
@@ -387,6 +397,8 @@ class CurrentSquare(urwid.Edit):
       newSquareId = self.view.graph.newLinkedSquare(prevSquare,self.view.defaultStreetName)
       self.view.selection = newSquareId
       self.view.history.append(prevSquare)
+    if key in keybindings["next-sibling"]:
+      self.view.selection = self.view.graph.getNextSibling(self.view.selection)
     if key in keybindings['new-square-global']:
       self.view.selection = self.view.streets.newStreetToNewSquare(useDefaultStreetName=True)
       self.view.focus_item = self.view.currentSquareWidget
@@ -395,6 +407,10 @@ class CurrentSquare(urwid.Edit):
       if key in keybindings['add-to-stack']:
         self.view.tabbedEditor.clipboard.squares.append((self.view.graph.filename,self.view.selectedSquare))
         self.view.tabbedEditor.clipboard.update()
+      elif key in keybindings['new-square']:
+        self.view.selection = self.view.streets.newStreetToNewSquare(useDefaultStreetName=True, index = 0)
+        self.view.focus_item = self.view.currentSquareWidget
+        self.view.mode = 'insert'
       elif key in keybindings['delete-square']:
         if self.view.selection != 0:
           self.view.graph.deleteSquare(self.view.selection)
@@ -456,18 +472,20 @@ class StreetNavigator(urwid.ListBox):
   def keypress(self,size,key):
     if self.view.mode == "insert":
       return super(StreetNavigator,self).keypress(size,key)
+    if key in keybindings["next-sibling"]:
+      self.view.selection = self.view.graph.getNextSibling(self.view.selection)
     if key in keybindings['new-square'] or key in keybindings['new-square-global']:
-      self.view.selection = self.newStreetToNewSquare(useDefaultStreetName=True)
+      self.view.selection = self.newStreetToNewSquare(useDefaultStreetName=True,index = self.focus_position + 1)
       self.view.focus_item = self.view.currentSquareWidget
       self.view.mode = 'insert'
     if key in keybindings['new-square-with-blank-street-name']:
-      self.view.selection = self.newStreetToNewSquare(useDefaultStreetName=False)
+      self.view.selection = self.newStreetToNewSquare(useDefaultStreetName=False,index = self.focus_position + 1)
       self.view.focus_item = self.view.currentSquareWidget
       self.view.mode = 'insert'
     if key in keybindings['new-square-setting-street-name']:
-      self.newStreetToNewSquare(useDefaultStreetName=False)
+      self.newStreetToNewSquare(useDefaultStreetName=False,index = self.focus_position + 1)
       self.view.mode = 'insert'
-      self.focus_position = len(self.streets) - 1
+      self.focus_position = self.focus_position + 1
       return None
     if key in keybindings['set-default-street-name']:
       if self.streets:
@@ -542,7 +560,7 @@ class IncommingStreetsList(StreetNavigator):
     """
     return self.streets[self.focus_position].origin
 
-  def newStreetToNewSquare(self,useDefaultStreetName=True):
+  def newStreetToNewSquare(self,useDefaultStreetName=True, index = None):
     self.view.recordChanges()
     squareId = self.view.graph.allocSquare()
     if useDefaultStreetName:
@@ -563,6 +581,25 @@ class IncommingStreetsList(StreetNavigator):
         self.view.streets.focus_position = 0
       except IndexError:
         pass
+    if key in keybindings['reverse-street-direction']:
+      try:
+        fcp = self.focus_position
+        street = self.streets[fcp]
+        square = copy.deepcopy(self.view.graph[street.origin])
+        #def imsurethereisacleanerwayofdoingthis(l):
+        def a(l):
+          if l == []: return []
+          i = l.pop()
+          if i.destination == street.destination and i.name == street.name: return l
+          else: return [i] + a(l)
+        square.streets = a(square.streets)
+        self.view.graph.stageSquare(square)
+        square = copy.deepcopy(self.view.graph[street.destination])
+        square.streets.append(Street(street.name,origin=street.destination,destination=street.origin))
+        self.view.graph.stageSquare(square)
+        self.view.graph.applyChanges()
+      except IndexError:
+        pass
     if key in keybindings['street-or-back-street-last-stack-item']:
       if self.view.tabbedEditor.clipboard.squares:
         filenameOfOriginGraph,square = self.view.tabbedEditor.clipboard.squares.pop()
@@ -571,12 +608,18 @@ class IncommingStreetsList(StreetNavigator):
         self.view.graph.stageSquare(square)
         self.view.graph.applyChanges()
         self.focus_position = len(self.streets) - 1
-    elif key in keybindings['remove-street-or-incommingStreet']:
+    elif key in keybindings['remove-street-or-incomming-street']:
       try:
         fcp = self.focus_position
         street = self.streets[fcp]
         square = copy.deepcopy(self.view.graph[street.origin])
-        square.streets = [street for street in square.streets if street.destination != self.view.selection]
+        #def imsurethereisacleanerwayofdoingthis(l):
+        def a(l):
+          if l == []: return []
+          i = l.pop()
+          if i.destination == street.destination and i.name == street.name: return l
+          else: return [i] + a(l)
+        square.streets = a(square.streets)
         self.view.graph.stageSquare(square)
         self.view.graph.applyChanges()
       except IndexError:
@@ -608,13 +651,13 @@ class StreetsList(StreetNavigator):
     """
     return self.streets[self.focus_position].destination
 
-  def newStreetToNewSquare(self,useDefaultStreetName=True):
+  def newStreetToNewSquare(self,useDefaultStreetName=True,index=None):
     self.view.recordChanges()
     if useDefaultStreetName:
       streetName = self.view.defaultStreetName
     else:
       streetName = ""
-    return self.view.graph.newLinkedSquare(self.view.selection,streetName)
+    return self.view.graph.newLinkedSquare(self.view.selection,streetName,index)
 
   def keypress(self,size,key):
     if self.view.mode == "insert":
@@ -656,7 +699,7 @@ class StreetsList(StreetNavigator):
         self.view.graph.stageSquare(sel)
         self.view.graph.applyChanges()
         self.focus_position = fcp + 1
-    elif key in keybindings['remove-street-or-incommingStreet']:
+    elif key in keybindings['remove-street-or-incomming-street']:
       try:
         fcp = self.focus_position
         street = self.streets[fcp]
@@ -668,6 +711,29 @@ class StreetsList(StreetNavigator):
         pass
     else:
       return super(StreetsList,self).keypress(size,key)
+
+class Help(urwid.ListBox):
+  def __init__(self,view):
+    self.view = view
+    self.keybindingEdits = {}
+    super(Help,self).__init__(urwid.SimpleFocusListWalker([]))
+    items = []
+    for command,binding in keybindings.items():
+      edit = urwid.Edit(edit_text=json.dumps(binding))
+      self.keybindingEdits[command] = edit
+      items.append(urwid.Columns([edit, urwid.Text(command)]))
+    self.body.extend(items)
+    self.focus_position = 0
+
+  def keypress(self,size,key):
+    return super(Help,self).keypress(size,key)
+
+  def recordChanges(self):
+    for command,edit in self.keybindingEdits.items():
+      try:
+        keybindings[command] = json.loads(edit.edit_text)
+      except ValueError:
+        pass
 
 class SearchBox(urwid.ListBox):
   def __init__(self,view):
@@ -778,7 +844,7 @@ class CommandBar(urwid.Edit):
           raise urwid.ExitMainLoop()
       try:
         newSelection = int(com)
-        if newSelection >= 0 and newSelection < len(self.view.graph) and self.view.graph[newSelection].text is not None:
+        if newSelection in self.view.graph and self.view.graph[newSelection].text is not None:
           self.view.selection = newSelection
           self.view.focus_item = self.view.currentSquareWidget
           self.view.mode = 'command'
@@ -808,7 +874,7 @@ keybindings = {
  'new-square-with-blank-street-name' : ['meta n'],
  'new-square-setting-street-name' : ['meta i'],
  'new-square-streeted-to-previous-square' : ['meta enter'],
- 'remove-street-or-incommingStreet' : ['d'],
+ 'remove-street-or-incomming-street' : ['d'],
  'delete-square' : ['delete'],
  'delete-tree' : ['ctrl delete'],
  'jump-to-command-bar' : [':'],
@@ -821,8 +887,10 @@ keybindings = {
  'command-mode.right' : ['l'],
  'command-mode.undo' : ['u'],
  'command-mode.redo' : ['ctrl r'],
+ 'next-sibling' : ['meta s'],
  'insert-mode' : ['i'],
  'search-mode' : ['/'],
+ 'help-mode'   : ['?'],
  'show-map-of-neighborhood': ['m'],
  'show-map': ['M'],
  'clear-default-street-name': ['F'],
@@ -830,6 +898,7 @@ keybindings = {
  'go-up-default-street': ['G'],
  # street navigator
  'set-default-street-name': ['f'],
+ 'reverse-street-direction': ['meta r'],
  # stack area
  'remove-from-stack' : ['d'],
  'street-to-stack-item-no-pop' : ['ctrl right'],

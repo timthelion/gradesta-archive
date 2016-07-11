@@ -228,11 +228,15 @@ class TextGraph(collections.abc.MutableMapping):
     self.done.append(transaction)
     self.applyChangesHandler()
 
-  def newLinkedSquare(self,streetedSquareId,streetName):
+  def newLinkedSquare(self,streetedSquareId,streetName,index = None):
     newSquareId = self.allocSquare()
     newSquare = Square(newSquareId,"",[])
     selectedSquare = copy.deepcopy(self[streetedSquareId])
-    selectedSquare.streets.append(Street(streetName,newSquareId,selectedSquare.squareId))
+    newStreet = Street(streetName,newSquareId,selectedSquare.squareId)
+    if index is None:
+      selectedSquare.streets.append(newStreet)
+    else:
+      selectedSquare.streets.insert(index,newStreet)
     self.stageSquare(newSquare)
     self.stageSquare(selectedSquare)
     self.applyChanges()
@@ -266,6 +270,20 @@ class TextGraph(collections.abc.MutableMapping):
       if not street.destination in tree:
         tree.update(self.getTree(street.destination))
     return tree
+
+  def getNextSibling(self,squareId):
+    for incommingStreet in self[squareId].incommingStreets:
+      found = False
+      for street in self[incommingStreet.origin].streets:
+        if street.destination == squareId:
+          found = True
+        elif found:
+          return street.destination
+      if found:
+        for street in self[incommingStreet.origin].streets:
+          if street.destination != squareId:
+            return street.destination
+    return squareId
 
   def deleteTree(self,squareId):
     squaresForDeletion = set(self.getTree(squareId))
