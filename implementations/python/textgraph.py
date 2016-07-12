@@ -393,7 +393,7 @@ class TextGraph(collections.abc.MutableMapping):
         else:
           text = square.text
         labelstring = '"' + text.replace('\\','\\\\').replace('\n','\\l').replace('"','\\"') + '\\l' + str(square.squareId) + '\\r\"'
-        labels += str(square.squareId)+"[shape=rect label="+labelstring+markings+"]\n"
+        labels += str(square.squareId)+"[shape=rect ordering=out label="+labelstring+markings+"]\n"
         n = 0
         for street in square.streets:
           edgeColoring = ""
