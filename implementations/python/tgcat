@@ -6,6 +6,7 @@ import json
 parser = argparse.ArgumentParser(description='Print textgraph as text by concatinating square contents.')
 parser.add_argument('files', metavar='FILE', nargs='+', help='files to concatinate')
 parser.add_argument('--comment-prefix', dest='commentPrefix', default=None, help='What prefix should we use to add squareId comments to each line of code?')
+parser.add_argument('--no-follow-prefix', dest='noFollowPrefix', default=None, help='Street names which start with the no-follow-prefix will not be followed.')
 parser.add_argument('--prepend-street-names', dest='indent', action='store_const',const=True, default=False, help='Automatically indent output by prepending street names?')
 args = parser.parse_args()
 indentation = ""
@@ -20,5 +21,6 @@ for file in args.files:
     else:
       print(indentation+tg[square].text.replace("\n",squareIdComment+"\n"+indentation)+squareIdComment)
     for street in tg[square].streets:
-      printSquares(street.destination,indentation+json.loads('"' + street.name + '"'))
+      if args.noFollowPrefix is None or not street.name.startswith(args.noFollowPrefix):
+        printSquares(street.destination,indentation+json.loads('"' + street.name + '"'))
   printSquares(0,"")
