@@ -87,7 +87,7 @@ class TextGraphServer():
         if squareId is None:
           squareId = self.nextSquareId
           self.nextSquareId += 1
-        elif isinstance(squareId,int) and squareId > self.nextSquareId:
+        elif isinstance(squareId,int) and squareId >= self.nextSquareId:
           self.nextSquareId = squareId + 1
       except IndexError:
         error = lineNo+":"+line + " is invalid."
