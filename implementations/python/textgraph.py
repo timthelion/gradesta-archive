@@ -342,6 +342,24 @@ class TextGraph(collections.abc.MutableMapping):
           raise ValueError("Cannot load file "+self.filename+"\n"+ "Error on line: "+str(lineNo)+"\n"+str(e))
       lineNo += 1
 
+  def lookupStreetedSquare(self,squareId,text):
+    """
+    Look up square which is connected to squareId. If no matching square exists, returns None.
+    """
+    for street in self[squareId].streets:
+      if self[street.destination].text == text:
+        return self[street.destination]
+    return None
+
+  def lookupSquareViaContents(self,root,contents):
+    currentSquare = root
+    for text in contents:
+      try:
+        currentSquare = self.lookupStreetedSquare(currentSquare,text).squareId
+      except AttributeError:
+        raise KeyError("No square with text "+text+" is linked to from square "+str(currentSquare))
+    return currentSquare
+
   def __neighborhood(self,center,level):
     """
     Returns a list of squares around a given square.
