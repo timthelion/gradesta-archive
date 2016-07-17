@@ -1,0 +1,68 @@
+#!/usr/bin/python3
+import json
+import fileinput
+import sys
+
+imports = ""
+squares = []
+for line in fileinput.input():
+	if line.startswith("#"):
+		print(line)
+	try:
+		id,text,streets = json.loads(line)
+	except ValueError:
+		sys.exit("Line: "+str(lineno)+"\n"+line+"\nis invalid.")
+	if text:
+		squares.append(id)
+		print("def __py_cfg_square"+str(id)+"(__py_cfg_bag):")
+		first_line = True
+		for l in text.split("\n"):
+			if first_line:
+				if len(l.split()) > 1:
+					print("\t["+",".join(l.split()[1:])+"] = __py_cfg_bag")
+				first_line = False
+			elif line.startswith("import "):
+				imports = imports + "\n" + line + " # □:"+str(id)
+			else:
+				print("\t"+l+" # □:"+str(id))
+		conditions = []
+		cont = ""
+		for s in reversed(streets):
+			if s[0].startswith("cont;"):
+				cont = "__py_cfg_stack.append(("+str(s[1])+", ["+",".join(s[0][5:].split())+"])) # □:"+str(id)
+			else:
+				vars_to_pass_on = []
+				cond = []
+				reading_cond = False
+				ret = False
+				for v in reversed(s[0].split()):
+					if reading_cond:
+						cond = [v] + cond
+					elif v.endswith(";"):
+						reading_cond = True
+						if v[:-1]:
+							cond = [v[:-1]] + cond
+					elif v == "return":
+						ret = True
+					else:
+						vars_to_pass_on.insert(0,v)
+				if not ret:
+					continuation = "return "+str(s[1])+",["+",".join(vars_to_pass_on)+"]"
+				else:
+					continuation = "__py_cfg_cont,__py_cfg_stack_bag = __py_cfg_stack.pop()\n\t\treturn __py_cfg_cont,__py_cfg_stack_bag+["+",".join(vars_to_pass_on)+"]"
+				conditions.insert(0,"\tif "+" ".join(cond)+": # □:"+str(id)+"\n\t\t"+cont+"\n\t\t"+continuation)
+				cont = ""
+		for c in conditions:
+			print(c)
+		print("\treturn None,[]")
+print(imports)
+print("__py_cfg_squares = {"+",".join(map(lambda i: str(i)+":__py_cfg_square"+str(i),squares))+"}")
+print("""
+__py_cfg_square = 0
+__py_cfg_bag = None
+__py_cfg_stack = []
+while __py_cfg_square is not None:
+  __py_cfg_square,__py_cfg_bag = __py_cfg_squares[__py_cfg_square](__py_cfg_bag)
+  if __py_cfg_square is None:
+    break
+""")
