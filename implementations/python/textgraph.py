@@ -417,10 +417,8 @@ class TextGraph(collections.abc.MutableMapping):
           edgeColoring = ""
           if street.destination in edge or street.origin in edge:
             edgeColoring = ",style = dotted, color = grey"
-          labelstring = list(repr(str(n)+":"+street.name))
-          labelstring[0] = '"'
-          labelstring[-1] = '"'
-          edges += str(square.squareId)+" -> "+str(street.destination)+" [label="+''.join(labelstring)+edgeColoring+"]\n"
+          labelstring = str(n)+":"+street.name.replace('\\','\\\\').replace('"','\\"')
+          edges += str(square.squareId)+" -> "+str(street.destination)+" [label=\""+labelstring+'" '+edgeColoring+"]\n"
           n += 1
     dot += labels
     dot += edges
