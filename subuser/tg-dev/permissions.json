@@ -1,0 +1,12 @@
+{
+ "description": "Dev image for building and running the various textgraph programs.",
+ "access-working-directory": true,
+ "executable": "/bin/bash",
+ "maintainer": "Timothy Hobbs <timothyhobbs@seznam.cz>",
+ "gui": {
+  "clipboard": true,
+  "cursors": false,
+  "system-tray": false
+ },
+ "basic-common-permissions": true
+}

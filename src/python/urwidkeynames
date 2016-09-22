@@ -1,0 +1,13 @@
+#!/usr/bin/python3
+import urwid
+
+def show_or_exit(key):
+    if key is 'q':
+        raise urwid.ExitMainLoop()
+    keyname.set_text(repr(key))
+
+instructions = urwid.Text("Press any key to find it's name. Use 'q' to exit. Not all keys can be used, see: https://github.com/urwid/urwid/issues/140")
+keyname = urwid.Text(u"")
+fill = urwid.Filler(urwid.Pile([instructions,keyname]), 'top')
+loop = urwid.MainLoop(fill, unhandled_input=show_or_exit)
+loop.run()

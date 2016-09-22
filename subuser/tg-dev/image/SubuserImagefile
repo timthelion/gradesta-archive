@@ -1,0 +1,12 @@
+FROM-SUBUSER-IMAGE libx11@default
+RUN apt-get update && apt-get upgrade -y && apt-get install -y golang python3 python3-urwid llvm cmake graphviz
+RUN apt-get install -y build-essential
+RUN apt-get install -y curl
+RUN mkdir -p /cmake/ ; cd /cmake/ ; curl https://cmake.org/files/v3.6/cmake-3.6.0-rc3.tar.gz | tar -xzzf -
+RUN cd /cmake/cmake-3.6.0-rc3 ; ls ; ./bootstrap && make && make install
+RUN ln -s /usr/bin/gold /usr/local/bin/ld # It is not possible to link llvm go bindings with ld due to HUGE memory requirements.
+ENV PATH $PATH:/pwd/bin
+RUN apt-get install -yqq openscad
+RUN apt-get update && apt-get install -yqq locales
+RUN locale-gen en_US en_US.UTF-8
+RUN dpkg-reconfigure locales

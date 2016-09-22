@@ -104,7 +104,7 @@ def getSquareFromList(square,permissions):
 
 class TextGraphServer():
   def __init__(self,filename):
-    self.proc = subprocess.Popen(["./tgserve.py",filename],stdin=subprocess.PIPE,stdout=subprocess.PIPE,stderr=subprocess.PIPE,close_fds=True)
+    self.proc = subprocess.Popen(["tgserve",filename],stdin=subprocess.PIPE,stdout=subprocess.PIPE,stderr=subprocess.PIPE,close_fds=True)
 
   def send(self,query):
     queryString = json.dumps(query) + "\n"
@@ -406,10 +406,10 @@ class TextGraph(collections.abc.MutableMapping):
             markings += "," + attr + " = " + value
         if square.squareId in edge:
           markings += ", color=grey"
-        if len(square.text) > 200:
-          text = square.text[0:200] + "\n..."
-        else:
-          text = square.text
+        #if len(square.text) > 200:
+        #  text = square.text[0:200] + "\n..."
+        #else:
+        text = square.text
         labelstring = '"' + text.replace('\\','\\\\').replace('\n','\\l').replace('"','\\"') + '\\l' + str(square.squareId) + '\\r\"'
         labels += str(square.squareId)+"[shape=rect ordering=out label="+labelstring+markings+"]\n"
         n = 0

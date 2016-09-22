@@ -1,0 +1,20 @@
+#!/usr/bin/python3
+import json
+import fileinput
+import sys
+
+lineno = 0
+for line in fileinput.input():
+	if line.startswith("#"):
+		print(line)
+	try:
+		id,text,streets = json.loads(line)
+	except ValueError:
+		sys.exit("Line: "+str(lineno)+"\n"+line+"\nis invalid.")
+	print("sqr"+str(id)+":")
+	for l in text.split("\n"):
+		print(" | "+l)
+	for s in streets:
+		print(" → sqr"+str(s[1]))
+		for l in s[0].split("\n"):
+			print(" | "+l)

@@ -1,0 +1,22 @@
+#!/usr/bin/python3
+import json
+import fileinput
+import sys
+
+lineno = 0
+squareId = None
+text = ""
+streets = []
+mode = None
+for line in fileinput.input():
+	if line.startswith("#"):
+		print(line)
+	elif line.startswith("sqr"):
+		if squareId is not None:
+			print(json.dumps([squareId,text,streets])
+		squareId = int(line[3:-1])
+		mode = "text"
+	elif line.startswith(" → sqr"):
+		mode = "streetName"
+	elif line.startswith(" | "):
+		
