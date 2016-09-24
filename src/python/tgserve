@@ -6,37 +6,18 @@ import optparse
 import os
 
 class TextGraphServer():
-  def __init__(self,filepath = None):
+  def __init__(self):
     self.graph = {}
     self.streetsByDestination = {}
     self.nextSquareId = 0
     self.lineNo = 0
     self.readonly = False
     self.debug = False
-    if filepath is None:
-      pass
-    elif filepath.startswith("http://"):
-      import urllib.request
-      try:
-        with urllib.request.urlopen(filepath) as webgraph:
-          for line in webgraph.read().decode("utf-8").splitlines():
-            self.interpretLine(line,outputResult = False)
-          self.readonly = True
-      except urllib.error.URLError as e:
-        raise OSError(str(e))
-    else:
-      try:
-        with open(filepath) as fd:
-          for line in fd.read().splitlines():
-            self.interpretLine(line,outputResult = False)
-          self.readonly = False
-      except FileNotFoundError:
-        pass
     if not 0 in self.graph:
       self.graph[0] = [0,"",[]]
       self.nextSquareId = 1
 
-  def interpretLine(self,line,outputResult = True,repl=False):
+  def interpretLine(self,line,repl=False):
     if self.debug:
       print("<<" + line[:-1], file=sys.stderr)
     # Lines starting with # and blank lines are ignored.
@@ -147,15 +128,14 @@ class TextGraphServer():
         incommingStreets = []
       resultingSquares.append([squareId,text,streets,incommingStreets])
       returnValues.append([squareId,readWritePermissions,[readWritePermissions for _ in streets]])
-    if outputResult:
-      sys.stdout.write(json.dumps(resultingSquares)+"\n")
-      sys.stdout.flush()
-      sys.stdout.write(json.dumps(returnValues)+"\n")
-      sys.stdout.flush()
-      if self.debug:
-        print(">>" + json.dumps(resultingSquares), file=sys.stderr)
-        print(">>" + json.dumps(returnValues), file=sys.stderr)
-        print("", file=sys.stderr)
+    sys.stdout.write(json.dumps(resultingSquares)+"\n")
+    sys.stdout.flush()
+    sys.stdout.write(json.dumps(returnValues)+"\n")
+    sys.stdout.flush()
+    if self.debug:
+      print(">>" + json.dumps(resultingSquares), file=sys.stderr)
+      print(">>" + json.dumps(returnValues), file=sys.stderr)
+      print("", file=sys.stderr)
 
   def repl(self):
     import readline
@@ -184,11 +164,7 @@ if __name__ == "__main__":
   parser.add_option("--repl", dest="repl",action="store_true",default=False,help="Run in REPL mode, don't exit on errors.")
   parser.add_option("--debug", dest="debug",action="store_true",default=False,help="Print what is happening at the protocol level.")
   options,args = parser.parse_args(sys.argv[1:])
-  if args:
-    filepath = args[0]
-  else:
-    filepath = None
-  tgs = TextGraphServer(filepath)
+  tgs = TextGraphServer()
   tgs.debug = options.debug
   if options.repl:
     tgs.repl()

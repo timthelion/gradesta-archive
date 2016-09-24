@@ -5,7 +5,7 @@
 #
 # Description:
 #
-# gasm is a text graph asm to standard textual asm translator
+# tg2dot converts tg files to graphviz dot files.
 #
 ########################################################################
 #
@@ -23,13 +23,68 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 from textgraph import *
 import optparse
-
-def translate(filepath):
-  tg = TextGraph(filepath)
-  tg.saveDot()
+import subprocess
+import sys
+import os
 
 if __name__ == "__main__":
-  parser = optparse.OptionParser(usage = "tg2dot TG-FILE(s)",description = "Translate a text graph file to dot file.")
+  parser = optparse.OptionParser(usage = "tg2dot",description = "Translate a text graph file to dot file.")
+  parser.add_option("--display", dest="display",action="store_true",default=False,help="Display the graph using graphviz.")
+  parser.add_option("--no-output", dest="noOutput",action="store_true",default=False,help="Don't print anything to stdout. To be used with --display")
+  parser.add_option("--clip", dest="clip",type="int",default=None,help="Clip square text to a certain length.")
+  parser.add_option("--center", dest="center",type="int",default=None,help="Highlight a center square.")
+  parser.add_option("--neighborhood", dest="neighborhoodLevel",type="int",default=None,help="Only show squares within the neighborhood of the center square. Set to an integer to specify the size of the neighborhood in terms of the maximum distance from the center.")
   options,args = parser.parse_args(sys.argv[1:])
-  for arg in args:
-    translate(arg)
+  if "TG_CENTER" in os.environ:
+    try:
+      options.center = int(os.environ["TG_CENTER"])
+    except ValueError:
+      sys.exit("TG_CENTER env var set, but not a valid integer.")
+  tg = TextGraph()
+  for line in iter(sys.stdin.readline,''):
+    tg.server.send_raw(line[:-1])
+  if options.center is not None:
+    markedSquares = {options.center:{"style":"filled","fillcolor":"black","fontcolor":"white"}}
+  else:
+    markedSquares = {}
+  if options.neighborhoodLevel is None:
+    neighborhood = tg.values()
+    edge = []
+  else:
+    neighborhood, edge = tg.getNeighborhood(options.center,options.neighborhoodLevel)
+  dot = "digraph graphname{\n"
+  labels = ""
+  edges = ""
+  for square in neighborhood:
+    if square.text is not None:
+      markings = ""
+      if square.squareId in markedSquares:
+        for attr,value in markedSquares[square.squareId].items():
+          markings += "," + attr + " = " + value
+      if square.squareId in edge:
+        markings += ", color=grey"
+      if options.clip is not None and len(square.text) > options.clip:
+        text = square.text[0:options.clip] + "\n..."
+      else:
+        text = square.text
+      labelstring = '"' + text.replace('\\','\\\\').replace('\n','\\l').replace('"','\\"') + '\\l' + str(square.squareId) + '\\r\"'
+      labels += str(square.squareId)+"[shape=rect ordering=out label="+labelstring+markings+"]\n"
+      n = 0
+      for street in square.streets:
+        edgeColoring = ""
+        if street.destination in edge or street.origin in edge:
+          edgeColoring = ",style = dotted, color = grey"
+        if street.destination == options.center:
+          edgeColoring = ",style = bold, color = red"
+        if street.origin == options.center:
+          edgeColoring = ",style = bold, color = green"
+        labelstring = str(n)+":"+street.name.replace('\\','\\\\').replace('"','\\"')
+        edges += str(square.squareId)+" -> "+str(street.destination)+" [label=\""+labelstring+'" '+edgeColoring+"]\n"
+        n += 1
+  dot += labels
+  dot += edges
+  dot += "}"
+  if options.display:
+    stdout,stderr = subprocess.Popen(["dot","-T","xlib","/dev/stdin"],stdin=subprocess.PIPE).communicate(input=dot.encode("utf-8"))
+  if not options.noOutput:
+    sys.stdout.write(dot)

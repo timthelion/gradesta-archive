@@ -103,11 +103,14 @@ def getSquareFromList(square,permissions):
   return Square(squareId,text,streets,readonly = textPermission is not None,incommingStreets = incommingStreets)
 
 class TextGraphServer():
-  def __init__(self,filename):
-    self.proc = subprocess.Popen(["tgserve",filename],stdin=subprocess.PIPE,stdout=subprocess.PIPE,stderr=subprocess.PIPE,close_fds=True)
+  def __init__(self):
+    self.proc = subprocess.Popen(["tgserve"],stdin=subprocess.PIPE,stdout=subprocess.PIPE,stderr=subprocess.PIPE,close_fds=True)
 
   def send(self,query):
-    queryString = json.dumps(query) + "\n"
+    return self.send_raw(json.dumps(query))
+
+  def send_raw(self,queryString):
+    queryString += "\n"
     self.proc.stdin.write(queryString.encode("utf-8"))
     self.proc.stdin.flush()
     def nextline():
@@ -134,15 +137,14 @@ class TextGraphServer():
     return (response,returnCodes)
 
 class TextGraph(collections.abc.MutableMapping):
-  def __init__(self,filename):
-    self.filename = filename
-    self.edited = False
+  def __init__(self):
     self.stagedSquares = []
     self.undone = []
     self.done = []
     self.header = ""
     self.applyChangesHandler = lambda: None
-    self.server = TextGraphServer(filename)
+    self.server = TextGraphServer()
+    self.edited = False
 
   def _getAllSquares(self):
     allSquares = {}
@@ -179,9 +181,6 @@ class TextGraph(collections.abc.MutableMapping):
     self.stagedSquares.append(copy.deepcopy(square))
 
   def applyChanges(self):
-    if self.readonly:
-      self.stagedSquares = []
-      return
     didNow = []
     didSomething = False
     for square in self.stagedSquares:
@@ -300,10 +299,6 @@ class TextGraph(collections.abc.MutableMapping):
     self.applyChanges()
 
   @property
-  def readonly(self):
-    return self.filename.startswith("http://")
-
-  @property
   def sorted_items(self):
     return sorted(self.items(),key=str)
 
@@ -360,7 +355,7 @@ class TextGraph(collections.abc.MutableMapping):
         raise KeyError("No square with text "+text+" is linked to from square "+str(currentSquare))
     return currentSquare
 
-  def __neighborhood(self,center,level):
+  def getNeighborhood(self,center,level):
     """
     Returns a list of squares around a given square.
     Level gives you some control over the size of the neighborhood.
@@ -389,44 +384,32 @@ class TextGraph(collections.abc.MutableMapping):
       finalNeighborhood.append(newSquare)
     return finalNeighborhood, oldEdge
 
-  def dot(self,markedSquares={},neighborhoodCenter=None,neighborhoodLevel=4):
-    if neighborhoodCenter is None:
-      neighborhood = self.values()
-      edge = []
+class TextGraphFile(TextGraph):
+  def __init__(self,filename):
+    TextGraph.__init__(self)
+    self.filename = filename
+    if filename is None:
+      pass
+    elif filename.startswith("http://"):
+      import urllib.request
+      try:
+        with urllib.request.urlopen(filename) as webgraph:
+          for line in webgraph.read().decode("utf-8").splitlines():
+            self.server.send_raw(line)
+      except urllib.error.URLError as e:
+        raise OSError(str(e))
     else:
-      neighborhood, edge = self.__neighborhood(neighborhoodCenter,neighborhoodLevel)
-    dot = "digraph graphname{\n"
-    labels = ""
-    edges = ""
-    for square in neighborhood:
-      if square.text is not None:
-        markings = ""
-        if square.squareId in markedSquares:
-          for attr,value in markedSquares[square.squareId].items():
-            markings += "," + attr + " = " + value
-        if square.squareId in edge:
-          markings += ", color=grey"
-        #if len(square.text) > 200:
-        #  text = square.text[0:200] + "\n..."
-        #else:
-        text = square.text
-        labelstring = '"' + text.replace('\\','\\\\').replace('\n','\\l').replace('"','\\"') + '\\l' + str(square.squareId) + '\\r\"'
-        labels += str(square.squareId)+"[shape=rect ordering=out label="+labelstring+markings+"]\n"
-        n = 0
-        for street in square.streets:
-          edgeColoring = ""
-          if street.destination in edge or street.origin in edge:
-            edgeColoring = ",style = dotted, color = grey"
-          labelstring = str(n)+":"+street.name.replace('\\','\\\\').replace('"','\\"')
-          edges += str(square.squareId)+" -> "+str(street.destination)+" [label=\""+labelstring+'" '+edgeColoring+"]\n"
-          n += 1
-    dot += labels
-    dot += edges
-    dot += "}"
-    return dot
+      try:
+        with open(filename) as fd:
+          for line in fd.read().splitlines():
+            self.server.send_raw(line)
+      except FileNotFoundError:
+        pass
+    self.edited = False
 
-  def showDiagram(self,neighborhoodCenter = None,neighborhoodLevel = 4,markedSquares={}):
-    stdout,stderr = subprocess.Popen(["dot","-T","xlib","/dev/stdin"],stdin=subprocess.PIPE).communicate(input=self.dot(markedSquares=markedSquares,neighborhoodCenter=neighborhoodCenter,neighborhoodLevel=neighborhoodLevel).encode("utf-8"))
+  @property
+  def readonly(self):
+    return self.filename.startswith("http://")
 
   def save(self):
     if self.readonly:
@@ -439,9 +422,3 @@ class TextGraph(collections.abc.MutableMapping):
       return
     with open(os.path.join(os.path.dirname(self.filename),"."+os.path.basename(self.filename)+".draft"),"w") as fd:
       fd.write(self.json)
-
-  def saveDot(self):
-    if self.readonly:
-      raise OSError(self.filename + " is read only.")
-    with open(self.filename+".dot","w") as fd:
-      fd.write(self.dot())
