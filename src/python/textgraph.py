@@ -77,6 +77,10 @@ class Square():
     return [self.squareId,self.text,streets]
 
   @property
+  def json(self):
+    return json.dumps(self.list)
+
+  @property
   def title(self):
     try:
       return self.text.splitlines()[0]
@@ -262,13 +266,13 @@ class TextGraph(collections.abc.MutableMapping):
     self.stageSquareForDeletion(squareId)
     self.applyChanges()
 
-  def getTree(self,squareId):
+  def getSubgraph(self,squareId):
     square = self[squareId]
-    tree = set([square.squareId])
+    subgraph = set([square.squareId])
     for street in square.streets:
-      if not street.destination in tree:
-        tree.update(self.getTree(street.destination))
-    return tree
+      if not street.destination in subgraph:
+        subgraph.update(self.getSubgraph(street.destination))
+    return subgraph
 
   def getNextSibling(self,squareId):
     for incommingStreet in self[squareId].incommingStreets:
@@ -306,7 +310,7 @@ class TextGraph(collections.abc.MutableMapping):
   def json(self):
     serialized = self.header
     for _,square in self.sorted_items:
-      serialized += json.dumps([square.squareId,square.text,square.streets])
+      serialized += square.json
       serialized += "\n"
     return serialized
 
