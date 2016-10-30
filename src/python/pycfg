@@ -13,56 +13,63 @@ for line in fileinput.input():
 	except ValueError:
 		sys.exit("Line: "+str(lineno)+"\n"+line+"\nis invalid.")
 	if text:
-		squares.append(id)
-		print("def __py_cfg_square"+str(id)+"(__py_cfg_bag):")
 		first_line = True
 		for l in text.split("\n"):
+			lwords = l.split()
 			if first_line:
-				if len(l.split()) > 1:
-					print("\t["+",".join(l.split()[1:])+"] = __py_cfg_bag")
+				print("def "+lwords[0]+"(*args):\n\treturn __py_cfg_call("+str(id)+",*args)\n")
+				print("def __py_cfg_internal_function_"+lwords[0]+"(*args):")
+				squares.append((id,lwords[0]))
+				if len(lwords) > 1:
+					print("\t["+",".join(lwords[1:])+"] = list(args)")
+				print("\ttry:")
 				first_line = False
 			elif line.startswith("import "):
 				imports = imports + "\n" + line + " # □:"+str(id)
 			else:
-				print("\t"+l+" # □:"+str(id))
+				print("\t\t"+l+" # □:"+str(id))
 		conditions = []
+		exceptions = []
+		exception = False
 		cont = ""
 		for s in reversed(streets):
-			if s[0].startswith("cont;"):
-				cont = "__py_cfg_stack.append(("+str(s[1])+", ["+",".join(s[0][5:].split())+"])) # □:"+str(id)
-			else:
-				vars_to_pass_on = []
-				cond = []
-				reading_cond = False
-				ret = False
-				for v in reversed(s[0].split()):
-					if reading_cond:
-						cond = [v] + cond
-					elif v.endswith(";"):
-						reading_cond = True
-						if v[:-1]:
-							cond = [v[:-1]] + cond
-					elif v == "return":
-						ret = True
-					else:
-						vars_to_pass_on.insert(0,v)
-				if not ret:
-					continuation = "return "+str(s[1])+",["+",".join(vars_to_pass_on)+"]"
+			vars_to_pass_on = []
+			cond = []
+			reading_cond = False
+			next_square = s[1]
+			for v in reversed(s[0].split()):
+				if v == "except":
+					exception = True
+				if reading_cond:
+					cond = [v] + cond
+				elif v.endswith(";"):
+					reading_cond = True
+					if v[:-1]:
+						cond = [v[:-1]] + cond
+				elif v == "return":
+					next_square = None
 				else:
-					continuation = "__py_cfg_cont,__py_cfg_stack_bag = __py_cfg_stack.pop()\n\t\treturn __py_cfg_cont,__py_cfg_stack_bag+["+",".join(vars_to_pass_on)+"]"
+					vars_to_pass_on.insert(0,v)
+			continuation = "return "+str(next_square)+",["+",".join(vars_to_pass_on)+"]"
+			if not exception:
 				conditions.insert(0,"\tif "+" ".join(cond)+": # □:"+str(id)+"\n\t\t"+cont+"\n\t\t"+continuation)
-				cont = ""
+			else:
+				exceptions.insert(0,"\t"+" ".join(cond)+": # □:"+str(id)+"\n\t\t"+cont+"\n\t\t"+continuation)
+			cont = ""
+		for e in exceptions:
+			print(e)
+		print("\texcept Exception as e:\n\t\traise e")
 		for c in conditions:
 			print(c)
 		print("\treturn None,[]")
 print(imports)
-print("__py_cfg_squares = {"+",".join(map(lambda i: str(i)+":__py_cfg_square"+str(i),squares))+"}")
+print("__py_cfg_squares = {"+",".join(map(lambda sqr: str(sqr[0])+":__py_cfg_internal_function_"+sqr[1],squares))+"}")
 print("""
-__py_cfg_square = 0
-__py_cfg_bag = None
-__py_cfg_stack = []
-while __py_cfg_square is not None:
-  __py_cfg_square,__py_cfg_bag = __py_cfg_squares[__py_cfg_square](__py_cfg_bag)
-  if __py_cfg_square is None:
-    break
+def __py_cfg_call(__py_cfg_square,*args):
+  __py_cfg_bag = list(args)
+  while __py_cfg_square is not None:
+    __py_cfg_square,__py_cfg_bag = __py_cfg_squares[__py_cfg_square](*__py_cfg_bag)
+  return __py_cfg_bag
+
+__py_cfg_call(0,[])
 """)

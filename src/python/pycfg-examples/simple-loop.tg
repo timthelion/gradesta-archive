@@ -1,0 +1,6 @@
+[0, "main\nname = input(\"What is your name? \")\nage = int(input(\"Enter your age: \"))", [["age >= 13; name age", 1], ["True; name age", 2]]]
+[1, "introduce_yourself name age\nprint(\"Hello \"+name)\nprint(\"Your age is \"+str(age))", []]
+[2, "refuse_to_talk name age\nprint(\"I don't talk to minors.\")", [["True; name age", 9]]]
+[5, "count_the_years age\nage = age + 1\nprint(\"One year has passed, and you are now \"+str(age)+\" old.\")", [["age < 13; age", 5], ["True; return age", 8]]]
+[8, "", []]
+[9, "wait_till_youre_older name age\n[age] = count_the_years(age)", [["True; name age", 1]]]
