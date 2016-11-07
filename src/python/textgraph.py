@@ -145,7 +145,6 @@ class TextGraph(collections.abc.MutableMapping):
     self.stagedSquares = []
     self.undone = []
     self.done = []
-    self.header = ""
     self.applyChangesHandler = lambda: None
     self.server = TextGraphServer()
     self.edited = False
@@ -308,7 +307,7 @@ class TextGraph(collections.abc.MutableMapping):
 
   @property
   def json(self):
-    serialized = self.header
+    serialized = ""
     for _,square in self.sorted_items:
       serialized += square.json
       serialized += "\n"
@@ -316,30 +315,8 @@ class TextGraph(collections.abc.MutableMapping):
 
   @json.setter
   def json(self,text):
-    self.header = ""
-    readingHeader = True
-    lineNo = 0
-    sqr = 0
     for line in text.splitlines():
-      if not line or line.startswith("#"):
-        if readingHeader:
-          self.header += line+"\n"
-      else:
-        readingHeader = False
-        try:
-          (squareId,text,streetsList) = json.loads(line)
-          streets = []
-          for streetName,destination in streetsList:
-            streets.append(Street(streetName,destination,squareId))
-          self[squareId] = Square(squareId,text,streets)
-          try:
-            if squareId >= self.nextSquareId:
-              self.nextSquareId = squareId + 1
-          except TypeError:
-            pass
-        except ValueError as e:
-          raise ValueError("Cannot load file "+self.filename+"\n"+ "Error on line: "+str(lineNo)+"\n"+str(e))
-      lineNo += 1
+      self.server.send_raw(line)
 
   def lookupStreetedSquare(self,squareId,text):
     """
@@ -392,21 +369,20 @@ class TextGraphFile(TextGraph):
   def __init__(self,filename):
     TextGraph.__init__(self)
     self.filename = filename
+    self.header = ""
     if filename is None:
       pass
     elif filename.startswith("http://"):
       import urllib.request
       try:
         with urllib.request.urlopen(filename) as webgraph:
-          for line in webgraph.read().decode("utf-8").splitlines():
-            self.server.send_raw(line)
+          self.json = webgraph.read().decode("utf-8")
       except urllib.error.URLError as e:
         raise OSError(str(e))
     else:
       try:
         with open(filename) as fd:
-          for line in fd.read().splitlines():
-            self.server.send_raw(line)
+          self.json = fd.read()
       except FileNotFoundError:
         pass
     self.edited = False
@@ -426,3 +402,19 @@ class TextGraphFile(TextGraph):
       return
     with open(os.path.join(os.path.dirname(self.filename),"."+os.path.basename(self.filename)+".draft"),"w") as fd:
       fd.write(self.json)
+
+  @property
+  def json(self):
+    return self.header + TextGraph.json.fget(self)
+
+  @json.setter
+  def json(self,text):
+    if text.startswith("["):
+      TextGraph.json.fset(self,text)
+      return
+    try:
+      (header,rest) = text.split("\n[",1)
+      self.header = header + "\n" 
+      TextGraph.json.fset(self,"["+rest)
+    except ValueError:
+      TextGraph.json.fset(self,text)

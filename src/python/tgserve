@@ -22,6 +22,10 @@ class TextGraphServer():
       print("<<" + line[:-1], file=sys.stderr)
     # Lines starting with # and blank lines are ignored.
     if line.startswith("#") or not line:
+      sys.stdout.write("[]\n")
+      sys.stdout.flush()
+      sys.stdout.write("[]\n")
+      sys.stdout.flush()
       return
     try:
       inputObject = json.loads(line)

@@ -7,7 +7,7 @@ import subprocess
 import copy
 parser = argparse.ArgumentParser(description="""Print textgraph as text by concatinating square contents.
 
-Do not runn this command on untrusted input!
+Do not run this command on untrusted input!
 
 Street names effect the output. The prefix of a street name determines which effect it has.
 
@@ -16,8 +16,8 @@ Street names effect the output. The prefix of a street name determines which eff
 `!^` - Same as `!`, however, follows the same prefixing rules as with normal concatination.
 `#` - Ignore subgraph.
 
-""")
-parser.add_argument('files', metavar='FILE', nargs='+', help='files to concatinate')
+""",formatter_class=argparse.RawTextHelpFormatter)
+parser.add_argument('files', metavar='FILE', nargs='+', help='template files to fill in and concatinate')
 parser.add_argument('--comment-prefix', dest='commentPrefix', default=None, help='What prefix should we use to add squareId comments to each line of code?')
 args = parser.parse_args()
 indentation = ""

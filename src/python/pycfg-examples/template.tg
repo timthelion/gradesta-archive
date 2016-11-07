@@ -1,0 +1,4 @@
+#Header
+[0, "import sys", [["!pycfg", 1]]]
+[1, "print_arg_zero\nprint(sys.argv[0])", [["True;", 2]]]
+[2, "print_bar\nprint(\"bar\")", []]
