@@ -303,7 +303,7 @@ class TextGraph(collections.abc.MutableMapping):
 
   @property
   def sorted_items(self):
-    return sorted(self.items(),key=str)
+    return sorted(self.items(),key=lambda sqr:sqr[0])
 
   @property
   def json(self):
