@@ -1,0 +1,8 @@
+[0, "main\nimport sys\nimport fileinput\nimport json", [["True;", 1]]]
+[1, "load_file\nfd = fileinput.input()", [["True; fd", 3], ["except SystemError;", 2]]]
+[10, "start_function fd line\nprint(\"\"\"\ndef %s(*args):\n  return __py_cfg_call(%i,*args)\ndef __py_cfg_internal_function_%s(*args):\n\"\"\" %)", []]
+[2, "print_help_and_exit\nsys.exit(\"\"\"\npycfg is a compiler which translates textgraph files of the python control flow graph format to runnable python3 code.\n\nTo use run\n\n$pycfg FILENAME\n\n\"\"\")", []]
+[3, "print_header fd\nprint(\"\"\"\n#!/usr/bin/python3\nDO NOT EDIT\nThis file was automatically generated from its textgraph source by pycfg.\n\"\"\")", [["True; fd", 4]]]
+[4, "read_line fd\nline = fd.readline()", [["line.startswith(\"#\") or line.isspace(); fd", 4], ["True; fd line", 8]]]
+[8, "json_load_line fd line\nnode = json.loads(line)", [["except ValueError as e: fd e", 9], ["True; fd node", 10]]]
+[9, "invalid_json fd e\neprint(\"Error on line \"+str(fd.lineno()))\neprint(e)", [["True;", 2]]]
