@@ -52,7 +52,7 @@ if __name__ == "__main__":
     edge = []
   else:
     neighborhood, edge = tg.getNeighborhood(options.center,options.neighborhoodLevel)
-  dot = "digraph graphname{\n"
+  dot = "digraph graphname{\n  rankdir=LR\n"
   labels = ""
   edges = ""
   for square in neighborhood:
