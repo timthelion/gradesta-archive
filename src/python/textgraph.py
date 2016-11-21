@@ -265,12 +265,15 @@ class TextGraph(collections.abc.MutableMapping):
     self.stageSquareForDeletion(squareId)
     self.applyChanges()
 
-  def getSubgraph(self,squareId):
+  def getSubgraph(self,squareId,subgraph=None):
     square = self[squareId]
-    subgraph = set([square.squareId])
+    if subgraph is None:
+      subgraph = set([square.squareId])
+    else:
+      subgraph.update([square.squareId])
     for street in square.streets:
       if not street.destination in subgraph:
-        subgraph.update(self.getSubgraph(street.destination))
+        subgraph.update(self.getSubgraph(street.destination,subgraph=subgraph))
     return subgraph
 
   def getNextSibling(self,squareId):
