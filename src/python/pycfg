@@ -5,6 +5,8 @@ import sys
 
 imports = ""
 squares = []
+in_function = True
+print("PyCfgSquareState = type('PyCfgSquareState', (object,), {})")
 for line in fileinput.input():
 	if line.startswith("#"):
 		print(line)
@@ -14,6 +16,7 @@ for line in fileinput.input():
 		sys.exit("Line: "+str(lineno)+"\n"+line+"\nis invalid.")
 	if text:
 		first_line = True
+		something_was_printed = False
 		for l in text.split("\n"):
 			lwords = l.split()
 			if first_line:
@@ -27,7 +30,12 @@ for line in fileinput.input():
 			elif line.startswith("import "):
 				imports = imports + "\n" + line + " # □:"+str(id)
 			else:
+				if l.strip():
+					something_was_printed = True
+				if l.strip().startswith("return "):
+					 l = l.replace("return","return None,")
 				print("\t\t"+l+" # □:"+str(id))
+		print("\t\tpass # □:"+str(id))
 		conditions = []
 		exceptions = []
 		exception = False
@@ -71,5 +79,8 @@ def __py_cfg_call(__py_cfg_square,*args):
     __py_cfg_square,__py_cfg_bag = __py_cfg_squares[__py_cfg_square](*__py_cfg_bag)
   return __py_cfg_bag
 
-__py_cfg_call(0,[])
 """)
+if in_function:
+  print("return __py_cfg_call(0,[])")
+else:
+  print("__py_cfg_call(0,[])")
