@@ -69,7 +69,7 @@ for line in fileinput.input():
 		print("\texcept Exception as e:\n\t\traise e")
 		for c in conditions:
 			print(c)
-		print("\treturn None,[]")
+		print("\treturn None,None")
 print(imports)
 print("__py_cfg_squares = {"+",".join(map(lambda sqr: str(sqr[0])+":__py_cfg_internal_function_"+sqr[1],squares))+"}")
 print("""
