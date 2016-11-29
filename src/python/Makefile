@@ -9,4 +9,9 @@ mge: mge.tg
 	tgtemplate mge.tg --comment-prefix=\ \# >> mge
 	chmod +x ./mge
 
+mge-debug: mge.tg
+	echo \#\!/usr/bin/python3 > mge-debug
+	tgtemplate mge.tg --comment-prefix=\ \# >> mge-debug
+	chmod +x ./mge-debug
+
 all: mge pycfg
