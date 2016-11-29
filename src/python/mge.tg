@@ -37,7 +37,7 @@
 [37, "#mode\n@property\ndef mode(self):", [["^\\t", 38]]]
 [38, "return self.__mode", []]
 [39, "@mode.setter\ndef mode(self,value):", [["^\\t", 40]]]
-[40, "self.__mode = value\nif value in ['command','navigation']:\n  self.original_widget = self.myopic_graph_view\nelif value == 'search':\n  self.original_widget = self.searchBox\nelif value == 'help':\n  self.original_widget = self.help\nelif value in ['insert', 'visual', 'replace']:\n  pass\nelse:\n  raise ValueError(\"Invalid mode \"+value)\n", []]
+[40, "if (self.__mode == 'navigation') ^ (value == 'navigation'):\n  self.__mode = value\n  self.update()\nself.__mode = value\nif value in ['command','navigation']:\n  self.original_widget = self.myopic_graph_view\nelif value == 'search':\n  self.original_widget = self.searchBox\nelif value == 'help':\n  self.original_widget = self.help\nelif value in ['insert', 'visual', 'replace']:\n  pass\nelse:\n  raise ValueError(\"Invalid mode \"+value)\n", []]
 [41, "#statusMessage\n@property\ndef statusMessage(self):", [["^\\t", 42]]]
 [42, "return self._statusMessage", []]
 [43, "@statusMessage.setter\ndef statusMessage(self,value):", [["^\\t", 44]]]
