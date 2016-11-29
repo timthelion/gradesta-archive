@@ -30,6 +30,7 @@ import os
 if __name__ == "__main__":
   parser = optparse.OptionParser(usage = "tg2dot",description = "Translate a text graph file to dot file.")
   parser.add_option("--display", dest="display",action="store_true",default=False,help="Display the graph using graphviz.")
+  parser.add_option("--horizontal", dest="horizontal",action="store_true",default=False,help="Layout the graph flowing left to right rather than top to bottom.")
   parser.add_option("--no-output", dest="noOutput",action="store_true",default=False,help="Don't print anything to stdout. To be used with --display")
   parser.add_option("--clip", dest="clip",type="int",default=None,help="Clip square text to a certain length.")
   parser.add_option("--center", dest="center",type="int",default=None,help="Highlight a center square.")
@@ -52,7 +53,9 @@ if __name__ == "__main__":
     edge = []
   else:
     neighborhood, edge = tg.getNeighborhood(options.center,options.neighborhoodLevel)
-  dot = "digraph graphname{\n  rankdir=LR\n"
+  dot = "digraph graphname{\n"
+  if options.horizontal:
+    dot += "  rankdir=LR\n"
   labels = ""
   edges = ""
   for square in neighborhood:
