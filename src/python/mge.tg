@@ -167,7 +167,7 @@
 [195, "if not command == 'send-key-to-child':", [["^\\t", 196]]]
 [196, "self.recordChanges()", []]
 [197, "if command == 'search-mode':", [["^\\t", 198]]]
-[198, "self.mode = 'search'\nself.searchBox.searchEdit.edit_text = \"\"\nself.searchBox.update()", []]
+[198, "self.mode = 'search'", []]
 [199, "if command == 'help-mode':", [["^\\t", 200]]]
 [200, "self.mode = 'help'", []]
 [205, "if command == 'go-down-default-street':", [["^\\t", 206]]]
