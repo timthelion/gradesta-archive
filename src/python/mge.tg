@@ -229,7 +229,7 @@
 [268, "if command == \"new-square-after-selection\":", [["^\\t", 270]]]
 [270, "self.newStreetToNewSquare(useDefaultStreetName=True,index = self.focus_position + 1)\nself.focus_position += 1\nself.view.mode = 'insert'", []]
 [271, "if command == \"new-square-with-blank-street-name\":", [["^\\t", 272]]]
-[272, "self.view.selection = self.newStreetToNewSquare(useDefaultStreetName=False,index = self.focus_position + 1)\nself.view.focus_item = self.view.currentSquareWidget\nself.view.mode = 'insert'", []]
+[272, "self.newStreetToNewSquare(useDefaultStreetName=False,index = self.focus_position + 1)\nself.focus_position += 1\nself.view.mode = 'insert'", []]
 [273, "if command == 'goto-square':", [["^\\t", 274]]]
 [274, "filenameOfOriginGraph,square = self.squares(self.focused_item)\n# TODO multi tab support!\nself.view.graph", []]
 [275, "#properties", []]
