@@ -302,7 +302,7 @@
 [545, "", [["!^pycfg -f", 845]]]
 [546, "init_streets\nself.streets = streets", [["True;", 547]]]
 [547, "default_values\nitems = []\nself.streetNameEdits = []\nself.squareEdits = []", [["not self.streets; items ", 548], ["True; items", 628]]]
-[548, "empty_streets_list items\nitems.append((urwid.Padding(urwid.SelectableIcon(\" \",0),align=self.alignment,width=\"pack\"),('pack',None)))", [["True; items", 624]]]
+[548, "empty_streets_list items\nitems.append((urwid.Padding(urwid.SelectableIcon(\" \",0),width=\"pack\"),('pack',None)))", [["True; items", 624]]]
 [551, "if command == \"set-default-street-name\":", [["^\\t", 552]]]
 [552, "if self.streets:\n  self.view.defaultStreetName = self.streets[self.focus_position].name", []]
 [553, "if command == \"go-down-street\":", [["^\\t", 554]]]
