@@ -426,7 +426,7 @@
 [913, "prestage_square squares zip_iter street_tuple\nstreet,_,_ = street_tuple", [["not street.destination in squares; squares zip_iter street_tuple", 914], ["True; squares zip_iter street_tuple", 915]]]
 [914, "prestage_square squares zip_iter street_tuple\nstreet,_,_ = street_tuple\nsquares[street.destination] = copy.deepcopy(self.view.graph[street.destination])", [["True; squares zip_iter street_tuple", 915]]]
 [915, "update_square_text squares zip_iter street_tuple\nstreet,_,square_edit = street_tuple\nsquares[street.destination].text = square_edit.edit_text", [["True; squares zip_iter", 904]]]
-[917, "", [["self.view.mode == 'insert';", 903]]]
+[917, "", [["self.view.mode != 'navigation';", 903]]]
 [918, "if command == 'next-search-item':", [["^\\t", 919]]]
 [919, "self.mode = 'search'\ntry:\n  self.searchBox.focus_position += 1\nexcept IndexError:\n  try:\n    self.searchBox.focus_position = 1\n  except IndexError:\n    pass", []]
 [920, "if command == 'up':", [["^\\t", 921]]]
