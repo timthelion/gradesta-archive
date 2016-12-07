@@ -1,0 +1,106 @@
+\input texinfo
+@setfilename book.texinfo
+@settitle History and Future of Graph Based Systems
+@copying
+Text copyright @copyright{} 2016 Timothy Hobbs. Image copyrights are noted in their respective captions.
+
+The text of this document is released under the Creative Commons Attribution-ShareAlike 4.0 International (CC BY-SA 4.0).
+
+For more information see @url{https://creativecommons.org/licenses/by-sa/4.0/}
+@end copying
+
+@titlepage
+@title History and Future of Graph Based Systems
+@subtitle An extended user manual for the textgraph system
+@subtitle for textgraph git master late 2016.
+@author Timothy Hobbs <@url{http://timothy.hobbs.cz}>
+
+@page
+@vskip 0pt plus 1filll
+@insertcopying
+@end titlepage
+@contents
+@ifnottex
+@node Top
+@top Short Sample
+This is a short sample Texinfo file.
+@menu
+Prolog:: Why write a history and not a normal manual?
+Chapter 1:: The first graph based system.
+* Non-biological Graph-like Structures
+Index:: Complete index.
+@end menu
+@end ifnottex
+@node Prolog
+@chapter Prolog
+I wanted to write a manual for the textgraph ecosystem. I thought it would be rather short. The file format is trivial and the utilities are only a few lines of code. But despite the simplicity of it all, I felt like I was describing the use of a hammer to an audience which had never seen a nail. In preson, I would tell people about how the myopic graph editor to effectively edit and manipulate graph data, and they would look at me quisically and ask themselves? Why would I want to manipulate graph based data? Thus I find myself writing, not a manual, but a traveler's guide to the world of graphs.
+
+@float
+@image{./images/graph,,200pt,A simple graph,png}
+@caption{Fig 1. A graph (Copyright @copyright{} 2016 Timothy Hobbs, CC By-Sa 4.0)}
+@end float
+@cindex graph
+@cindex vertex
+@cindex edge
+A graph is illustrated in Fig 1. When I use the word @emph{graph}, I am not referring to bar charts. In mathematics, @emph{graphs} are a kind of network. A graph is a collection of @emph{vertexes} which are connected by @emph{edges}. 
+
+This is a book about graphs. I will discuss the myriad of ways that they can be, and have been, used to represent data, calculations, and systems. I will also discuss basic philosophical questions, such as "what is @emph{data}", "what is a @emph{calculation}" and "what is a @emph{system}?" Finally, I will discuss ways of manipulating digital representations of graphs using the textgraph ecosystem and I will present concrete examples of how you can use digital representations of graphs to enhance your understanding of the programs you write and improve automation and code reuse.
+
+@node Chapter 1
+@chapter Chapter 1 - Early Graph Based Systems
+This might be a good time to point out the distinction between three types of existance and their relationship to history. Abstract mathematical concepts exist without any relationship to time. The mathematical laws which govern graphs have always been and always will be. All physical graph-like structures that we know of, came into existance some time after the big bang. As historians, we can talk about when they started existing. Examples of such physical forms are spider webs and slime mold. Human formed theories about graphs, digital representations of graphs, and other "discoveries" have all been either discovered or invented by human kind, and these inventions, too, can be arranged upon a timeline.
+
+@float
+@image{./images/slime-mold,,200pt,Slime mold,png}
+@caption{Fig 2. Slime mold (Copyright @copyright{} 2011 @url{https://www.flickr.com/photos/mjambon/6271724816,Martin Jambon CC-By 2.0})}
+@end float
+
+@section Non-biological Graph-like Structures
+
+Interesting, non-biological, graph-like structures are rather rare. Matter tends to form clumps rather than strands and when strands do form they rarely connect. One of the most common uses of graphs in computer science is the representation of molecular structures.
+
+@float
+@image{./images/Caffeine_Molecule,,100pt,Caffeine Molecule,png}
+@caption{Fig 3. Caffeine Molecule (Copyright @copyright{} 2005 @url{https://commons.wikimedia.org/wiki/File:Caffeine_Molecule.png,Michael Ströck CC-By-Sa 3.0})}
+@end float
+
+However, molecules are not really graph like structures. What looks clearly like @emph{vertexes} (atoms) and @emph{edges} (bonds) on paper is, in reallity, an amorphous blob of amorphous electroniness with some nuclei stuck in the middle.
+
+Looking to space as a model for non-biological physicality, I see Mars covered with dust (not graph-like), rock (not graph-like), gasses (not graph-like), lava (sometimes graph-like). There is so little graphiness on Mars, that it is hard to find anything that even looks like a tree (in the mathematical sense). However, these structures do exist. As I said earlier, matter likes to form clumps.
+
+@float
+@image{./images/mud,,140pt,Mud,jpg}
+@caption{Fig 4. The negative space around these clumps form an @url{https://en.wikipedia.org/wiki/Torus#n-dimensional_torus, n-torus}, which is graphy enough for me (Copyright @copyright{} 2007 @url{https://en.wikipedia.org/wiki/Mudcrack#/media/File:Desiccation-cracks_hg.jpg,Hannes Grobe CC-By-Sa 2.5})}
+@end float
+
+When you poor liquid around a bunch of clumps, the clumps become islands, which force the liquid to flow around them.
+
+@float
+@image{./images/LempisaariNaantaliFinland,,200pt,An archipellago in Finland,jpg}
+@caption{Fig 5. When water flows around an archipellago an n-torus of water is formed. (Copyright @copyright{} 2006 @url{https://commons.wikimedia.org/wiki/File:Lempisaari%2C_Naantali%2C_Finland..jpg, Paul Lenz CC-By-Sa 3.0})}
+@end float
+
+The liquid in question is now graphy. It is an @url{https://en.wikipedia.org/wiki/Torus#n-dimensional_torus, n-torus}. Saying something is an n-torus is a fancy way of saying that it has holes in it. But when you look at the water in figure 5, your brain does not imediately say "look! The water has holes in it!" Your brain, rather, starts disecting the water into @emph{channels}, and @emph{intersections between channels}. If you really look at the picture cross eyed, you can even imagine that these intersections are @emph{verteces} and the channels are @emph{edges} of a graph. This is not quite true. An n-torus is not a graph. The vertices and the the edges are not distinct enough to really be a graph. But it's pretty graphy.
+
+Just to make sure that everyone is up to speed, these are tori:
+
+@float
+@w{@image{./images/torus,,100pt,A 1-torus,png} @image{./images/2-torus,,100pt,A 2-torus,png}}
+
+@caption{Fig 6. A 1-torus and 2-torus side by side. (Copyright @copyright{} 2007 @url{https://en.wikipedia.org/wiki/Genus_(mathematics)#/media/File:Torus_illustration.png, Oleg Alexandrov Public Domain})}
+@end float
+
+A torus really is any shape with a hole in it. A 1-torus is any shape with one hole, a 2-torus is any shape with two holes and an n-torus is any shape with any number of holes.
+
+This copper ore is pretty graphy too. It is formed by a liquid (molten copper) flowing around clumps of something else and then hardening. It is not a graph but it is an n-torus and that's graphy enough for me.
+
+@float
+@image{./images/copper,,200pt,Native Copper,jpg}
+@caption{Fig 7. Native copper ore (Copyright @copyright{} 2009 @url{https://en.wikipedia.org/wiki/Copper#/media/File:NatCopper.jpg, Jonathan Zander CC-By-Sa 3.0})}
+@end float
+
+
+@node Index
+@unnumbered Index
+@printindex cp
+@bye
