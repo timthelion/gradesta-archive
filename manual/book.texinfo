@@ -28,7 +28,7 @@ This is the extended textgraph user manual.
 Prologue:: Why write a history and not a normal manual?
 Chapter 1:: The first graph based system.
 * Non-biological Graph-like Structures
-* Tree-like structures
+* Non-biological Tree-like structures
 Index:: Complete index.
 @end menu
 @end ifnottex
@@ -58,7 +58,7 @@ This might be a good time to point out the distinction between three types of ex
 
 @section Non-biological Graph-like Structures
 
-Interesting, natural non-biological, graph-like structures on the macro scale are rather rare. Matter tends to form clumps rather than strands and when strands do form they rarely connect. One of the most common uses of graphs in computer science is the representation of molecular structures.
+Interesting, natural non-biological, graph-like structures on the macro scale are rather rare. Matter tends to form clumps rather than strands and when strands do form they rarely connect. However, one of the most common uses of graphs in computer science is the representation of molecular structures.
 
 @float
 @image{./images/Caffeine_Molecule,,100pt,Caffeine Molecule,png}
@@ -67,7 +67,7 @@ Interesting, natural non-biological, graph-like structures on the macro scale ar
 
 Molecules are sort of graph like. But what looks clearly like @emph{vertexes} (atoms) and @emph{edges} (bonds) on paper is, in reality, an amorphous blob of amorphous electroniness with some nuclei stuck in the middle.
 
-Looking to space as a model for non-biological physicality, I see Mars covered with dust (not graph-like), rock (not graph-like), gases (not graph-like), lava (sometimes graph-like). There is so little graphiness on Mars, that it is hard to find anything that even looks like a tree (in the mathematical sense). However, these structures do exist. As I said earlier, matter likes to form clumps.
+Looking to space as a model for non-biological physics, I see Mars covered with dust (not graph-like), rock (not graph-like), gases (not graph-like), lava (sometimes graph-like). There is so little graphiness on Mars, that it is hard to find anything that even looks like a tree (in the mathematical sense). However, these structures do exist. As I said earlier, matter likes to form clumps.
 
 @float
 @image{./images/mud,,140pt,Mud,jpg}
@@ -81,14 +81,16 @@ When you poor liquid around a bunch of clumps, the clumps become islands, which 
 @caption{Fig 5. When water flows around an archipelago an n-toroid of water is formed. (Copyright @copyright{} 2006 @url{https://commons.wikimedia.org/wiki/File:Lempisaari%2C_Naantali%2C_Finland..jpg, Paul Lenz CC-By-Sa 3.0})}
 @end float
 
-The liquid in question is now graphy. It is an @url{https://en.wikipedia.org/wiki/Torus#n-dimensional_torus, n-toroid}. Saying something is an n-toroid is a fancy way of saying that it has holes in it. But when you look at the water in Fig. 5, your brain does not immediately say "look! The water has holes in it!" Your brain, rather, starts dissecting the water into @emph{channels}, and @emph{intersections between channels}. If you really look at the picture cross eyed, you can even imagine that these intersections are @emph{vertices} and the channels are @emph{edges} of a graph. This is not quite true. An n-toroid is not a graph. The vertices and the edges are not distinct enough to really be a graph. But it's pretty graphy.
+@cindex graphy
+
+The liquid in question is now @emph{graphy}. It is an @url{https://en.wikipedia.org/wiki/Torus#n-dimensional_torus, n-toroid}. Saying something is an n-toroid is a fancy way of saying that it has holes in it. But when I look at the water in Fig. 5, my brain does not immediately say "look! The water has holes in it!" My brain, rather, starts dissecting the water into @emph{channels}, and @emph{intersections between channels}. And when I really look at the picture cross eyed, I can even imagine that these intersections are @emph{vertices} and the channels are @emph{edges} of a graph. This is not quite true. An n-toroid is not a graph. The vertices and the edges are not distinct enough to really be a graph. But it's pretty graphy.
 
 @cindex torus
 @cindex toroid
 @cindex n-torus
 @cindex n-toroid
 
-Just to make sure that everyone is up to speed, these are tori:
+Just to make sure that everyone is up to speed, these are toroids:
 
 @float
 @w{@image{./images/torus,,100pt,A 1-toroid,png} @image{./images/2-torus,,100pt,A 2-toroid,png}}
@@ -98,17 +100,15 @@ Just to make sure that everyone is up to speed, these are tori:
 
 A toroid really is any shape with a hole in it. A 1-toroid is any shape with one hole, a 2-toroid is any shape with two holes and an n-toroid is any shape with any number of holes.
 
-This copper ore is pretty graphy too. It is formed by a liquid (molten copper) flowing around clumps of something else and then hardening. It is not a graph but it is an n-toroid and that's graphy enough for me.
+This copper ore is pretty graphy too. It is formed by a liquid (molten copper) flowing around clumps of something else and then hardening. It is not a graph but it is an n-toroid and that's graphy.
 
 @float
 @image{./images/copper,,200pt,Native Copper,jpg}
 @caption{Fig 7. Native copper ore (Copyright @copyright{} 2009 @url{https://en.wikipedia.org/wiki/Copper#/media/File:NatCopper.jpg, Jonathan Zander CC-By-Sa 3.0})}
 @end float
 
-@section Tree-like structures
+@section Non-biological tree-like structures
 @cindex tree-like
-@cindex branch
-@cindex node
 
 Tree-like structures can be interesting too and an n-toroid with tree like appendages is certainly more interesting than an n-toroid without them.
 
@@ -140,10 +140,12 @@ Not all natural, non-biological, graphy structures are formed by the collision o
 @caption{Fig 11. Scoria, a type of porous rock formed by expanding bubbles of gas (Copyright @copyright{} 2008 @url{https://en.wikipedia.org/wiki/Scoria#/media/File:Scoria_Macro_Digon3.jpg, Jonathan Zander CC-By-Sa 3.0})}
 @end float
 
-Now these structures are not actually as graphy as they might seem at first glance. They do have hollow bits, but they aren't particularly toroidal. As I said earlier, toroids have holes in them and these rocks tend to be water proof. One type of porous rock, pumice, even floats on water because there is so much air trapped inside!
- When you think of the physical properties of expanding gas, it is clear why these rocks are never particularly toroidal. Gas expands, making a bubble, that bubble may then pop, but a popped bubble leaves a crater, not a hole going all the way through a material, and once the bubble has popped, there is no force of expanding gas which would cause another opening to appear on the other side of the crater. Thus, no real graphiness.
+Now these structures are not actually as graphy as they might seem at first glance. They do have hollow bits, but they aren't particularly toroidal. As I said earlier, toroids have holes in them. These rocks tend to be water proof, not very holy. One type of porous rock, pumice, even floats on water because there is so much air trapped inside! When you think of the physical properties of expanding gas, it is clear why these rocks are never particularly toroidal. Gas expands, making bubbles. Those bubbles may then pop. But a popped bubble leaves a crater, not a hole going all the way through a material. Once a bubble has popped, there is no force of expanding gas which would cause another opening to appear on the other side of the crater. Thus, no real graphiness.
 
-Graphy structures that have actual cavities in them form when material is washed or blown away. These structures form because:
+@cindex ablation
+@cindex growth
+
+The toroidal graphy structures that we have seen so far, were all formed when a material was washed or blown away. Thus we have the superset of graphy structures which are formed by @emph{ablation}.
 
 @enumerate
 @item
@@ -169,6 +171,15 @@ Here are two examples of honeycomb weathering, a complex form of weathering in w
 @float
 @image{./images/honeycomb1,,200pt,Honeycomb weathering,jpg}
 @caption{Fig 13. Honeycomb weathering, Watchet, Somerset, Great Britain (Copyright @copyright{} 2010 @url{http://www.geograph.org.uk/photo/1707186, Nigel Chadwick CC-By-Sa 2.0})}
+@end float
+
+Graph like structures can also @emph{grow}. Examples include stalactites, icicles, and crystals.
+
+@float
+@w{@image{./images/stalactites,,160pt,Stalactites,jpg} @image{./images/ice-crystals,,160pt,Ice crystals,jpg}}
+@caption{Fig 14. Stalactites in Damlataş Cave, Alanya, Turkey (Copyright @copyright{} 2007 @url{https://www.flickr.com/photos/48264958@@N00/2041974766/, BillBl CC-By 2.0})
+Fig 15. Ice crystals (Copyright @copyright{} 2009 @url{https://en.wikipedia.org/wiki/Ice_crystals#/media/File:Ice_crystals_on_the_box.jpg,Brocken Inaglory CC-By-Sa 3.0})
+}
 @end float
 
 @node Index
