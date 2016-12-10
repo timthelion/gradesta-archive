@@ -3,5 +3,6 @@
 ../filler error1 2>> out
 ../filler error2 2>> out
 ../filler escape >> out
-../filler works >> out
+printf "Bob\nGreen" | ../filler works >> out
+../filler --help >> out
 diff out golden

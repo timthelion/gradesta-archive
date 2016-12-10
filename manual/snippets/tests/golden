@@ -5,9 +5,24 @@ Unexpected end of file while reading feild.
 
 
 Foo $ bar
-
-Name: Color: ----------------------------------
+Name: 
+Color: 
+----------------------------------
 
 
 Hello Bob! Bob is a nice name. Green is cool too!
+usage: filler [-h] [--clip] [infile] [outfile]
 
+The filler program prompts the user to fill out a snipet of code. The filled
+out snipet is then sent to standard output. The file format is simple. If you
+want to create a feild write ${feild name}. The user will then be prompted to
+enter in the contents of the feild. If you want to include a $ use $$.
+Repeated feild names are prompted for only once.
+
+positional arguments:
+  infile
+  outfile
+
+optional arguments:
+  -h, --help  show this help message and exit
+  --clip      Copy output to clipboard.
