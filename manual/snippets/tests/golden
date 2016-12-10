@@ -1,0 +1,13 @@
+Expected feild start, '{' or escape sequence following '$'. Instead received ' '.
+Unexpected end of file while reading feild.
+Unexpected end of file while reading feild.
+----------------------------------
+
+
+Foo $ bar
+
+Name: Color: ----------------------------------
+
+
+Hello Bob! Bob is a nice name. Green is cool too!
+
