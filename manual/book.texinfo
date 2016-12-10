@@ -25,15 +25,17 @@ For more information see @url{https://creativecommons.org/licenses/by-sa/4.0/}
 @top textgraph manual
 This is the extended textgraph user manual.
 @menu
-Prologue:: Why write a history and not a normal manual?
-Chapter 1:: The first graph based system.
+Prologue::
+Natural Graph Based Systems::
 * Non-biological Graph-like Structures
 * Non-biological Tree-like structures
+* Biological Tree-like Structures
+What is a System and how does it differ from a Calculation::
 Index:: Complete index.
 @end menu
 @end ifnottex
 @node Prologue
-@chapter Prologue
+@unnumbered Prologue
 I wanted to write a manual for the textgraph ecosystem. I thought it would be rather short. The file format is trivial and the utilities are only a few lines of code. But despite the simplicity of it all, I felt like I was describing the use of a hammer to an audience which had never seen a nail. In person, I would tell people about how the myopic graph editor to effectively edit and manipulate graph data, and they would look at me quizzically and ask themselves? Why would I want to manipulate graph based data? Thus I find myself writing, not a manual, but a traveler's guide to the world of graphs.
 
 @float
@@ -47,8 +49,8 @@ A graph is illustrated in Fig 1. When I use the word @emph{graph}, I am not refe
 
 This is a book about graphs. I will discuss the myriad of ways that they can be, and have been, used to represent data, calculations, and systems. I will also discuss basic philosophical questions, such as "what is @emph{data}", "what is a @emph{calculation}" and "what is a @emph{system}?" Finally, I will discuss ways of manipulating digital representations of graphs using the textgraph ecosystem and I will present concrete examples of how you can use digital representations of graphs to enhance your understanding of the programs you write and improve automation and code reuse.
 
-@node Chapter 1
-@chapter Chapter 1 - Early Graph Based Systems
+@node Natural Graph Based Systems
+@chapter Natural Graph Based Systems
 This might be a good time to point out the distinction between three types of existence and their relationship to history. Abstract mathematical concepts exist without any relationship to time. The mathematical laws which govern graphs have always been and always will be. All physical graph-like structures that we know of, came into existence some time after the big bang. As historians, we can talk about when they started existing. Examples of such physical forms are spider webs and slime mold. Human formed theories about graphs, digital representations of graphs, and other "discoveries" have all been either discovered or invented by human kind, and these inventions, too, can be arranged upon a time-line.
 
 @float
@@ -181,6 +183,41 @@ Graph like structures can also @emph{grow}. Examples include stalactites, icicle
 Fig 15. Ice crystals (Copyright @copyright{} 2009 @url{https://en.wikipedia.org/wiki/Ice_crystals#/media/File:Ice_crystals_on_the_box.jpg,Brocken Inaglory CC-By-Sa 3.0})
 }
 @end float
+
+@page
+@section Biological Tree-like Structures
+
+With the appearance of multi-celled life, the quantity and diversity of tree-like structures exploded.
+
+@float
+@image{./images/Socotra_dragon_tree,,200pt,Socotra dragon tree,jpg}
+@caption{Fig 16. Socotra dragon tree Socotra island, Yemen (Copyright @copyright{} 2008 @url{https://commons.wikimedia.org/wiki/File:Socotra_dragon_tree.JPG,Boris Khvostichenko CC-By-Sa 4.0})}
+@end float
+
+Indeed, multi-celled life forms tend to have at least several tree-like appendages and it is rare for a life form to be truly bloby. This is completely different from the non-biological world, which is mostly bloby and rarely tree-like.
+
+@float
+@image{./images/slug,,200pt,Even bloby life forms like this slug have appendages.,jpg}
+@caption{Fig 17. Even bloby life forms like this slug have appendages. (Copyright @copyright{} 2006 @url{https://cs.wikipedia.org/wiki/Soubor:Orange_slug.jpg,Guillaume Brocker CC By-Sa 3.0})}
+@end float
+
+@float
+@image{./images/rock,,200pt,Rocks, however, almost @emph{never} have appendages.,jpg}
+@caption{Fig 18. Rocks, however, almost @emph{never} have appendages. (Copyright @copyright{} 2012 @url{http://reptonix.awardspace.co.uk/photos/2012-02-11.htm,Reptonix free Creative Commons licensed photos CC-By 3.0})}
+@end float
+
+@node What is a System and how does it differ from a Calculation
+@chapter What is a System and how does it differ from a Calculation
+
+Behaviors that Turing completeness either does not guarantee or that Turing machines cannot express:
+@enumerate
+@item
+Concurrency
+@item
+Continuity of time and quantity
+@item
+Instantaneousness
+@end enumerate
 
 @node Index
 @unnumbered Index

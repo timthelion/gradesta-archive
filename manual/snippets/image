@@ -1,0 +1,4 @@
+@float
+@image{./images/${File name},,200pt,${Description},jpg}
+@caption{Fig ${Figure number}. ${Description} (Copyright @copyright{} 20${Copyright year} @url{${URL},${Author name} ${Licence}})}
+@end float
