@@ -25,15 +25,6 @@ For more information see @url{https://creativecommons.org/licenses/by-sa/4.0/}
 @top textgraph manual
 This is the extended textgraph user manual.
 @menu
-Prologue::
-Natural Graph Based Systems::
-* Non-biological Graph-like Structures
-* Non-biological Tree-like structures
-* Formation Processes of Non-Biological Graphy and Tree-like Structures
-* Biological Tree-like Structures
-What is a System and how does it differ from a Calculation::
-Index:: Complete index.
-@end menu
 @end ifnottex
 @node Prologue
 @unnumbered Prologue
