@@ -1,4 +1,4 @@
-[0, "#!/usr/bin/python3\ndesc = \"\"\"\nThe filler program prompts the user to fill out a snipet of code. The filled out snipet is then sent to standard output.\n\nThe file format is simple. If you want to create a feild write ${feild name}. The user will then be prompted to enter in the contents of the feild. If you want to include a $ use $$. Repeated feild names are prompted for only once.\n\"\"\"", [["^#", 23], ["", 12], ["!pycfg", 27]]]
+[0, "#!/usr/bin/python3\ndesc = \"\"\"\nThe filler program prompts the user to fill out a snipet of code. The filled out snipet is then sent to standard output.\n\nThe file format is simple. If you want to create a feild write ${feild name}. The user will then be prompted to enter in the contents of the feild. If you want to include a $ use $$. Repeated feild names are prompted for only once.\n\"\"\"", [["^#", 23], ["", 12], ["", 41], ["", 43]]]
 [4, "read_char s\nchar = s.args.infile.read(1)", [["char == \"\"; s", 11], ["char == \"$\"; s", 28], ["True; s char", 34]]]
 [11, "print_end s\nprint(\"----------------------------------\\n\\n\")\ns.args.outfile.write(s.output)", [["s.args.clip; s", 39]]]
 [12, "#imports\nimport sys\nimport argparse\nimport subprocess\nfrom types import SimpleNamespace", []]
@@ -16,3 +16,6 @@
 [37, "die_expected_feild_or_escape char\nsys.exit(\"Expected feild start, '{' or escape sequence following '$'. Instead received '%s'.\" % char)", []]
 [39, "send_to_clipboard s\np=subprocess.Popen(\"xclip\",stdin=subprocess.PIPE)\np.communicate(input=s.output.encode(\"utf-8\"))", [["except FileNotFoundError;", 40]]]
 [40, "die_no_xclip_command\nsys.exit(\"xclip is not installed.\")", []]
+[41, "try:", [["^\\t", 42]]]
+[42, "", [["!^pycfg", 27]]]
+[43, "except KeyboardInterrupt:\n  print(\"\\nBye!\")", []]
