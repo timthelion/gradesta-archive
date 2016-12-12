@@ -66,7 +66,7 @@ Looking to space as a model for non-biological physics, I see Mars covered with 
 
 @float Figure,mud
 @image{./images/mud,,140pt,Mud,jpg}
-@caption{The negative space around these clumps of mud form an @url{https://en.wikipedia.org/wiki/Torus#n-dimensional_torus, n-toroid}, and the whole picture looks pretty graphy (Copyright @copyright{} 2007 @url{https://en.wikipedia.org/wiki/Mudcrack#/media/File:Desiccation-cracks_hg.jpg,Hannes Grobe CC-By-Sa 2.5})}
+@caption{The negative space around these clumps of mud form an @url{https://en.wikipedia.org/wiki/Torus#n-dimensional_torus, n-toroid}, and the whole picture looks pretty graph-like (Copyright @copyright{} 2007 @url{https://en.wikipedia.org/wiki/Mudcrack#/media/File:Desiccation-cracks_hg.jpg,Hannes Grobe CC-By-Sa 2.5})}
 @end float
 
 When you poor liquid around a bunch of clumps, the clumps become islands, which force the liquid to flow around them.
@@ -76,9 +76,9 @@ When you poor liquid around a bunch of clumps, the clumps become islands, which 
 @caption{When water flows around an archipelago an n-toroid of water is formed. (Copyright @copyright{} 2006 @url{https://commons.wikimedia.org/wiki/File:Lempisaari%2C_Naantali%2C_Finland..jpg, Paul Lenz CC-By-Sa 3.0})}
 @end float
 
-@cindex graphy
+@cindex graph-like
 
-The liquid in question is now @emph{graphy}. It is an @url{https://en.wikipedia.org/wiki/Torus#n-dimensional_torus, n-toroid}. Saying something is an n-toroid is a fancy way of saying that it has holes in it. But when I look at the water in @ref{LempisaariNaantaliFinland}, my brain does not immediately say "look! The water has holes in it!" My brain, rather, starts dissecting the water into @emph{channels}, and @emph{intersections between channels}. And when I really look at the picture cross eyed, I can even imagine that these intersections are @emph{vertices} and the channels are @emph{edges} of a graph. This is not quite true. An n-toroid is not a graph. The vertices and the edges are not distinct enough to really be a graph. But it's pretty graphy.
+The liquid in question is now @emph{graph-like}. It is an @url{https://en.wikipedia.org/wiki/Torus#n-dimensional_torus, n-toroid}. Saying something is an n-toroid is a fancy way of saying that it has holes in it. But when I look at the water in @ref{LempisaariNaantaliFinland}, my brain does not immediately say "look! The water has holes in it!" My brain, rather, starts dissecting the water into @emph{channels}, and @emph{intersections between channels}. And when I really look at the picture cross eyed, I can even imagine that these intersections are @emph{vertices} and the channels are @emph{edges} of a graph. This is not quite true. An n-toroid is not a graph. The vertices and the edges are not distinct enough to really be a graph. But it's pretty graph-like.
 
 @cindex torus
 @cindex toroid
@@ -94,7 +94,7 @@ Just to make sure that everyone is up to speed, these are toroids:
 
 A toroid really is any shape with a hole in it. A 1-toroid is any shape with one hole, a 2-toroid is any shape with two holes and an n-toroid is any shape with any number of holes.
 
-This copper ore is pretty graphy too. It is formed by a liquid (molten copper) flowing around clumps of something else and then hardening. It is not a graph but it is an n-toroid and that's graphy.
+This copper ore is pretty graph-like too. It is formed by a liquid (molten copper) flowing around clumps of something else and then hardening. It is not a graph but it is an n-toroid and that's graph-like.
 
 @float Figure, copper 
 @image{./images/copper,,200pt,Native Copper,jpg}
@@ -130,53 +130,53 @@ But since the tree-like-ness of a structure is not dependent on the existence of
 @caption{Asteroids are undeniably bloby. (Copyright @copyright{} 1993 @url{http://photojournal.jpl.nasa.gov/catalog/?IDNumber=PIA00069,NASA/JPL Public Domain})}
 @end float
 
-Tree-like structures and graphy structures are intimately related. One of the main ways that graphy toroidal structures are formed is when two tree-like structures are joined together. For example, the copper ore in @ref{copper} was a tree like mess of molten copper before it flowed around whatever it was flowing around to become toroidal and graphy. The corollary to this is when graphy toroidal structures are cut up. What were once loops become appendages, so tree-like structures can be formed when toroidal ones are damaged.
+Tree-like structures and graph-like structures are intimately related. One of the main ways that graph-like toroidal structures are formed is when two tree-like structures are joined together. For example, the copper ore in @ref{copper} was a tree like mess of molten copper before it flowed around whatever it was flowing around to become toroidal and graph-like. The corollary to this is when graph-like toroidal structures are cut up. What were once loops become appendages, so tree-like structures can be formed when toroidal ones are damaged.
 
-@section Formation Processes of Non-Biological Graphy and Tree-like Structures
+@section Formation Processes of Non-Biological Graph-like and Tree-like Structures
 @cindex gas expansion
 @cindex ablation
 @cindex growth
 
-In the beginning of this chapter I presented the flow of a liquid around clumps as being the main formation process for graphy toroidal structures. I would like to present three more formation processes; @emph{gas expansion}, @emph{ablation} and @emph{growth}. @emph{Gas expansion} is when bubbles of gas form in a viscous liquid,  @emph{ablation} is when material is removed to create a toroidal or tree-like structure and @emph{growth} is a term that you already know.
+In the beginning of this chapter I presented the flow of a liquid around clumps as being the main formation process for graph-like toroidal structures. I would like to present three more formation processes; @emph{gas expansion}, @emph{ablation} and @emph{growth}. @emph{Gas expansion} is when bubbles of gas form in a viscous liquid,  @emph{ablation} is when material is removed to create a toroidal or tree-like structure and @emph{growth} is a term that you already know.
 
 @subsection Gas expansion
 
 @float Figure,scoria
-@image{./images/scoria,,200pt,Scoria,jpg}
+@image{./images/scoria,,150pt,Scoria,jpg}
 @caption{Scoria, a type of porous rock formed by expanding bubbles of gas (Copyright @copyright{} 2008 @url{https://en.wikipedia.org/wiki/Scoria#/media/File:Scoria_Macro_Digon3.jpg, Jonathan Zander CC-By-Sa 3.0})}
 @end float
 
-The Scoria in @ref{scoria} is not actually as graphy as it might seem at first glance. It does have hollow bits, but it isn't particularly toroidal. As I said earlier, toroids have holes in them and these rocks tend to be water proof, not very holy. One type of porous rock, pumice, even floats on water because there is so much air trapped inside! When you think of the physical properties of expanding gas, it is clear why these rocks are rarely particularly toroidal. Gas expands, making bubbles. Those bubbles may then pop. But a popped bubble leaves a crater, not a hole going all the way through a material. Once a bubble has popped, there is no force of expanding gas which would cause another opening to appear on the other side of the crater. Thus, no real graphiness.
+The Scoria in @ref{scoria} is not actually as graph-like as it might seem at first glance. It does have hollow bits, but it isn't particularly toroidal. As I said earlier, toroids have holes in them and these rocks tend to be water proof, not very holy. One type of porous rock, pumice, even floats on water because there is so much air trapped inside! When you think of the physical properties of expanding gas, it is clear why these rocks are rarely particularly toroidal. Gas expands, making bubbles. Those bubbles may then pop. But a popped bubble leaves a crater, not a hole going all the way through a material. Once a bubble has popped, there is no force of expanding gas which would cause another opening to appear on the other side of the crater. Thus, no real graphiness.
 
 However, in concert with @emph{ablation}, porous rocks may become toroidal. After-all, the bubble walls are very thin and may be worn away quite easily.
 
 @float Figure, lava-rock-ablated
-@image{./images/lava-rock-ablated,,200pt,A graphy porous rock, the thin walls of which have become ablated.,jpg}
-@caption{A graphy porous rock, the thin walls of which have become ablated. (Copyright @copyright{} 2015 @url{https://pixabay.com/en/stone-volcanic-rock-905093/,Ruben Rubio CC0 Public Domain})}
+@image{./images/lava-rock-ablated,,150pt,A graph-like porous rock, the thin walls of which have become ablated.,jpg}
+@caption{A graph-like porous rock, the thin walls of which have become ablated. (Copyright @copyright{} 2015 @url{https://pixabay.com/en/stone-volcanic-rock-905093/,Ruben Rubio CC0 Public Domain})}
 @end float
 
 In rare cases, the popping of the bubbles is the direct cause of the graphiness and no ablation is needed.
 
 @float Figure, reticulite
 @image{./images/reticulite,,200pt,Reticulite, a form of volcanic pumice, the bubbles of which have no walls.,jpg}
-@caption{Reticulite, a form of volcanic pumice, the bubbles of which have no walls. (Copyright @copyright{} @url{http://hvo.wr.usgs.gov/volcanowatch/archive/2007/07_09_06.html,USGS, J.D. Griggs, Public Domain})}
+@caption{Reticulite is a form of volcanic pumice, the bubbles of which have no walls. (Copyright @copyright{} @url{http://hvo.wr.usgs.gov/volcanowatch/archive/2007/07_09_06.html,J.D. Griggs and the US Geographic Survey}, Public Domain)}
 @end float
 
 @subsection Ablation
 
-The toroidal graphy structures that we have seen so far, were all formed when a material was washed or blown away. Thus we have the superset of graphy structures which are formed by @emph{ablation}.
+@emph{Ablation} is when material is washed, corroded, or blown away. This can leave a graph-like or tree-like structure in the following circumstances:
 
 @enumerate
 @item
 A harder substance flowed and hardened around a softer substance which is then washed away.
 @item
-The thin walls of the bubbles in non-graphy porous rock are destroyed. (And generally, walls of uneven thickness being eroded, corroded, or weathered.)
+The thin walls of the bubbles in non-graph-like porous rock are destroyed. (And generally, walls of uneven thickness being eroded, corroded, or weathered.)
 @item
 Uneven application of a corrosive substance.
 @item
 Wetting and drying cycles which change the hardness of parts of a rock by carrying some elements around.
 @item
-Complex eddy currents cause graphy erosion in a material which is otherwise uniform.
+Complex eddy currents cause graph-like erosion in a material which is otherwise uniform.
 @end enumerate
 
 Here are two examples of honeycomb weathering, a complex form of weathering in which calcium is moved around limestone by water, causing it to concentrate in a web like pattern forming a hardened web of rock.
@@ -225,12 +225,85 @@ Indeed, multi-celled life forms tend to have at least several tree-like appendag
 @caption{Rocks, however, almost @emph{never} have appendages. (Copyright @copyright{} 2012 @url{http://reptonix.awardspace.co.uk/photos/2012-02-11.htm,Reptonix free Creative Commons licensed photos CC-By 3.0})}
 @end float
 
-There must be something truly special about being tree-like, for life to have evolved to have such an unusual geometry. When I ask myself, why does life need to be so tree-like, my first impression is that it is hard to move if you're a blob. However, plants don't move, and they are even more treeish than animals are. Perhaps it is merely a side-effect of some property of growth. One of the few tree-like structures 
+There must be something truly special about being tree-like, for life to have evolved to have such an unusual geometry. When I ask myself, why does life need to be so tree-like, my first impression is that it is hard to move if you're a blob. However, plants don't move, and they are even more treeish than animals are. Perhaps it is merely a side-effect of some property of growth. Further analysis shows, that the advantages and disadvantages of tree-like structures are diverse and that there are multiple competing factors in the shape of a plant or animal.
+
+Animals tend to be bloby with only the few, relatively short, appendages which they need for locomotion or dexterity.
+
+@subsection Disadvantages of Tree-like Structures for Multi-celled Life-forms
+@enumerate 
+
+@item Fragility
+
+You will notice that the rock in @ref{rock} is not just bloby, but downright round. It has been polished by tumbling in a stream. If it ever had a narrowish appendage, that appendage is long gone. Indeed, the key reason why rocks are almost exclusively bloby is that graph-like and tree-like structures are fragile!
+
+@float Figure, turtle
+@image{./images/turtle,,200pt,An Eastern Box Turtle hiding in its shell to protect its fragile appendages,jpg}
+@caption{An Eastern Box Turtle hiding in its shell to protect its fragile appendages(Copyright @copyright{} 2011 @url{https://www.flickr.com/photos/npsncbn/8579419363,Robin Baranowski@comma{} National Parks Service photo CC By-Sa 2.0})}
+@end float
+
+@item Heat loss
+
+The equation for heat loss of an organism is a product of its surface area. The shape with the lowest surface area per volume is a sphere. Anything other than a sphere loses unnecessary heat and appendages have a particularly high surface area to volume ratio.
+
+Note: plants do not generate significant heat with their metabolisms and therefore are not evolutionarily motivated to conserve internally generated heat.
+
+@item Water loss
+A very similar equation also applies to water loss. However, plants are effected by this too.
+@end enumerate
+
+One important thing to understand, is that an analysis of emperical data regarding the heat loss or water-loss of an organism is @b{meaningless} when studying the merits of biological geometry! For example, animals will send less blood to their limbs in order to combat heat loss. Emperically, this means that heat loss from limbs is relatively low in terms of heat loss per surface area. However, this is only an evolutionary adaption to a fundamental disadvantage to having a certain geometric shape. The same applies with water loss.
+
+@subsection Advantages of Tree-like Structures for Multi-celled Life-forms
+
+For animals:
+@enumerate
+@item Mobility
+@item Dexterity
+@item Height
+@end enumerate
+
+For plants (in order of importance):
+@enumerate
+@item Dispensability
+If an animal bights off a leaf, then a new leaf can be easily grown back. If, in the winter, temperatures are too low for leaf cells to survive, than these leaves can be grown back in the spring.
+@item Height
+I believe that the main motivator for plants to have a tree like structure is that it allows them to be tall cheaply. They do not need to invest much growth volume into growing high above their neighbors and therefor reaching the sun.
+@item Quarantinable
+If a leaf or branch becomes infected, the plant can quarantine just the infected branch and survive.
+@item Mobility
+Plants actually move towards the light, albiet slowly. Being long and thin allows them to do this.
+@end enumerate
 
 @float Figure, rose
 @image{./images/rose,,200pt,A rose branch exhibiting winter dieback.,png}
-@caption{A rose branch exhibiting winter dieback. (Copyright @copyright{} 202016 @url{http://timothy.hobbs.cz/,Timothy Hobbs CC By-Sa 4.0})}
+@caption{A rose branch exhibiting winter dieback. Note that branches 2 and 4 are dead and have been quarantined by the plant to prevent the spread of disease. (Copyright @copyright{} 202016 @url{http://timothy.hobbs.cz/,Timothy Hobbs CC By-Sa 4.0})}
 @end float
+
+@cindex discrete
+@cindex tree
+
+Near the beginning of this manual, I noted that the water surrounding the archipelago in @ref{LempisaariNaantaliFinland} is not a @b{@i{true}} graph because the vertexes and edges are not distinct. Plants are @b{@i{true}} trees in the mathematical sense. The vertexes and edges are very distinct. In the language of mathematics one would say that they are @emph{discrete}. This discreteness plays a @emph{very} important role in the reason why plants are geometrically tree-like.
+
+The ability for the plant to treat leaves and branches as dispensable is dependent on its treatment of these leaves and their associated branches as discrete entities. When a person gets a deep gash in their finger, the wound will take months to heal, their finger will never be "like new" and the risk of fatal sepsis(blood poisoning) is severe. But you can tear a leaf on a plant to shreds and the plant will sabotage the leaf and grow a perfect new one in a fraction of the time it took the human to do a poor repair job. Furthermore, if an infection does occur in the leaf, and that infection begins to spread, the plant can choose a vertex bellow the infection point and sabotage an entire branch, as is illustrated in @ref{rose}.
+
+Height is also an important reason why plants evolved to be tree-like and it might be even more important than the property of dispensability. Take a look at this cactus and tell me that it isn't bloby.
+
+@float Figure, cactus
+@image{./images/cactus,,200pt,A bloby Golden Barrel Cactus (echinocactus grusonii)@comma{} Koko Crater Botanical Garden@comma{} Oahu Hawaii,jpg}
+@caption{A bloby Golden Barrel Cactus (echinocactus grusonii)@comma{} Koko Crater Botanical Garden@comma{} Oahu Hawaii (Copyright @copyright{} 20O9 @url{https://www.flickr.com/photos/33590535@@N06/3595297276/,Drew Avery CC By 2.0})}
+@end float
+
+The cactus needs to fight water loss, and therefore tries to be spherical in order to minimize surface area. It deals with the lack of dispensability and quarantinability of its leaves by a) protecting itself with spikes b) living in a dry climate where infection is less likely and c) having a thick skin. Its need to tall is limited as there are few neighboring plants to compete with in the desert, however, one can clearly see that rather than being a perfect sphere, it is somewhat elongated.
+
+Now compare that cactus to the trees in this forest, where height competition is at its peek. The trees have grown very tall, and certainly have branches in order to reach out into whatever ray of sunlight the can find.
+
+@float Figure, forest
+@image{./images/forest,,200pt,A forest trail in H. Dutlinger Natural Area,jpg}
+@caption{A forest trail in H. Dutlinger Natural Area (Copyright @copyright{} 2013 @url{https://www.flickr.com/photos/nicholas_t/9660892548,Nicholas A. Tonelli CC By 2.0})}
+@end float
+
+One thing I notice when I look at these trees though, is that they are less tree-like than the rose bush, both geometrically  and in terms of graph-theory. Everything seems to come out of one central trunk, and the sub-branches are not nearly as distinct. I have rarely seen a pine tree quarantine a sub-branch. They choose to drop entire branches instead. This lack of discreteness can probably be traced to the fact that few animals can reach up high enough to graze on the needles, and the tough needles are hardly worth eating anyways. The trees have found an alternative to discreteness and dispensability for their survival.
+
 
 @node What is a System and how does it differ from a Calculation
 @chapter What is a System and how does it differ from a Calculation
