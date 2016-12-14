@@ -5,3 +5,4 @@
 .subuser-dev
 *.o
 .#*
+*.xcf
