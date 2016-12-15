@@ -25,8 +25,11 @@ For more information see @url{https://creativecommons.org/licenses/by-sa/4.0/}
 @top textgraph manual
 This is the extended textgraph user manual.
 @menu
+@end menu
 @end ifnottex
-@node Prologue
+@unnumbered Notes
+This is an interdisciplinary work with a single author and I am not an expert on most disciplines here-in represented. Please send corrections to <timothy@@hobbs.cz>.
+
 @unnumbered Prologue
 I wanted to write a manual for the textgraph ecosystem. I thought it would be rather short. The file format is trivial and the utilities are only a few lines of code. But despite the simplicity of it all, I felt like I was describing the use of a hammer to an audience which had never seen a nail. In person, I would tell people about how the myopic graph editor lets you effectively edit and manipulate graph data and they would look at me quizzically and ask themselves? Why would I want to manipulate graph based data? Thus I find myself writing, not a manual, but a traveler's guide to the world of graphs.
 
@@ -41,12 +44,11 @@ A graph is illustrated in @ref{graph}. When I use the word @emph{graph}, I am no
 
 This is a book about graphs. I will discuss the myriad of ways that they can be, and have been, used to represent data, calculations, and systems. I will also discuss basic philosophical questions, such as "what is @emph{data}", "what is a @emph{calculation}" and "what is a @emph{system}?" Finally, I will discuss ways of manipulating digital representations of graphs using the textgraph ecosystem and I will present concrete examples of how you can use digital representations of graphs to enhance your understanding of the programs you write and improve automation and code reuse.
 
-@node Natural Graph Based Systems
 @chapter Natural Graph Based Systems
 As the title of this manual suggests, I will start by presenting a history of graphs and graph based systems. 
 There are three types of existence each with their own relationship to history. Abstract mathematical concepts exist without any relationship to time. The mathematical laws which govern graphs have always been and always will be. Physical graph-like structures came into existence some time after the big bang and we can discuss when they started appearing. Human formed theories about graphs, digital representations of graphs, and other "discoveries" are even simpler for the historian, because we often know exactly when these concepts were first published or used.
 
-@float Figure, slome-mold
+@float Figure, slime-mold
 @image{./images/slime-mold,,200pt,Slime mold,png}
 @caption{Slime mold, a physical graph-like structure (Copyright @copyright{} 2011 @url{https://www.flickr.com/photos/mjambon/6271724816,Martin Jambon CC-By 2.0})}
 @end float
@@ -60,9 +62,16 @@ Interesting, natural non-biological, graph-like structures on the macro scale ar
 @caption{Caffeine Molecule (Copyright @copyright{} 2005 @url{https://commons.wikimedia.org/wiki/File:Caffeine_Molecule.png,Michael Ströck CC-By-Sa 3.0})}
 @end float
 
-Molecules are sort of graph like. But what looks clearly like @emph{vertexes} (atoms) and @emph{edges} (bonds) on paper is, in reality, an amorphous blob of amorphous electroniness with some nuclei stuck in the middle.
+Molecules are indeed graphs, but what looks clearly like @emph{vertexes} (atoms) and @emph{edges} (bonds) on paper is, in reality, an blob of amorphous electroniness with some nuclei stuck in the middle.
 
-Looking to space as a model for non-biological physics, I see Mars covered with dust (not graph-like), rock (not graph-like), gases (not graph-like), lava (sometimes graph-like). There is so little graphiness on Mars, that it is hard to find anything that even looks like a tree (in the mathematical sense). However, these structures do exist. As I said earlier, matter likes to form clumps.
+Looking to space as a model for non-biological physics, I see Mars covered with dust (not graph-like), rock (not graph-like), gases (not graph-like), lava (sometimes graph-like). There is so little graphiness on Mars, that it is hard to find anything that even looks like a tree (in the mathematical sense).
+
+@float Figure, mars
+@image{./images/mars,,200pt,Mars is devoid of graph-like structures,jpg}
+@caption{Mars is devoid of graph-like structures (Copyright @copyright{} 2014 @url{https://commons.wikimedia.org/wiki/File:PIA17944-MarsCuriosityRover-AfterCrossingDingoGapSanddune-20140209.jpg,NASA/JPL-Caltech/MSSS Public Domain})}
+@end float
+
+However, these structures do exist. As I said earlier, matter likes to form clumps.
 
 @float Figure,mud
 @image{./images/mud,,140pt,Mud,jpg}
@@ -276,7 +285,7 @@ Plants actually move towards the light, albiet slowly. Being long and thin allow
 
 @float Figure, rose
 @image{./images/rose,,200pt,A rose branch exhibiting winter dieback.,png}
-@caption{A rose branch exhibiting winter dieback. Note that branches 2 and 4 are dead and have been quarantined by the plant to prevent the spread of disease. (Copyright @copyright{} 202016 @url{http://timothy.hobbs.cz/,Timothy Hobbs CC By-Sa 4.0})}
+@caption{A rose branch exhibiting winter dieback. Note that branches 2 and 4 are dead and have been quarantined by the plant to prevent the spread of disease. (Copyright @copyright{} 2016 @url{http://timothy.hobbs.cz/,Timothy Hobbs CC By-Sa 4.0})}
 @end float
 
 @cindex discrete
@@ -293,7 +302,7 @@ Height is also an important reason why plants evolved to be tree-like and it mig
 @caption{A bloby Golden Barrel Cactus (echinocactus grusonii)@comma{} Koko Crater Botanical Garden@comma{} Oahu Hawaii (Copyright @copyright{} 20O9 @url{https://www.flickr.com/photos/33590535@@N06/3595297276/,Drew Avery CC By 2.0})}
 @end float
 
-The cactus needs to fight water loss, and therefore tries to be spherical in order to minimize surface area. It deals with the lack of dispensability and quarantinability of its leaves by a) protecting itself with spikes b) living in a dry climate where infection is less likely and c) having a thick skin. Its need to tall is limited as there are few neighboring plants to compete with in the desert, however, one can clearly see that rather than being a perfect sphere, it is somewhat elongated.
+The cactus needs to fight water loss and therefore tries to be spherical in order to minimize surface area. It deals with the lack of dispensability and quarantinability of its leaves by a) protecting itself with spikes b) living in a dry climate where infection is less likely and c) having a thick skin. Its need to tall is limited as there are few neighboring plants to compete with in the desert. Many cacti, rather than being a perfect spheres, are somewhat elongated in order to regain at least some of that lost hight advantage, however, this one is not.
 
 Now compare that cactus to the trees in this forest, where height competition is at its peek. The trees have grown very tall, and certainly have branches in order to reach out into whatever ray of sunlight the can find.
 
@@ -302,23 +311,133 @@ Now compare that cactus to the trees in this forest, where height competition is
 @caption{A forest trail in H. Dutlinger Natural Area (Copyright @copyright{} 2013 @url{https://www.flickr.com/photos/nicholas_t/9660892548,Nicholas A. Tonelli CC By 2.0})}
 @end float
 
-One thing I notice when I look at these trees though, is that they are less tree-like than the rose bush, both geometrically  and in terms of graph-theory. Everything seems to come out of one central trunk, and the sub-branches are not nearly as distinct. I have rarely seen a pine tree quarantine a sub-branch. They choose to drop entire branches instead. This lack of discreteness can probably be traced to the fact that few animals can reach up high enough to graze on the needles, and the tough needles are hardly worth eating anyways. The trees have found an alternative to discreteness and dispensability for their survival.
+One thing I notice when I look at these trees though, is that they are less tree-like than the rose bush, both geometrically  and in terms of graph-theory. Everything seems to come out of one central trunk and the sub-branches are not nearly as distinct. I have rarely seen a pine tree quarantine a sub-branch. They choose to drop entire branches instead. This lack of discreteness can probably be traced to the fact that few animals can reach up high enough to graze on the needles, and the tough needles are hardly worth eating anyways. The trees have found an alternative to discreteness and dispensability for their survival.
+
+@section The Biological Graph
+
+Plants are topologically relatively simple. The upper parts of plants are essentially never toroidal except in cases of human intervention.
+
+@float Figure, tree-shaping
+@image{./images/tree-shaping,,200pt,This is not natural.,jpg}
+@caption{This is not natural. (Copyright @copyright{} 2009 @url{https://en.wikipedia.org/wiki/Tree_shaping#/media/File:Person-tree.jpg,Becky Northey@comma{} Pooktre CC By 3.0})}
+@end float
+
+@float Figure, inosculation
+@image{./images/inosculation,,200pt,Inosculation or cojoining is when two different trees join together. It is uncommon.,jpg}
+@caption{This is uncommon. It is called @url{https://en.wikipedia.org/wiki/Inosculation,inosculation} or cojoining. In this picture two different trees have naturally joined together by getting really close and rubbing against eachother. (Copyright @copyright{} 2009 @url{https://en.wikipedia.org/wiki/Inosculation#/media/File:Acer_pseudoplatanus_exhibiting_inosculation.JPG,Roger Griffith CC0 Public Domain})}
+@end float
+
+The roots, however, may be toroidal and graph-like.
+
+@float Figure, roots
+@image{./images/roots,,200pt,This tree's roots have grown together into a toroidal graph-like structure,jpg}
+@caption{This tree's roots have grown together (self grafted in the terminology of botinists) into a toroidal graph-like structure (Copyright @copyright{} @url{http://www.publicdomainpictures.net/view-image.php?image=66632&picture=roots,Lisa McCarty CC0 1.0 Public Domain})}
+@end float
+
+@cindex path redundancy
+@cindex redundancy
+Why would roots be toroidal and graph-like when above ground branches are not? I would posit that roots are less dispensable and less replaceable than branches and leaves. Roots probably contain more nutrients and are probably harder to grow. More importantly, when a branch dies and falls off, it falls to the ground, getting out of the way. And even if it doesn't fall to the ground, there is usually quite a lot of empty air-space around the plant for the plant to grow a new branch into. The ground has less space in it, and the old dead root is likely to get in the way. So it is important to plants that parts of their root system don't become disconnected from the rest of the plant by way of being cut. If I cut a branch of a tree then all of the sub-branches and leaves attached to that branch become disconnected from the rest of the tree. If I cut a root, which is connected to other roots in a toroidal and graph-like fashion, the tree may lose one pathway to get nutrients in and out of that section of it's root system, however it won't lose all of its pathways. In network theory and graph theory this property of graphs is called @emph{path redundancy} and is a fundamental mathematical advantage to graph-like systems and structures. It is also a slight disadvantage over the tree, as quarantining a diseased root requires blocking off multiple pathways, where-as the quarantining of a diseased branch requires blocking off only one edge-vertex connection.
+
+@float Figure, roots-tree
+@image{./images/roots-tree,,200pt,A tree with tree-like roots.,png}
+@caption{A tree with tree-like roots. (Copyright @copyright{} 2016 @url{http://timothy.hobbs.cz/,Timothy Hobbs CC By-Sa 4.0})}
+@end float
+
+@float Figure, roots-tree-cut
+@image{./images/roots-tree-cut,,200pt,If the base of tree2 section of the tree's roots is cut. Then the tree loses its connection to the water supply.,png}
+@caption{It only takes cutting a tiny section of root for the tree to lose its connection to the water supply. (Copyright @copyright{} 2016 @url{http://timothy.hobbs.cz/,Timothy Hobbs CC By-Sa 4.0})}
+@end float
+
+@float Figure, roots-graph
+@image{./images/roots-graph,,200pt,Here, there is path redundancy between the roots that reached water and the tree.,png}
+@caption{If the roots connect to each-other to form a graph-like structure then there is path redundancy between the roots that reached water and the tree. (Copyright @copyright{} 2016 @url{http://timothy.hobbs.cz/,Timothy Hobbs CC By-Sa 4.0})}
+@end float
+
+@float Figure, roots-graph-cut
+@image{./images/roots-graph-cut,,200pt,You have to cut more than one section of root in order to break the trees connection to water.,png}
+@caption{You have to cut more than one section of root in order to break the trees connection to water. (Copyright @copyright{} 2016 @url{http://timothy.hobbs.cz/,Timothy Hobbs CC By-Sa 4.0})}
+@end float
 
 
-@node What is a System and how does it differ from a Calculation
-@chapter What is a System and how does it differ from a Calculation
+These structures are not, however, true graphs, as discrete vertexes and edges cannot be easily identified.
+
+@subsection Truly Graph Based Systems in Nature
+
+Beyond self grafting for the purposes of redundancy, relatively recent research has shown that trees also transfer nutrients and communicate with each-other through their roots. This lecture by tree ecologist Suzanne Simard is enlightening to the lay-person <@url{https://www.ted.com/talks/suzanne_simard_how_trees_talk_to_each_other}>. 
+
+In these networks trees transfer nutrients and potentially hormonal information(not yet proven) via fungi which connect to their roots. Like molecules, which I described as being an amorphous blob of electroniness with nuclii stuck in the middle, in these graphs of trees, it is much easier to distinguish the vertexes than the edges. I would say that the vertexes are discrete but the edges are not.
+
+This kind of nutrient transfer is vital to the forests survival. When a young tree is growing up, its branches are not yet tall enough to reach the sun. Without this "nutrient communism" it would be impossible for trees in forests to reproduce, because the young trees would all be shaded out and die of "starvation". It has also been shown that this tree communism helps forests survive droughts. Trees which are near water send water through the root network to other trees which are thirsty. From each according to their means, to each, according to their needs.
+
+And now things get really exciting.
+
+@float Figure, brain
+@image{./images/brain,,200pt,This is a graph!,jpg}
+@caption{This is a graph! (Copyright @copyright{} 1894-1895 @url{https://commons.wikimedia.org/wiki/File:PSM_V46_D167_Outer_surface_of_the_human_brain.jpg,Unknown Public Domain})}
+@end float
+
+The nervous system is a graph. When I say that I don't just mean the human brain, I'm referring to all multi-neuron nervous systems.
+
+@float Figure, neurons
+@image{./images/neurons,,200pt,Neurons connect to each-other via discrete edges called dendrons as drawn.,jpg}
+@caption{Neurons connect to each-other via discrete edges called dendrons as drawn. (Copyright @copyright{} 2009 @url{https://en.wikipedia.org/wiki/Neuron#/media/File:Chemical_synapse_schema_cropped.jpg,US National Institutes of Health Public Domain})}
+@end float
+
+Nervous systems are made up of neurons. These are cells like any other. They have a nucleus, a cell wall, and some fluid inside with lots of other stuff that isn't important to this work. They are funnily shaped however. They certainly aren't bloby like this amoeba.
+
+@float Figure, amoeba
+@image{./images/amoeba,,200pt,This amoeba is a bloby single celled organism.,jpg}
+@caption{A photograph of an amoeba, which is a bloby single celled organism. (Copyright @copyright{} 1907 @url{https://commons.wikimedia.org/wiki/File:PSM_V71_D368_Amoeba_coli_highly_magnified.png,Unknown Public Domain})}
+@end float
+
+Neurons are more like blobs with tree-like appendages. However, when we look at a graph of neurons we can clearly identify the neuron cells as being the vertexes and the dendrons (their tree-like appendages) as being the edges! While the molecule and the communist tree-root network have amorphous edges and discrete vertexes both the edges and the vertexes of the nervous system are @emph{almost} fully discrete.
+
+@float Figure, neuron-photo
+@image{./images/neuron-photo,,200pt,A photograph of a pyramidal neuron in the hippocampus,jpg}
+@caption{A photograph of a pyramidal neuron in the hippocampus (Copyright @copyright{} 2005 @url{https://commons.wikimedia.org/wiki/File:Pyramidal_hippocampal_neuron_40x.jpg,MethoxyRoxy CC By-Sa 2.5})}
+@end float
+
+The nervous system is the closes thing to a fully discrete graph that exists in the natural world.
+
+It is no coincidence, that the graphiest structure that exists also has the most interesting behavior.
+
+In the next chapter I will discuss graph based systems, how they differ from mere structures, and also some of their properties and classification.
+
+In the mean time. Lets review some of the concepts that we learned in this chapter.
+
+@section Review of Terms
+
+@enumerate
+@cindex graph
+@item @b{graph:}
+A network of vertexes which are connected by edges.
+@cindex vertex
+@item @b{vertex:}
+A point or object in a graph which may be connected to other vertexes.
+@end enumerate
+
+@chapter The System
+
+
+
+@chapter Artificial Graph Based Systems
+@chapter The textgraph Ecosystem
+
 
 Behaviors that Turing completeness either does not guarantee or that Turing machines cannot express:
 @enumerate
-@item
-Concurrency
-@item
-Continuity of time and quantity
-@item
-Instantaneousness
+@item Concurrency
+@item Continuity of time and quantity
+@item Instantaneousness
 @end enumerate
 
-@node Index
+@enumerate
+@item State change
+@item Structural/shape change
+@item Harmonic residue
+@end enumerate
+
+
 @unnumbered Index
 @printindex cp
 @bye
