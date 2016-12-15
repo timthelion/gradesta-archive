@@ -116,7 +116,7 @@ This copper ore is pretty graph-like too. It is formed by a liquid (molten coppe
 Tree-like structures can be interesting too and an n-toroid with tree like appendages is certainly more interesting than an n-toroid without them.
 
 @float Figure,tree-like-toroid
-@image{./images/tree-like-toroid>toroid,,150pt,A tree-like toroid is more interesting than a simple toroid,png}
+@image{./images/tree-like-toroid-vs-toroid,,150pt,A tree-like toroid is more interesting than a simple toroid,png}
 @caption{A toroid with tree-like appendages is more interesting than a toroid without (Copyright @copyright{} 2016 Timothy Hobbs CC-By-Sa 4.0)}
 @end float
 
