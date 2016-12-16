@@ -25,11 +25,23 @@ For more information see @url{https://creativecommons.org/licenses/by-sa/4.0/}
 @top textgraph manual
 This is the extended textgraph user manual.
 @menu
+* Prologue::
+* Chapter 1::
+* 1.1::
+* 1.2::
+* 1.3::
+* 1.4::
+* 1.5::
+* 1.6::
+* Chapter 2::
+* Chapter 3::
+* Chapter 4::
 @end menu
 @end ifnottex
 @unnumbered Notes
 This is an interdisciplinary work with a single author and I am not an expert on most disciplines here-in represented. Please send corrections to <timothy@@hobbs.cz>.
 
+@node Prologue
 @unnumbered Prologue
 I wanted to write a manual for the textgraph ecosystem. I thought it would be rather short. The file format is trivial and the utilities are only a few lines of code. But despite the simplicity of it all, I felt like I was describing the use of a hammer to an audience which had never seen a nail. In person, I would tell people about how the myopic graph editor lets you effectively edit and manipulate graph data and they would look at me quizzically and ask themselves? Why would I want to manipulate graph based data? Thus I find myself writing, not a manual, but a traveler's guide to the world of graphs.
 
@@ -44,6 +56,7 @@ A graph is illustrated in @ref{graph}. When I use the word @emph{graph}, I am no
 
 This is a book about graphs. I will discuss the myriad of ways that they can be, and have been, used to represent data, calculations, and systems. I will also discuss basic philosophical questions, such as "what is @emph{data}", "what is a @emph{calculation}" and "what is a @emph{system}?" Finally, I will discuss ways of manipulating digital representations of graphs using the textgraph ecosystem and I will present concrete examples of how you can use digital representations of graphs to enhance your understanding of the programs you write and improve automation and code reuse.
 
+@node Chapter 1,1.1,Prologue,Top
 @chapter Natural Graph Based Systems
 As the title of this manual suggests, I will start by presenting a history of graphs and graph based systems. 
 There are three types of existence each with their own relationship to history. Abstract mathematical concepts exist without any relationship to time. The mathematical laws which govern graphs have always been and always will be. Physical graph-like structures came into existence some time after the big bang and we can discuss when they started appearing. Human formed theories about graphs, digital representations of graphs, and other "discoveries" are even simpler for the historian, because we often know exactly when these concepts were first published or used.
@@ -53,6 +66,7 @@ There are three types of existence each with their own relationship to history. 
 @caption{Slime mold, a physical graph-like structure (Copyright @copyright{} 2011 @url{https://www.flickr.com/photos/mjambon/6271724816,Martin Jambon CC-By 2.0})}
 @end float
 
+@node 1.1,1.2,Chapter 1,Top
 @section Non-biological Graph-like Structures
 
 Interesting, natural non-biological, graph-like structures on the macro scale are rather rare. Matter tends to form clumps rather than strands and when strands do form they rarely connect. However, one of the most common uses of graphs in computer science is the representation of molecular structures.
@@ -97,7 +111,7 @@ The liquid in question is now @emph{graph-like}. It is an @url{https://en.wikipe
 Just to make sure that everyone is up to speed, these are toroids:
 
 @float Figure,torus
-@w{@image{./images/torus,,100pt,A 1-toroid,png} @image{./images/2-torus,,100pt,A 2-toroid,png}}
+@w{@image{./images/torus,,100pt,A 1-toroid,png} @image{./images/two-torus,,100pt,A 2-toroid,png}}
 @caption{A 1-toroid and 2-toroid side by side. (Copyright @copyright{} 2007 @url{https://en.wikipedia.org/wiki/Genus_(mathematics)#/media/File:Torus_illustration.png, Oleg Alexandrov Public Domain})}
 @end float
 
@@ -110,6 +124,7 @@ This copper ore is pretty graph-like too. It is formed by a liquid (molten coppe
 @caption{Native copper ore (Copyright @copyright{} 2009 @url{https://en.wikipedia.org/wiki/Copper#/media/File:NatCopper.jpg, Jonathan Zander CC-By-Sa 3.0})}
 @end float
 
+@node 1.2,1.3,1.1,Top
 @section Non-biological tree-like structures
 @cindex tree-like
 
@@ -141,6 +156,7 @@ But since the tree-like-ness of a structure is not dependent on the existence of
 
 Tree-like structures and graph-like structures are intimately related. One of the main ways that graph-like toroidal structures are formed is when two tree-like structures are joined together. For example, the copper ore in @ref{copper} was a tree like mess of molten copper before it flowed around whatever it was flowing around to become toroidal and graph-like. The corollary to this is when graph-like toroidal structures are cut up. What were once loops become appendages, so tree-like structures can be formed when toroidal ones are damaged.
 
+@node 1.3,1.4,1.2,Top
 @section Formation Processes of Non-Biological Graph-like and Tree-like Structures
 @cindex gas expansion
 @cindex ablation
@@ -213,6 +229,7 @@ Graph like structures can also @emph{grow}. Examples include stalactites, icicle
 @end float
 
 @page
+@node 1.4,1.5,1.3,Top
 @section Biological Tree-like Structures
 
 With the appearance of multi-celled life, the quantity and diversity of tree-like structures exploded.
@@ -313,6 +330,7 @@ Now compare that cactus to the trees in this forest, where height competition is
 
 One thing I notice when I look at these trees though, is that they are less tree-like than the rose bush, both geometrically  and in terms of graph-theory. Everything seems to come out of one central trunk and the sub-branches are not nearly as distinct. I have rarely seen a pine tree quarantine a sub-branch. They choose to drop entire branches instead. This lack of discreteness can probably be traced to the fact that few animals can reach up high enough to graze on the needles, and the tough needles are hardly worth eating anyways. The trees have found an alternative to discreteness and dispensability for their survival.
 
+@node 1.5,1.6,1.4,Top
 @section The Biological Graph
 
 Plants are topologically relatively simple. The upper parts of plants are essentially never toroidal except in cases of human intervention.
@@ -405,6 +423,7 @@ In the next chapter I will discuss graph based systems, how they differ from mer
 
 In the mean time. Lets review some of the concepts that we learned in this chapter.
 
+@node 1.6,Chapter 2,1.5,Top
 @section Review of Terms
 
 @enumerate
@@ -416,11 +435,13 @@ A network of vertexes which are connected by edges.
 A point or object in a graph which may be connected to other vertexes.
 @end enumerate
 
+@node Chapter 2,1.6,Chapter 3,Top
 @chapter The System
 
 
-
+@node Chapter 3
 @chapter Artificial Graph Based Systems
+@node Chapter 4
 @chapter The textgraph Ecosystem
 
 
