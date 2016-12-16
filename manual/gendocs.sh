@@ -232,45 +232,18 @@ calcsize()
 
 # copy_images OUTDIR HTML-FILE...
 # -------------------------------
-# Copy all the images needed by the HTML-FILEs into OUTDIR.
-# Look for them in . and the -I directories; this is simpler than what
-# makeinfo supports with -I, but hopefully it will suffice.
 copy_images()
 {
-  local odir
-  odir=$1
-  shift
-  $PERL -n -e "
-BEGIN {
-  \$me = '$prog';
-  \$odir = '$odir';
-  @dirs = qw(. $dirs);
-}
-" -e '
-/<img src="(.*?)"/g && ++$need{$1};
-
-END {
-  #print "$me: @{[keys %need]}\n";  # for debugging, show images found.
-  FILE: for my $f (keys %need) {
-    for my $d (@dirs) {
-      if (-f "$d/$f") {
-        use File::Basename;
-        my $dest = dirname ("$odir/$f");
-        #
-        use File::Path;
-        -d $dest || mkpath ($dest)
-          || die "$me: cannot mkdir $dest: $!\n";
-        #
-        use File::Copy;
-        copy ("$d/$f", $dest)
-          || die "$me: cannot copy $d/$f to $dest: $!\n";
-        next FILE;
-      }
-    }
-    die "$me: $ARGV: cannot find image $f\n";
-  }
-}
-' -- "$@" || exit 1
+  local outdir
+  outdir=$1
+  echo $outdir
+  if [ -d $outdir/images ];
+  then
+    echo Images already present.
+  else
+    mkdir -p $outdir/images
+    ln images/* $outdir/images/
+  fi 
 }
 
 case $outdir in
@@ -288,9 +261,6 @@ if $generate_info; then
   echo "Generating info... ($cmd)"
   rm -f $PACKAGE.info* # get rid of any strays
   eval "$cmd"
-  tar czf "$outdir/$PACKAGE.info.tar.gz" $PACKAGE.info*
-  ls -l "$outdir/$PACKAGE.info.tar.gz"
-  info_tgz_size=`calcsize "$outdir/$PACKAGE.info.tar.gz"`
   # do not mv the info files, there's no point in having them available
   # separately on the web.
 fi  # end info
@@ -332,9 +302,7 @@ html_split()
   (
     cd ${split_html_dir} || exit 1
     ln -sf ${PACKAGE}.html index.html
-    tar -czf "$abs_outdir/${PACKAGE}.html_$1.tar.gz" -- *.html
   )
-  eval html_$1_tgz_size=`calcsize "$outdir/${PACKAGE}.html_$1.tar.gz"`
   rm -f "$outdir"/html_$1/*.html
   mkdir -p "$outdir/html_$1/"
   mv ${split_html_dir}/*.html "$outdir/html_$1/"
@@ -371,10 +339,7 @@ if test -z "$use_texi2html"; then
   copy_images $split_html_dir/ $split_html_dir/*.html
   (
     cd $split_html_dir || exit 1
-    tar -czf "$abs_outdir/$PACKAGE.html_$split.tar.gz" -- *
   )
-  eval \
-    html_${split}_tgz_size=`calcsize "$outdir/$PACKAGE.html_$split.tar.gz"`
   rm -rf "$outdir/html_$split/"
   mv $split_html_dir "$outdir/html_$split/"
   du -s "$outdir/html_$split/"
@@ -427,9 +392,7 @@ if test -n "$docbook"; then
   eval "$cmd"
   (
     cd ${split_html_db_dir} || exit 1
-    tar -czf "$abs_outdir/${PACKAGE}.html_node_db.tar.gz" -- *.html
   )
-  html_node_db_tgz_size=`calcsize "$outdir/${PACKAGE}.html_node_db.tar.gz"`
   rm -f "$outdir"/html_node_db/*.html
   mkdir -p "$outdir/html_node_db"
   mv ${split_html_db_dir}/*.html "$outdir/html_node_db/"
@@ -465,17 +428,8 @@ sed \
    -e "s!%%PACKAGE%%!$PACKAGE!g" \
    -e "s!%%DATE%%!$curdate!g" \
    -e "s!%%HTML_MONO_SIZE%%!$html_mono_size!g" \
-   -e "s!%%HTML_MONO_GZ_SIZE%%!$html_mono_gz_size!g" \
-   -e "s!%%HTML_NODE_TGZ_SIZE%%!$html_node_tgz_size!g" \
-   -e "s!%%HTML_SECTION_TGZ_SIZE%%!$html_section_tgz_size!g" \
-   -e "s!%%HTML_CHAPTER_TGZ_SIZE%%!$html_chapter_tgz_size!g" \
-   -e "s!%%INFO_TGZ_SIZE%%!$info_tgz_size!g" \
-   -e "s!%%DVI_GZ_SIZE%%!$dvi_gz_size!g" \
    -e "s!%%PDF_SIZE%%!$pdf_size!g" \
-   -e "s!%%ASCII_SIZE%%!$ascii_size!g" \
-   -e "s!%%ASCII_GZ_SIZE%%!$ascii_gz_size!g" \
    -e "s!%%TEXI_TGZ_SIZE%%!$texi_tgz_size!g" \
-   -e "s!%%DOCBOOK_HTML_NODE_TGZ_SIZE%%!$html_node_db_tgz_size!g" \
    -e "s!%%DOCBOOK_ASCII_SIZE%%!$docbook_ascii_size!g" \
    -e "s!%%DOCBOOK_PDF_SIZE%%!$docbook_pdf_size!g" \
    -e "s!%%DOCBOOK_XML_SIZE%%!$docbook_xml_size!g" \

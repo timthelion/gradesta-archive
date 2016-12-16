@@ -62,7 +62,7 @@ As the title of this manual suggests, I will start by presenting a history of gr
 There are three types of existence each with their own relationship to history. Abstract mathematical concepts exist without any relationship to time. The mathematical laws which govern graphs have always been and always will be. Physical graph-like structures came into existence some time after the big bang and we can discuss when they started appearing. Human formed theories about graphs, digital representations of graphs, and other "discoveries" are even simpler for the historian, because we often know exactly when these concepts were first published or used.
 
 @float Figure, slime-mold
-@image{./images/slime-mold,,200pt,Slime mold,png}
+@image{./images/slime-mold,,180pt,Slime mold,png}
 @caption{Slime mold, a physical graph-like structure (Copyright @copyright{} 2011 @url{https://www.flickr.com/photos/mjambon/6271724816,Martin Jambon CC-By 2.0})}
 @end float
 
@@ -150,7 +150,7 @@ But since the tree-like-ness of a structure is not dependent on the existence of
 @end float
 
 @float Figure,asteroid
-@image{./images/asteroid,,200pt,Asteroids are bloby.,jpg}
+@image{./images/asteroid,,230pt,Asteroids are bloby.,jpg}
 @caption{Asteroids are undeniably bloby. (Copyright @copyright{} 1993 @url{http://photojournal.jpl.nasa.gov/catalog/?IDNumber=PIA00069,NASA/JPL Public Domain})}
 @end float
 
