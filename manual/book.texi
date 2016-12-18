@@ -38,6 +38,7 @@ This is the extended textgraph user manual.
 * Chapter 3::
 * Chapter 4::
 * Chapter 5::
+* Chapter 6::
 @end menu
 @end ifnottex
 @unnumbered Notes
@@ -529,6 +530,9 @@ When the outside of an object gets bigger over time by way of new material being
 @chapter Graphs in Computer Software
 
 @node Chapter 5
+@chapter The Artist and the Engineer
+
+@node Chapter 6
 @chapter The textgraph Ecosystem
 
 
