@@ -1,5 +1,6 @@
 \input texinfo
 @setfilename book.texinfo
+@documentencoding UTF-8
 @settitle History and Future of Graph Based Systems (DRAFT!)
 @copying
 Text copyright @copyright{} 2016 Timothy Hobbs. Image copyrights are noted in their respective captions.
@@ -43,7 +44,7 @@ This is an interdisciplinary work with a single author and I am not an expert on
 
 @node Prologue
 @unnumbered Prologue
-I wanted to write a manual for the textgraph ecosystem. I thought it would be rather short. The file format is trivial and the utilities are only a few lines of code. But despite the simplicity of it all, I felt like I was describing the use of a hammer to an audience which had never seen a nail. In person, I would tell people about how the myopic graph editor lets you effectively edit and manipulate graph data and they would look at me quizzically and ask themselves? Why would I want to manipulate graph based data? Thus I find myself writing, not a manual, but a traveler's guide to the world of graphs.
+I wanted to write a manual for the textgraph ecosystem. I thought it would be rather short. The file format is trivial and the utilities are only a few lines of code. But despite the simplicity of it all, I felt like I was describing the use of a hammer to an audience which had never seen a nail. In person, I would tell people about how the myopic graph editor lets you effectively edit and manipulate graph data and they would look at me quizzically and ask themselves "Why would I want to manipulate graph based data?" Or worse, "what is a graph?" Thus I find myself writing, not a manual, but a traveler's guide to the world of graphs.
 
 @float Figure,graph
 @image{./images/graph,,200pt,A simple graph,png}
@@ -52,14 +53,14 @@ I wanted to write a manual for the textgraph ecosystem. I thought it would be ra
 @cindex graph
 @cindex vertex
 @cindex edge
-A graph is illustrated in @ref{graph}. When I use the word @emph{graph}, I am not referring to bar charts. In mathematics, @emph{graphs} are a kind of network. A graph is a collection of @emph{vertexes} which are connected by @emph{edges}. 
+A graph is illustrated in @ref{graph}. When I use the word @emph{graph}, I am not referring to bar charts. In mathematics, @emph{graphs} are a kind of network. A graph is a collection of @emph{vertexes} which are connected by @emph{edges}. You can think of @emph{vertexes} as train stations and @emph{edges} as rail lines. A vertex can be anything and an edge is just a connection between one vertex and another.
 
 This is a book about graphs. I will discuss the myriad of ways that they can be, and have been, used to represent data, calculations, and systems. I will also discuss basic philosophical questions, such as "what is @emph{data}", "what is a @emph{calculation}" and "what is a @emph{system}?" Finally, I will discuss ways of manipulating digital representations of graphs using the textgraph ecosystem and I will present concrete examples of how you can use digital representations of graphs to enhance your understanding of the programs you write and improve automation and code reuse.
 
 @node Chapter 1,1.1,Prologue,Top
-@chapter Natural Graph Based Systems
+@chapter Natural Graph-like Structures
 As the title of this manual suggests, I will start by presenting a history of graphs and graph based systems. 
-There are three types of existence each with their own relationship to history. Abstract mathematical concepts exist without any relationship to time. The mathematical laws which govern graphs have always been and always will be. Physical graph-like structures came into existence some time after the big bang and we can discuss when they started appearing. Human formed theories about graphs, digital representations of graphs, and other "discoveries" are even simpler for the historian, because we often know exactly when these concepts were first published or used.
+There are three types of existence each with their own relationship to history. Abstract mathematical concepts exist without any relationship to time. The mathematical laws which govern graphs have always been and always will be. Physical graph-like structures came into existence some time after the big bang and we can discuss when they started appearing. Human formed theories about graphs, digital representations of graphs, and other "discoveries" are even simpler for the historian, because we often know exactly when these concepts were first published or used. I'll start with physical structures.
 
 @float Figure, slime-mold
 @image{./images/slime-mold,,180pt,Slime mold,png}
@@ -76,13 +77,13 @@ Interesting, natural non-biological, graph-like structures on the macro scale ar
 @caption{Caffeine Molecule (Copyright @copyright{} 2005 @url{https://commons.wikimedia.org/wiki/File:Caffeine_Molecule.png,Michael Ströck CC-By-Sa 3.0})}
 @end float
 
-Molecules are indeed graphs, but what looks clearly like @emph{vertexes} (atoms) and @emph{edges} (bonds) on paper is, in reality, an blob of amorphous electroniness with some nuclei stuck in the middle.
+Molecules are indeed graphs, but what looks clearly like @emph{vertexes} (atoms) and @emph{edges} (bonds) on paper is, in reality, a blob of amorphous electroniness with some nuclei stuck in the middle.
 
 Looking to space as a model for non-biological physics, I see Mars covered with dust (not graph-like), rock (not graph-like), gases (not graph-like), lava (sometimes graph-like). There is so little graphiness on Mars, that it is hard to find anything that even looks like a tree (in the mathematical sense).
 
 @float Figure, mars
 @image{./images/mars,,200pt,Mars is devoid of graph-like structures,jpg}
-@caption{Mars is devoid of graph-like structures (Copyright @copyright{} 2014 @url{https://commons.wikimedia.org/wiki/File:PIA17944-MarsCuriosityRover-AfterCrossingDingoGapSanddune-20140209.jpg,NASA/JPL-Caltech/MSSS Public Domain})}
+@caption{Mars is devoid of graph-like structures. (Copyright @copyright{} 2014 @url{https://commons.wikimedia.org/wiki/File:PIA17944-MarsCuriosityRover-AfterCrossingDingoGapSanddune-20140209.jpg,NASA/JPL-Caltech/MSSS Public Domain})}
 @end float
 
 However, these structures do exist. As I said earlier, matter likes to form clumps.
@@ -126,20 +127,34 @@ This copper ore is pretty graph-like too. It is formed by a liquid (molten coppe
 
 @node 1.2,1.3,1.1,Top
 @section Non-biological tree-like structures
+@cindex tree
 @cindex tree-like
+@cindex loop
 
-Tree-like structures can be interesting too and an n-toroid with tree like appendages is certainly more interesting than an n-toroid without them.
+Tree-like structures are also interesting. In mathematics, trees are just a special kind of graph which doesn't have any loops.
+
+@float Figure, tree
+@image{./images/tree,,180pt,This is a tree.,png}
+@caption{This is a @emph{tree}. (Copyright @copyright{} 2016 @url{http://timothy.hobbs.cz,Timothy Hobbs CC By-Sa 4.0})}
+@end float
+
+@float Figure, loop
+@image{./images/loop,,100pt,A loop,png}
+@caption{This is a loop. (Copyright @copyright{} 2016 @url{http://timothy.hobbs.cz/,Timothy Hobbs CC By-Sa 4.0})}
+@end float
+
+Since the tree-like-ness of a structure is not dependent on the existence of holes, we cannot determine if something is tree-like simply by asking if it is toroidal. I will not present a precise mathematical definition of what is tree-like, but you can certainly agree that a form which has narrowish appendages which branch is tree-like and is a lot more interesting than something that is merely bloby.
+
+@float Figure,tree-like-vs-blobiness
+@image{./images/tree-like-vs-blobiness,,150pt,Tree-like structures are not merely bloby,png}
+@caption{Tree-like structures are more interesting than bloby ones (Copyright @copyright{} 2016 Timothy Hobbs CC-By-Sa 4.0)}
+@end float
+
+The copper ore in @ref{copper} is not merely a 5-torroid. It also has a lot of weird knobs sticking out of it. These knoby things are interesting too, they jut out at odd angles and seem to be globbed together in an odd pattern. One could almost say they're tree-like, though that is probably a strech. Anyway, an n-toroid with tree-like appendages is certainly more interesting than an n-toroid without them.
 
 @float Figure,tree-like-toroid
 @image{./images/tree-like-toroid-vs-toroid,,150pt,A tree-like toroid is more interesting than a simple toroid,png}
 @caption{A toroid with tree-like appendages is more interesting than a toroid without (Copyright @copyright{} 2016 Timothy Hobbs CC-By-Sa 4.0)}
-@end float
-
-But since the tree-like-ness of a structure is not dependent on the existence of holes, we cannot determine if something is tree-like simply by asking if it is toroidal. I will not present a precise mathematical definition of what is tree-like, but you can certainly agree that a form which has narrowish appendages which branch is tree-like and is a lot more interesting than something that is merely blobly.
-
-@float Figure,tree-like-vs-blobiness
-@image{./images/tree-like-vs-blobiness,,150pt,Tree-like structures are not merely bloby,png}
-@caption{Tree-like structures are not merely bloby (Copyright @copyright{} 2016 Timothy Hobbs CC-By-Sa 4.0)}
 @end float
 
 @emph{Exercise:} Come up with a precise method for determining which shapes are a) totally boring b) bloby and c) have tree-like appendages. 
@@ -154,7 +169,7 @@ But since the tree-like-ness of a structure is not dependent on the existence of
 @caption{Asteroids are undeniably bloby. (Copyright @copyright{} 1993 @url{http://photojournal.jpl.nasa.gov/catalog/?IDNumber=PIA00069,NASA/JPL Public Domain})}
 @end float
 
-Tree-like structures and graph-like structures are intimately related. One of the main ways that graph-like toroidal structures are formed is when two tree-like structures are joined together. For example, the copper ore in @ref{copper} was a tree like mess of molten copper before it flowed around whatever it was flowing around to become toroidal and graph-like. The corollary to this is when graph-like toroidal structures are cut up. What were once loops become appendages, so tree-like structures can be formed when toroidal ones are damaged.
+Tree-like structures and graph-like structures are intimately related. One of the main ways that graph-like toroidal structures are formed is when two tree-like structures are joined together. For example, the copper ore in @ref{copper} was a tree-like mess of molten copper before it flowed around whatever it was flowing around to become toroidal and graph-like. The corollary to this is when graph-like toroidal structures are cut up. What were once loops become appendages, so tree-like structures can be formed when toroidal ones are damaged.
 
 @node 1.3,1.4,1.2,Top
 @section Formation Processes of Non-Biological Graph-like and Tree-like Structures
@@ -164,10 +179,12 @@ Tree-like structures and graph-like structures are intimately related. One of th
 
 In the beginning of this chapter I presented the flow of a liquid around clumps as being the main formation process for graph-like toroidal structures. I would like to present three more formation processes; @emph{gas expansion}, @emph{ablation} and @emph{growth}. @emph{Gas expansion} is when bubbles of gas form in a viscous liquid,  @emph{ablation} is when material is removed to create a toroidal or tree-like structure and @emph{growth} is a term that you already know.
 
+@page
 @subsection Gas expansion
+Think of rising bread.
 
 @float Figure,scoria
-@image{./images/scoria,,150pt,Scoria,jpg}
+@image{./images/scoria,,250pt,Scoria,jpg}
 @caption{Scoria, a type of porous rock formed by expanding bubbles of gas (Copyright @copyright{} 2008 @url{https://en.wikipedia.org/wiki/Scoria#/media/File:Scoria_Macro_Digon3.jpg, Jonathan Zander CC-By-Sa 3.0})}
 @end float
 
@@ -176,7 +193,7 @@ The Scoria in @ref{scoria} is not actually as graph-like as it might seem at fir
 However, in concert with @emph{ablation}, porous rocks may become toroidal. After-all, the bubble walls are very thin and may be worn away quite easily.
 
 @float Figure, lava-rock-ablated
-@image{./images/lava-rock-ablated,,150pt,A graph-like porous rock, the thin walls of which have become ablated.,jpg}
+@image{./images/lava-rock-ablated,,250pt,A graph-like porous rock, the thin walls of which have become ablated.,jpg}
 @caption{A graph-like porous rock, the thin walls of which have become ablated. (Copyright @copyright{} 2015 @url{https://pixabay.com/en/stone-volcanic-rock-905093/,Ruben Rubio CC0 Public Domain})}
 @end float
 
@@ -204,7 +221,7 @@ Wetting and drying cycles which change the hardness of parts of a rock by carryi
 Complex eddy currents cause graph-like erosion in a material which is otherwise uniform.
 @end enumerate
 
-Here are two examples of honeycomb weathering, a complex form of weathering in which calcium is moved around limestone by water, causing it to concentrate in a web like pattern forming a hardened web of rock.
+Here are two examples of honeycomb weathering, a complex form of weathering in which calcium is moved within limestone by water, causing it to concentrate in a web like pattern forming a hardened web of rock.
 
 @float Figure,honeycomb
 @image{./images/honeycomb,,200pt,Honeycomb weathering,jpg}
@@ -217,15 +234,19 @@ Here are two examples of honeycomb weathering, a complex form of weathering in w
 @caption{Honeycomb weathering, Watchet, Somerset, Great Britain (Copyright @copyright{} 2010 @url{http://www.geograph.org.uk/photo/1707186, Nigel Chadwick CC-By-Sa 2.0})}
 @end float
 
+@page
 @subsection Growth
 
 Graph like structures can also @emph{grow}. Examples include stalactites, icicles, and crystals.
 
 @float Figure,stalactites
-@w{@image{./images/stalactites,,160pt,Stalactites,jpg} @image{./images/ice-crystals,,160pt,Ice crystals,jpg}}
-@caption{@emph{left:} Stalactites in Damlataş Cave, Alanya, Turkey (Copyright @copyright{} 2007 @url{https://www.flickr.com/photos/48264958@@N00/2041974766/, BillBl CC-By 2.0})
-@emph{right:} Ice crystals (Copyright @copyright{} 2009 @url{https://en.wikipedia.org/wiki/Ice_crystals#/media/File:Ice_crystals_on_the_box.jpg,Brocken Inaglory CC-By-Sa 3.0})
-}
+@image{./images/stalactites,,250pt,Stalactites,jpg}
+@caption{Stalactites in Damlataş Cave, Alanya, Turkey (Copyright @copyright{} 2007 @url{https://www.flickr.com/photos/48264958@@N00/2041974766/, BillBl CC-By 2.0})}
+@end float
+
+@float Figure,ice-crystals
+@image{./images/ice-crystals,,200pt,Ice crystals,jpg}
+@caption{Ice crystals (Copyright @copyright{} 2009 @url{https://en.wikipedia.org/wiki/Ice_crystals#/media/File:Ice_crystals_on_the_box.jpg,Brocken Inaglory CC-By-Sa 3.0})}
 @end float
 
 @page
@@ -236,7 +257,7 @@ With the appearance of multi-celled life, the quantity and diversity of tree-lik
 
 @float Figure, Socotra_dragon_tree
 @image{./images/Socotra_dragon_tree,,200pt,Socotra dragon tree,jpg}
-@caption{Socotra dragon tree Socotra island, Yemen (Copyright @copyright{} 2008 @url{https://commons.wikimedia.org/wiki/File:Socotra_dragon_tree.JPG,Boris Khvostichenko CC-By-Sa 4.0})}
+@caption{Socotra dragon tree, Socotra island, Yemen (Copyright @copyright{} 2008 @url{https://commons.wikimedia.org/wiki/File:Socotra_dragon_tree.JPG,Boris Khvostichenko CC-By-Sa 4.0})}
 @end float
 
 Indeed, multi-celled life forms tend to have at least several tree-like appendages and it is rare for a life form to be truly bloby. This is completely different from the non-biological world, which is mostly bloby and rarely tree-like.
@@ -251,9 +272,15 @@ Indeed, multi-celled life forms tend to have at least several tree-like appendag
 @caption{Rocks, however, almost @emph{never} have appendages. (Copyright @copyright{} 2012 @url{http://reptonix.awardspace.co.uk/photos/2012-02-11.htm,Reptonix free Creative Commons licensed photos CC-By 3.0})}
 @end float
 
-There must be something truly special about being tree-like, for life to have evolved to have such an unusual geometry. When I ask myself, why does life need to be so tree-like, my first impression is that it is hard to move if you're a blob. However, plants don't move, and they are even more treeish than animals are. Perhaps it is merely a side-effect of some property of growth. Further analysis shows, that the advantages and disadvantages of tree-like structures are diverse and that there are multiple competing factors in the shape of a plant or animal.
+There must be something truly special about being tree-like, for life to have evolved to have such an unusual geometry. When I ask myself, "why does life need to be so tree-like?" my first impression is that it is hard to move if you're a blob. However, plants don't move, and they are even more treeish than animals are. Perhaps it is merely a side-effect of some property of growth. Further analysis shows, that the advantages and disadvantages of tree-like structures are diverse and that there are multiple competing factors in the shape of a plant or animal.
 
 Animals tend to be bloby with only the few, relatively short, appendages which they need for locomotion or dexterity.
+
+@float Figure, dexteritylocomotion
+@image{./images/dexteritylocomotion,,400pt,Two young mammamalian blobs exhibiting the use of their appendages for dexterity and locomotion.,jpg}
+@caption{Two young mammamalian blobs exhibiting the use of their appendages for locomotion and dexterity. (Copyright @copyright{} 2016 @url{http://timothy.hobbs.cz,Timothy Hobbs CC By-Sa 4.0})}
+@end float
+
 
 @subsection Disadvantages of Tree-like Structures for Multi-celled Life-forms
 @enumerate 
@@ -264,7 +291,7 @@ You will notice that the rock in @ref{rock} is not just bloby, but downright rou
 
 @float Figure, turtle
 @image{./images/turtle,,200pt,An Eastern Box Turtle hiding in its shell to protect its fragile appendages,jpg}
-@caption{An Eastern Box Turtle hiding in its shell to protect its fragile appendages(Copyright @copyright{} 2011 @url{https://www.flickr.com/photos/npsncbn/8579419363,Robin Baranowski@comma{} National Parks Service photo CC By-Sa 2.0})}
+@caption{An Eastern Box Turtle, pretending to be bloby, hiding in its shell to protect its fragile appendages(Copyright @copyright{} 2011 @url{https://www.flickr.com/photos/npsncbn/8579419363,Robin Baranowski@comma{} National Parks Service photo CC By-Sa 2.0})}
 @end float
 
 @item Heat loss
@@ -274,7 +301,8 @@ The equation for heat loss of an organism is a product of its surface area. The 
 Note: plants do not generate significant heat with their metabolisms and therefore are not evolutionarily motivated to conserve internally generated heat.
 
 @item Water loss
-A very similar equation also applies to water loss. However, plants are effected by this too.
+
+A very similar equation also applies to water loss. Plants are effected by this too.
 @end enumerate
 
 One important thing to understand, is that an analysis of emperical data regarding the heat loss or water-loss of an organism is @b{meaningless} when studying the merits of biological geometry! For example, animals will send less blood to their limbs in order to combat heat loss. Emperically, this means that heat loss from limbs is relatively low in terms of heat loss per surface area. However, this is only an evolutionary adaption to a fundamental disadvantage to having a certain geometric shape. The same applies with water loss.
@@ -291,13 +319,20 @@ For animals:
 For plants (in order of importance):
 @enumerate
 @item Dispensability
+
 If an animal bights off a leaf, then a new leaf can be easily grown back. If, in the winter, temperatures are too low for leaf cells to survive, than these leaves can be grown back in the spring.
+
 @item Height
-I believe that the main motivator for plants to have a tree like structure is that it allows them to be tall cheaply. They do not need to invest much growth volume into growing high above their neighbors and therefor reaching the sun.
-@item Quarantinable
+
+Having a tree-like structure allows plants to be tall cheaply. They do not need to invest much growth volume into growing high above their neighbors and therefor reaching the sun.
+
+@item Quarantinability
+
 If a leaf or branch becomes infected, the plant can quarantine just the infected branch and survive.
+
 @item Mobility
-Plants actually move towards the light, albiet slowly. Being long and thin allows them to do this.
+
+Plants actually move towards the light, albeit slowly. Being long and thin allows them to do this.
 @end enumerate
 
 @float Figure, rose
@@ -308,7 +343,7 @@ Plants actually move towards the light, albiet slowly. Being long and thin allow
 @cindex discrete
 @cindex tree
 
-Near the beginning of this manual, I noted that the water surrounding the archipelago in @ref{LempisaariNaantaliFinland} is not a @b{@i{true}} graph because the vertexes and edges are not distinct. Plants are @b{@i{true}} trees in the mathematical sense. The vertexes and edges are very distinct. In the language of mathematics one would say that they are @emph{discrete}. This discreteness plays a @emph{very} important role in the reason why plants are geometrically tree-like.
+Near the beginning of this manual, I noted that the water surrounding the archipelago in @ref{LempisaariNaantaliFinland} is not a @b{@i{true}} graph because the vertexes and edges are not distinct. The rose bush in @ref{rose} is a @b{@i{true}} tree in the mathematical sense. The vertexes and edges are very distinct. In the language of mathematics one would say that they are @emph{discrete}. This discreteness plays a @emph{very} important role in the reason why plants are geometrically tree-like.
 
 The ability for the plant to treat leaves and branches as dispensable is dependent on its treatment of these leaves and their associated branches as discrete entities. When a person gets a deep gash in their finger, the wound will take months to heal, their finger will never be "like new" and the risk of fatal sepsis(blood poisoning) is severe. But you can tear a leaf on a plant to shreds and the plant will sabotage the leaf and grow a perfect new one in a fraction of the time it took the human to do a poor repair job. Furthermore, if an infection does occur in the leaf, and that infection begins to spread, the plant can choose a vertex bellow the infection point and sabotage an entire branch, as is illustrated in @ref{rose}.
 
@@ -319,7 +354,7 @@ Height is also an important reason why plants evolved to be tree-like and it mig
 @caption{A bloby Golden Barrel Cactus (echinocactus grusonii)@comma{} Koko Crater Botanical Garden@comma{} Oahu Hawaii (Copyright @copyright{} 20O9 @url{https://www.flickr.com/photos/33590535@@N06/3595297276/,Drew Avery CC By 2.0})}
 @end float
 
-The cactus needs to fight water loss and therefore tries to be spherical in order to minimize surface area. It deals with the lack of dispensability and quarantinability of its leaves by a) protecting itself with spikes b) living in a dry climate where infection is less likely and c) having a thick skin. Its need to tall is limited as there are few neighboring plants to compete with in the desert. Many cacti, rather than being a perfect spheres, are somewhat elongated in order to regain at least some of that lost hight advantage, however, this one is not.
+The cactus needs to fight water loss and therefore tries to be spherical in order to minimize surface area. It deals with the lack of dispensability of its leaves by protecting itself with spikes having a thick skin. Its need for quarantinability is lessened by the fact that in dry climates infections are less likely. Its need to be tall is limited as there are few neighboring plants to compete with in the desert. Many cacti, rather than being a perfect spheres, are somewhat elongated in order to regain at least some of that lost hight advantage, however, this one is not.
 
 Now compare that cactus to the trees in this forest, where height competition is at its peek. The trees have grown very tall, and certainly have branches in order to reach out into whatever ray of sunlight the can find.
 
@@ -415,13 +450,7 @@ Neurons are more like blobs with tree-like appendages. However, when we look at 
 @caption{A photograph of a pyramidal neuron in the hippocampus (Copyright @copyright{} 2005 @url{https://commons.wikimedia.org/wiki/File:Pyramidal_hippocampal_neuron_40x.jpg,MethoxyRoxy CC By-Sa 2.5})}
 @end float
 
-The nervous system is the closes thing to a fully discrete graph that exists in the natural world.
-
-It is no coincidence, that the graphiest structure that exists also has the most interesting behavior.
-
-In the next chapter I will discuss graph based systems, how they differ from mere structures, and also some of their properties and classification.
-
-In the mean time. Lets review some of the concepts that we learned in this chapter.
+The nervous system is the closes thing to a fully discrete graph that exists in the natural world. It is no coincidence, that the graphiest structure that exists also has the most interesting behavior. In the next chapter I will discuss graph based systems, how they differ from mere structures, and also some of their properties and classification. In the mean time. Lets review some of the concepts that we learned in this chapter.
 
 @node 1.6,Chapter 2,1.5,Top
 @section Review of Terms
@@ -433,6 +462,48 @@ A network of vertexes which are connected by edges.
 @cindex vertex
 @item @b{vertex:}
 A point or object in a graph which may be connected to other vertexes.
+@cindex edge
+@item @b{edge:}
+A connection between one or more vertexes in a graph.
+@cindex torus
+@item @b{torus:}
+A donut shaped object
+@cindex toroid
+@item @b{toroid:}
+An object with a hole through it.
+@cindex n-toroid
+@item @b{n-toroid:}
+An object with n holes through it.
+@cindex tree
+@item @b{tree:}
+A type of graphs without loops.
+@cindex loop
+@item @b{loop:}
+A feature of a graph that the edges are connected together in such a way that you can find a path from a vertex back to that vertex without crossing the same edge twice.
+@cindex graph-like
+@item @b{graph-like:}
+An object who's shape reminds me of a graph.
+@cindex tree-like
+@item @b{tree-like:}
+An object who's shape reminds me of a tree (in the mathematical sense).
+@cindex path
+@item @b{path:}
+The list of edges one has to go down in order to get from one vertex to another.
+@cindex path redundancy
+@item @b{path redundancy:}
+When there are multiple paths between one vertex and another.
+@cindex discrete
+@item @b{discrete}
+The parts of an object are discrete when the boundaries between them are clearly defined.
+@cindex continuous
+@item @b{continuous}
+The parts of an object are continuous when no clear and precise boundaries can be drawn between them.
+@cindex ablation
+@item @b{ablation}
+When a part of an object is removed, rubbed, scraped, washed away.
+@cindex growth
+@item @b{growth}
+When the outside of an object gets bigger over time by way of new material being added.
 @end enumerate
 
 @node Chapter 2,1.6,Chapter 3,Top
