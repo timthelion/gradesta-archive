@@ -37,6 +37,7 @@ This is the extended textgraph user manual.
 * Chapter 2::
 * Chapter 3::
 * Chapter 4::
+* Chapter 5::
 @end menu
 @end ifnottex
 @unnumbered Notes
@@ -48,7 +49,7 @@ I wanted to write a manual for the textgraph ecosystem. I thought it would be ra
 
 @float Figure,graph
 @image{./images/graph,,200pt,A simple graph,png}
-@caption{A graph (Copyright @copyright{} 2016 Timothy Hobbs, CC By-Sa 4.0)}
+@caption{A graph (Copyright @copyright{} 2016 Timothy Hobbs, CC BY-SA 4.0)}
 @end float
 @cindex graph
 @cindex vertex
@@ -74,7 +75,7 @@ Interesting, natural non-biological, graph-like structures on the macro scale ar
 
 @float Figure,Caffeine_Molecule
 @image{./images/Caffeine_Molecule,,100pt,Caffeine Molecule,png}
-@caption{Caffeine Molecule (Copyright @copyright{} 2005 @url{https://commons.wikimedia.org/wiki/File:Caffeine_Molecule.png,Michael Ströck CC-By-Sa 3.0})}
+@caption{Caffeine Molecule (Copyright @copyright{} 2005 @url{https://commons.wikimedia.org/wiki/File:Caffeine_Molecule.png,Michael Ströck CC-By-SA 3.0})}
 @end float
 
 Molecules are indeed graphs, but what looks clearly like @emph{vertexes} (atoms) and @emph{edges} (bonds) on paper is, in reality, a blob of amorphous electroniness with some nuclei stuck in the middle.
@@ -90,14 +91,14 @@ However, these structures do exist. As I said earlier, matter likes to form clum
 
 @float Figure,mud
 @image{./images/mud,,140pt,Mud,jpg}
-@caption{The negative space around these clumps of mud form an @url{https://en.wikipedia.org/wiki/Torus#n-dimensional_torus, n-toroid}, and the whole picture looks pretty graph-like (Copyright @copyright{} 2007 @url{https://en.wikipedia.org/wiki/Mudcrack#/media/File:Desiccation-cracks_hg.jpg,Hannes Grobe CC-By-Sa 2.5})}
+@caption{The negative space around these clumps of mud form an @url{https://en.wikipedia.org/wiki/Torus#n-dimensional_torus, n-toroid}, and the whole picture looks pretty graph-like (Copyright @copyright{} 2007 @url{https://en.wikipedia.org/wiki/Mudcrack#/media/File:Desiccation-cracks_hg.jpg,Hannes Grobe CC-By-SA 2.5})}
 @end float
 
 When you poor liquid around a bunch of clumps, the clumps become islands, which force the liquid to flow around them.
 
 @float Figure,LempisaariNaantaliFinland
 @image{./images/LempisaariNaantaliFinland,,200pt,An archipelago in Finland,jpg}
-@caption{When water flows around an archipelago an n-toroid of water is formed. (Copyright @copyright{} 2006 @url{https://commons.wikimedia.org/wiki/File:Lempisaari%2C_Naantali%2C_Finland..jpg, Paul Lenz CC-By-Sa 3.0})}
+@caption{When water flows around an archipelago an n-toroid of water is formed. (Copyright @copyright{} 2006 @url{https://commons.wikimedia.org/wiki/File:Lempisaari%2C_Naantali%2C_Finland..jpg, Paul Lenz CC-By-SA 3.0})}
 @end float
 
 @cindex graph-like
@@ -122,7 +123,7 @@ This copper ore is pretty graph-like too. It is formed by a liquid (molten coppe
 
 @float Figure, copper 
 @image{./images/copper,,200pt,Native Copper,jpg}
-@caption{Native copper ore (Copyright @copyright{} 2009 @url{https://en.wikipedia.org/wiki/Copper#/media/File:NatCopper.jpg, Jonathan Zander CC-By-Sa 3.0})}
+@caption{Native copper ore (Copyright @copyright{} 2009 @url{https://en.wikipedia.org/wiki/Copper#/media/File:NatCopper.jpg, Jonathan Zander CC-By-SA 3.0})}
 @end float
 
 @node 1.2,1.3,1.1,Top
@@ -135,26 +136,26 @@ Tree-like structures are also interesting. In mathematics, trees are just a spec
 
 @float Figure, tree
 @image{./images/tree,,180pt,This is a tree.,png}
-@caption{This is a @emph{tree}. (Copyright @copyright{} 2016 @url{http://timothy.hobbs.cz,Timothy Hobbs CC By-Sa 4.0})}
+@caption{This is a @emph{tree}. (Copyright @copyright{} 2016 @url{http://timothy.hobbs.cz,Timothy Hobbs CC BY-SA 4.0})}
 @end float
 
 @float Figure, loop
 @image{./images/loop,,100pt,A loop,png}
-@caption{This is a loop. (Copyright @copyright{} 2016 @url{http://timothy.hobbs.cz/,Timothy Hobbs CC By-Sa 4.0})}
+@caption{This is a loop. (Copyright @copyright{} 2016 @url{http://timothy.hobbs.cz/,Timothy Hobbs CC BY-SA 4.0})}
 @end float
 
 Since the tree-like-ness of a structure is not dependent on the existence of holes, we cannot determine if something is tree-like simply by asking if it is toroidal. I will not present a precise mathematical definition of what is tree-like, but you can certainly agree that a form which has narrowish appendages which branch is tree-like and is a lot more interesting than something that is merely bloby.
 
 @float Figure,tree-like-vs-blobiness
 @image{./images/tree-like-vs-blobiness,,150pt,Tree-like structures are not merely bloby,png}
-@caption{Tree-like structures are more interesting than bloby ones (Copyright @copyright{} 2016 Timothy Hobbs CC-By-Sa 4.0)}
+@caption{Tree-like structures are more interesting than bloby ones (Copyright @copyright{} 2016 Timothy Hobbs CC-By-SA 4.0)}
 @end float
 
 The copper ore in @ref{copper} is not merely a 5-torroid. It also has a lot of weird knobs sticking out of it. These knoby things are interesting too, they jut out at odd angles and seem to be globbed together in an odd pattern. One could almost say they're tree-like, though that is probably a strech. Anyway, an n-toroid with tree-like appendages is certainly more interesting than an n-toroid without them.
 
 @float Figure,tree-like-toroid
 @image{./images/tree-like-toroid-vs-toroid,,150pt,A tree-like toroid is more interesting than a simple toroid,png}
-@caption{A toroid with tree-like appendages is more interesting than a toroid without (Copyright @copyright{} 2016 Timothy Hobbs CC-By-Sa 4.0)}
+@caption{A toroid with tree-like appendages is more interesting than a toroid without (Copyright @copyright{} 2016 Timothy Hobbs CC-By-SA 4.0)}
 @end float
 
 @emph{Exercise:} Come up with a precise method for determining which shapes are a) totally boring b) bloby and c) have tree-like appendages. 
@@ -185,7 +186,7 @@ Think of rising bread.
 
 @float Figure,scoria
 @image{./images/scoria,,250pt,Scoria,jpg}
-@caption{Scoria, a type of porous rock formed by expanding bubbles of gas (Copyright @copyright{} 2008 @url{https://en.wikipedia.org/wiki/Scoria#/media/File:Scoria_Macro_Digon3.jpg, Jonathan Zander CC-By-Sa 3.0})}
+@caption{Scoria, a type of porous rock formed by expanding bubbles of gas (Copyright @copyright{} 2008 @url{https://en.wikipedia.org/wiki/Scoria#/media/File:Scoria_Macro_Digon3.jpg, Jonathan Zander CC-By-SA 3.0})}
 @end float
 
 The Scoria in @ref{scoria} is not actually as graph-like as it might seem at first glance. It does have hollow bits, but it isn't particularly toroidal. As I said earlier, toroids have holes in them and these rocks tend to be water proof, not very holy. One type of porous rock, pumice, even floats on water because there is so much air trapped inside! When you think of the physical properties of expanding gas, it is clear why these rocks are rarely particularly toroidal. Gas expands, making bubbles. Those bubbles may then pop. But a popped bubble leaves a crater, not a hole going all the way through a material. Once a bubble has popped, there is no force of expanding gas which would cause another opening to appear on the other side of the crater. Thus, no real graphiness.
@@ -231,7 +232,7 @@ Here are two examples of honeycomb weathering, a complex form of weathering in w
 
 @float Figure,honeycomb1
 @image{./images/honeycomb1,,200pt,Honeycomb weathering,jpg}
-@caption{Honeycomb weathering, Watchet, Somerset, Great Britain (Copyright @copyright{} 2010 @url{http://www.geograph.org.uk/photo/1707186, Nigel Chadwick CC-By-Sa 2.0})}
+@caption{Honeycomb weathering, Watchet, Somerset, Great Britain (Copyright @copyright{} 2010 @url{http://www.geograph.org.uk/photo/1707186, Nigel Chadwick CC-By-SA 2.0})}
 @end float
 
 @page
@@ -246,7 +247,7 @@ Graph like structures can also @emph{grow}. Examples include stalactites, icicle
 
 @float Figure,ice-crystals
 @image{./images/ice-crystals,,200pt,Ice crystals,jpg}
-@caption{Ice crystals (Copyright @copyright{} 2009 @url{https://en.wikipedia.org/wiki/Ice_crystals#/media/File:Ice_crystals_on_the_box.jpg,Brocken Inaglory CC-By-Sa 3.0})}
+@caption{Ice crystals (Copyright @copyright{} 2009 @url{https://en.wikipedia.org/wiki/Ice_crystals#/media/File:Ice_crystals_on_the_box.jpg,Brocken Inaglory CC-By-SA 3.0})}
 @end float
 
 @page
@@ -257,14 +258,14 @@ With the appearance of multi-celled life, the quantity and diversity of tree-lik
 
 @float Figure, Socotra_dragon_tree
 @image{./images/Socotra_dragon_tree,,200pt,Socotra dragon tree,jpg}
-@caption{Socotra dragon tree, Socotra island, Yemen (Copyright @copyright{} 2008 @url{https://commons.wikimedia.org/wiki/File:Socotra_dragon_tree.JPG,Boris Khvostichenko CC-By-Sa 4.0})}
+@caption{Socotra dragon tree, Socotra island, Yemen (Copyright @copyright{} 2008 @url{https://commons.wikimedia.org/wiki/File:Socotra_dragon_tree.JPG,Boris Khvostichenko CC-By-SA 4.0})}
 @end float
 
 Indeed, multi-celled life forms tend to have at least several tree-like appendages and it is rare for a life form to be truly bloby. This is completely different from the non-biological world, which is mostly bloby and rarely tree-like.
 
 @float Figure, slug
 @image{./images/slug,,200pt,Even bloby life forms like this slug have appendages.,jpg}
-@caption{Even bloby life forms like this slug have appendages. (Copyright @copyright{} 2006 @url{https://cs.wikipedia.org/wiki/Soubor:Orange_slug.jpg,Guillaume Brocker CC By-Sa 3.0})}
+@caption{Even bloby life forms like this slug have appendages. (Copyright @copyright{} 2006 @url{https://cs.wikipedia.org/wiki/Soubor:Orange_slug.jpg,Guillaume Brocker CC BY-SA 3.0})}
 @end float
 
 @float Figure,rock
@@ -277,8 +278,8 @@ There must be something truly special about being tree-like, for life to have ev
 Animals tend to be bloby with only the few, relatively short, appendages which they need for locomotion or dexterity.
 
 @float Figure, dexteritylocomotion
-@image{./images/dexteritylocomotion,,400pt,Two young mammamalian blobs exhibiting the use of their appendages for dexterity and locomotion.,jpg}
-@caption{Two young mammamalian blobs exhibiting the use of their appendages for locomotion and dexterity. (Copyright @copyright{} 2016 @url{http://timothy.hobbs.cz,Timothy Hobbs CC By-Sa 4.0})}
+@image{./images/dexteritylocomotion,,400pt,Two young mammalian blobs exhibiting the use of their appendages for dexterity and locomotion.,jpg}
+@caption{Two young mammamalian blobs exhibiting the use of their appendages for locomotion and dexterity. (Copyright @copyright{} 2015 @url{http://denisa.hobbs.cz,Denisa Hobbs CC BY-SA 4.0})}
 @end float
 
 
@@ -291,7 +292,7 @@ You will notice that the rock in @ref{rock} is not just bloby, but downright rou
 
 @float Figure, turtle
 @image{./images/turtle,,200pt,An Eastern Box Turtle hiding in its shell to protect its fragile appendages,jpg}
-@caption{An Eastern Box Turtle, pretending to be bloby, hiding in its shell to protect its fragile appendages(Copyright @copyright{} 2011 @url{https://www.flickr.com/photos/npsncbn/8579419363,Robin Baranowski@comma{} National Parks Service photo CC By-Sa 2.0})}
+@caption{An Eastern Box Turtle, pretending to be bloby, hiding in its shell to protect its fragile appendages(Copyright @copyright{} 2011 @url{https://www.flickr.com/photos/npsncbn/8579419363,Robin Baranowski@comma{} National Parks Service photo CC BY-SA 2.0})}
 @end float
 
 @item Heat loss
@@ -337,7 +338,7 @@ Plants actually move towards the light, albeit slowly. Being long and thin allow
 
 @float Figure, rose
 @image{./images/rose,,200pt,A rose branch exhibiting winter dieback.,png}
-@caption{A rose branch exhibiting winter dieback. Note that branches 2 and 4 are dead and have been quarantined by the plant to prevent the spread of disease. (Copyright @copyright{} 2016 @url{http://timothy.hobbs.cz/,Timothy Hobbs CC By-Sa 4.0})}
+@caption{A rose branch exhibiting winter dieback. Note that branches 2 and 4 are dead and have been quarantined by the plant to prevent the spread of disease. (Copyright @copyright{} 2016 @url{http://timothy.hobbs.cz/,Timothy Hobbs CC BY-SA 4.0})}
 @end float
 
 @cindex discrete
@@ -351,7 +352,7 @@ Height is also an important reason why plants evolved to be tree-like and it mig
 
 @float Figure, cactus
 @image{./images/cactus,,200pt,A bloby Golden Barrel Cactus (echinocactus grusonii)@comma{} Koko Crater Botanical Garden@comma{} Oahu Hawaii,jpg}
-@caption{A bloby Golden Barrel Cactus (echinocactus grusonii)@comma{} Koko Crater Botanical Garden@comma{} Oahu Hawaii (Copyright @copyright{} 20O9 @url{https://www.flickr.com/photos/33590535@@N06/3595297276/,Drew Avery CC By 2.0})}
+@caption{A bloby Golden Barrel Cactus (echinocactus grusonii)@comma{} Koko Crater Botanical Garden@comma{} Oahu Hawaii (Copyright @copyright{} 20O9 @url{https://www.flickr.com/photos/33590535@@N06/3595297276/,Drew Avery CC BY 2.0})}
 @end float
 
 The cactus needs to fight water loss and therefore tries to be spherical in order to minimize surface area. It deals with the lack of dispensability of its leaves by protecting itself with spikes having a thick skin. Its need for quarantinability is lessened by the fact that in dry climates infections are less likely. Its need to be tall is limited as there are few neighboring plants to compete with in the desert. Many cacti, rather than being a perfect spheres, are somewhat elongated in order to regain at least some of that lost hight advantage, however, this one is not.
@@ -360,7 +361,7 @@ Now compare that cactus to the trees in this forest, where height competition is
 
 @float Figure, forest
 @image{./images/forest,,200pt,A forest trail in H. Dutlinger Natural Area,jpg}
-@caption{A forest trail in H. Dutlinger Natural Area (Copyright @copyright{} 2013 @url{https://www.flickr.com/photos/nicholas_t/9660892548,Nicholas A. Tonelli CC By 2.0})}
+@caption{A forest trail in H. Dutlinger Natural Area (Copyright @copyright{} 2013 @url{https://www.flickr.com/photos/nicholas_t/9660892548,Nicholas A. Tonelli CC BY 2.0})}
 @end float
 
 One thing I notice when I look at these trees though, is that they are less tree-like than the rose bush, both geometrically  and in terms of graph-theory. Everything seems to come out of one central trunk and the sub-branches are not nearly as distinct. I have rarely seen a pine tree quarantine a sub-branch. They choose to drop entire branches instead. This lack of discreteness can probably be traced to the fact that few animals can reach up high enough to graze on the needles, and the tough needles are hardly worth eating anyways. The trees have found an alternative to discreteness and dispensability for their survival.
@@ -372,7 +373,7 @@ Plants are topologically relatively simple. The upper parts of plants are essent
 
 @float Figure, tree-shaping
 @image{./images/tree-shaping,,200pt,This is not natural.,jpg}
-@caption{This is not natural. (Copyright @copyright{} 2009 @url{https://en.wikipedia.org/wiki/Tree_shaping#/media/File:Person-tree.jpg,Becky Northey@comma{} Pooktre CC By 3.0})}
+@caption{This is not natural. (Copyright @copyright{} 2009 @url{https://en.wikipedia.org/wiki/Tree_shaping#/media/File:Person-tree.jpg,Becky Northey@comma{} Pooktre CC BY 3.0})}
 @end float
 
 @float Figure, inosculation
@@ -393,22 +394,22 @@ Why would roots be toroidal and graph-like when above ground branches are not? I
 
 @float Figure, roots-tree
 @image{./images/roots-tree,,200pt,A tree with tree-like roots.,png}
-@caption{A tree with tree-like roots. (Copyright @copyright{} 2016 @url{http://timothy.hobbs.cz/,Timothy Hobbs CC By-Sa 4.0})}
+@caption{A tree with tree-like roots. (Copyright @copyright{} 2016 @url{http://timothy.hobbs.cz/,Timothy Hobbs CC BY-SA 4.0})}
 @end float
 
 @float Figure, roots-tree-cut
 @image{./images/roots-tree-cut,,200pt,If the base of tree2 section of the tree's roots is cut. Then the tree loses its connection to the water supply.,png}
-@caption{It only takes cutting a tiny section of root for the tree to lose its connection to the water supply. (Copyright @copyright{} 2016 @url{http://timothy.hobbs.cz/,Timothy Hobbs CC By-Sa 4.0})}
+@caption{It only takes cutting a tiny section of root for the tree to lose its connection to the water supply. (Copyright @copyright{} 2016 @url{http://timothy.hobbs.cz/,Timothy Hobbs CC BY-SA 4.0})}
 @end float
 
 @float Figure, roots-graph
 @image{./images/roots-graph,,200pt,Here, there is path redundancy between the roots that reached water and the tree.,png}
-@caption{If the roots connect to each-other to form a graph-like structure then there is path redundancy between the roots that reached water and the tree. (Copyright @copyright{} 2016 @url{http://timothy.hobbs.cz/,Timothy Hobbs CC By-Sa 4.0})}
+@caption{If the roots connect to each-other to form a graph-like structure then there is path redundancy between the roots that reached water and the tree. (Copyright @copyright{} 2016 @url{http://timothy.hobbs.cz/,Timothy Hobbs CC BY-SA 4.0})}
 @end float
 
 @float Figure, roots-graph-cut
 @image{./images/roots-graph-cut,,200pt,You have to cut more than one section of root in order to break the trees connection to water.,png}
-@caption{You have to cut more than one section of root in order to break the trees connection to water. (Copyright @copyright{} 2016 @url{http://timothy.hobbs.cz/,Timothy Hobbs CC By-Sa 4.0})}
+@caption{You have to cut more than one section of root in order to break the trees connection to water. (Copyright @copyright{} 2016 @url{http://timothy.hobbs.cz/,Timothy Hobbs CC BY-SA 4.0})}
 @end float
 
 
@@ -416,9 +417,20 @@ These structures are not, however, true graphs, as discrete vertexes and edges c
 
 @subsection Truly Graph Based Systems in Nature
 
-Beyond self grafting for the purposes of redundancy, relatively recent research has shown that trees also transfer nutrients and communicate with each-other through their roots. This lecture by tree ecologist Suzanne Simard is enlightening to the lay-person <@url{https://www.ted.com/talks/suzanne_simard_how_trees_talk_to_each_other}>. 
+Beyond self grafting for the purposes of redundancy, relatively recent research has shown that trees also transfer nutrients and communicate with each-other through their roots. This lecture by tree ecologist Suzanne Simard is enlightening to the lay-person:
+
+@float Figure, simard
+@url{https://www.ted.com/talks/suzanne_simard_how_trees_talk_to_each_other,@image{./images/simard,,200pt,TED talk about the mycorrhizal networks which connect trees. <@url{https://www.ted.com/talks/suzanne_simard_how_trees_talk_to_each_other}>,png}}
+@caption{TED talk about the mycorrhizal networks which connect trees. <@url{https://www.ted.com/talks/suzanne_simard_how_trees_talk_to_each_other}> (Copyright @copyright{} 2O16 @url{https://www.ted.com/talks/suzanne_simard_how_trees_talk_to_each_other,Suzanne Simard CC BY-NC-ND 3.0})}
+@end float
+
 
 In these networks trees transfer nutrients and potentially hormonal information(not yet proven) via fungi which connect to their roots. Like molecules, which I described as being an amorphous blob of electroniness with nuclii stuck in the middle, in these graphs of trees, it is much easier to distinguish the vertexes than the edges. I would say that the vertexes are discrete but the edges are not.
+
+@float Figure, fungi
+@image{./images/fungi,,150pt,The tree on the left gets water from the tree on the right via the fungi network connecting the trees.,png}
+@caption{The tree on the left gets water from the tree on the right via the fungi network connecting the trees. (Copyright @copyright{} 2016 @url{http://timothy.hobbs.cz/,Timothy Hobbs CC BY-SA 4.0})}
+@end float
 
 This kind of nutrient transfer is vital to the forests survival. When a young tree is growing up, its branches are not yet tall enough to reach the sun. Without this "nutrient communism" it would be impossible for trees in forests to reproduce, because the young trees would all be shaded out and die of "starvation". It has also been shown that this tree communism helps forests survive droughts. Trees which are near water send water through the root network to other trees which are thirsty. From each according to their means, to each, according to their needs.
 
@@ -443,17 +455,17 @@ Nervous systems are made up of neurons. These are cells like any other. They hav
 @caption{A photograph of an amoeba, which is a bloby single celled organism. (Copyright @copyright{} 1907 @url{https://commons.wikimedia.org/wiki/File:PSM_V71_D368_Amoeba_coli_highly_magnified.png,Unknown Public Domain})}
 @end float
 
-Neurons are more like blobs with tree-like appendages. However, when we look at a graph of neurons we can clearly identify the neuron cells as being the vertexes and the dendrons (their tree-like appendages) as being the edges! While the molecule and the communist tree-root network have amorphous edges and discrete vertexes both the edges and the vertexes of the nervous system are @emph{almost} fully discrete.
+Neurons are more like blobs with tree-like appendages. However, when we look at a graph of neurons we can clearly identify the neuron cell nuclei as being the vertexes and the dendrons (their tree-like appendages) as being the edges! While the molecule and the communist tree-root network have amorphous edges and discrete vertexes both the edges and the vertexes of the nervous system are @emph{almost} fully discrete.
 
 @float Figure, neuron-photo
 @image{./images/neuron-photo,,200pt,A photograph of a pyramidal neuron in the hippocampus,jpg}
-@caption{A photograph of a pyramidal neuron in the hippocampus (Copyright @copyright{} 2005 @url{https://commons.wikimedia.org/wiki/File:Pyramidal_hippocampal_neuron_40x.jpg,MethoxyRoxy CC By-Sa 2.5})}
+@caption{A photograph of a pyramidal neuron in the hippocampus (Copyright @copyright{} 2005 @url{https://commons.wikimedia.org/wiki/File:Pyramidal_hippocampal_neuron_40x.jpg,MethoxyRoxy CC BY-SA 2.5})}
 @end float
 
-The nervous system is the closes thing to a fully discrete graph that exists in the natural world. It is no coincidence, that the graphiest structure that exists also has the most interesting behavior. In the next chapter I will discuss graph based systems, how they differ from mere structures, and also some of their properties and classification. In the mean time. Lets review some of the concepts that we learned in this chapter.
+The nervous system is the closes thing to a fully discrete graph that exists in the natural world. It is no coincidence, that the graphiest structure that exists also has the most interesting behavior. In the next chapter I will discuss graph based systems, how they differ from mere structures, and also some of their properties and classification. In the mean time, lets review some of the concepts that we learned in this chapter.
 
 @node 1.6,Chapter 2,1.5,Top
-@section Review of Terms
+@section Glossary
 
 @enumerate
 @cindex graph
@@ -511,8 +523,12 @@ When the outside of an object gets bigger over time by way of new material being
 
 
 @node Chapter 3
-@chapter Artificial Graph Based Systems
+@chapter Artificial Graph-like Structures and Systems
+
 @node Chapter 4
+@chapter Graphs in Computer Software
+
+@node Chapter 5
 @chapter The textgraph Ecosystem
 
 
