@@ -285,7 +285,6 @@ if $generate_ascii; then
   gzip -f -9 -c $PACKAGE.txt >"$outdir/$PACKAGE.txt.gz"
   ascii_gz_size=`calcsize "$outdir/$PACKAGE.txt.gz"`
   mv $PACKAGE.txt "$outdir/"
-  ls -l "$outdir/$PACKAGE.txt" "$outdir/$PACKAGE.txt.gz"
 fi
 
 # 
@@ -320,7 +319,6 @@ if test -z "$use_texi2html"; then
   html_mono_gz_size=`calcsize "$outdir/$PACKAGE.html.gz"`
   copy_images "$outdir/" $PACKAGE.html
   mv $PACKAGE.html "$outdir/"
-  ls -l "$outdir/$PACKAGE.html" "$outdir/$PACKAGE.html.gz"
 
   # Before Texinfo 5.0, makeinfo did not accept a --split=HOW option,
   # it just always split by node.  So if we're splitting by node anyway,
@@ -343,7 +341,6 @@ if test -z "$use_texi2html"; then
   rm -rf "$outdir/html_$split/"
   mv $split_html_dir "$outdir/html_$split/"
   du -s "$outdir/html_$split/"
-  ls -l "$outdir/$PACKAGE.html_$split.tar.gz"
 
 else # use texi2html:
   opt="--output $PACKAGE.html $commonarg $htmlarg"
