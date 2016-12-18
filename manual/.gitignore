@@ -1,0 +1,15 @@
+manual/
+book.aux
+book.cp
+book.cps
+book.fn
+book.info
+book.ky
+book.log
+book.pg
+book.toc
+book.tp
+book.vr
+snippets/filler
+snippets/tests/out
+
