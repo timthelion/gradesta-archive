@@ -426,14 +426,28 @@ Beyond self grafting for the purposes of redundancy, relatively recent research 
 @end float
 
 
-In these networks trees transfer nutrients and potentially hormonal information(not yet proven) via fungi which connect to their roots. Like molecules, which I described as being an amorphous blob of electroniness with nuclii stuck in the middle, in these graphs of trees, it is much easier to distinguish the vertexes than the edges. I would say that the vertexes are discrete but the edges are not.
+In these networks trees transfer nutrients and potentially hormonal information(not yet proven) via fungi which connect to their roots.
 
 @float Figure, fungi
 @image{./images/fungi,,150pt,The tree on the left gets water from the tree on the right via the fungi network connecting the trees.,png}
 @caption{The tree on the left gets water from the tree on the right via the fungi network connecting the trees. (Copyright @copyright{} 2016 @url{http://timothy.hobbs.cz/,Timothy Hobbs CC BY-SA 4.0})}
 @end float
 
-This kind of nutrient transfer is vital to the forests survival. When a young tree is growing up, its branches are not yet tall enough to reach the sun. Without this "nutrient communism" it would be impossible for trees in forests to reproduce, because the young trees would all be shaded out and die of "starvation". It has also been shown that this tree communism helps forests survive droughts. Trees which are near water send water through the root network to other trees which are thirsty. From each according to their means, to each, according to their needs.
+@float Figure, fungi-graph
+@image{./images/fungi-graph,,200pt,The relationships between the trees in the forest can be seen as a kind of graph.,png}
+@caption{The relationships between the trees in the forest can be seen as a kind of graph. (Copyright @copyright{} 2016 @url{http://timothy.hobbs.cz,Timothy Hobbs CC BY-SA 4.0})}
+@end float
+
+ Like molecules, which I described as being an amorphous blob of electroniness with nuclii stuck in the middle, in these graphs of trees, it is much easier to distinguish the vertexes than the edges. I would say that the vertexes are discrete but the edges are not.
+
+@float Figure, fungi-ether
+@image{./images/fungi-ether,,200pt,The relationships can also be seen as being less destinct, as a kind of fungi ether with which the trees interface,png}
+@caption{The relationships can also be seen as being less distinct, as a kind of fungi ether with which the trees interface (Copyright @copyright{} 2016 @url{http://timothy.hobbs.cz,Timothy Hobbs CC BY-SA 4.0})}
+@end float
+
+The extent to which the edges of the mycorrhizal networks are discrete can be argued either way. One argument against discreteness is that there are species of plant which survive solely on the nutrients that they suck from the network. Loafers basically. If the networks edges were discrete, then one would think that the trees would be able to cut off their connections to the loafers and that it would be in their evolutionary advantage to do so. This though, is not a very strong argument against discreteness. The wires of the internet or the phone system are very much discrete, but these wires too can be tapped and there is no way to block the wire taping without cutting off the connection entirely. An argument for discreteness is that the older trees in the network have been shown to grow roots specifically in order to strengthen their bonds with their own kin/children. Rather than to say that the edges are discrete or not discrete I think that it is best to say that they are sort of discrete. For more info see: @cite{Selosse, Marc-André et al., Mycorrhizal networks: des liaisons dangereuses? Trends in Ecology & Evolution , Volume 21 , Issue 11 , 621 - 628 <@url{http://isyeb.mnhn.fr/IMG/pdf/selosse2006tree.pdf}>}.
+
+Regardless the degree of edge discreteness in Mycorrhizal networks, this kind of nutrient transfer is vital to the forests survival. When a young tree is growing up, its branches are not yet tall enough to reach the sun. Without this "nutrient communism" it would be impossible for trees in forests to reproduce, because the young trees would all be shaded out and die of "starvation". It has also been shown that this tree communism helps forests survive droughts. Trees which are near water send water through the root network to other trees which are thirsty. From each according to their means, to each, according to their needs.
 
 And now things get really exciting.
 
@@ -522,20 +536,6 @@ When the outside of an object gets bigger over time by way of new material being
 @node Chapter 2,1.6,Chapter 3,Top
 @chapter The System
 
-
-@node Chapter 3
-@chapter Artificial Graph-like Structures and Systems
-
-@node Chapter 4
-@chapter Graphs in Computer Software
-
-@node Chapter 5
-@chapter The Artist and the Engineer
-
-@node Chapter 6
-@chapter The textgraph Ecosystem
-
-
 Behaviors that Turing completeness either does not guarantee or that Turing machines cannot express:
 @enumerate
 @item Concurrency
@@ -549,6 +549,35 @@ Behaviors that Turing completeness either does not guarantee or that Turing mach
 @item Harmonic residue
 @end enumerate
 
+@node Chapter 3
+@chapter Artificial Graph-like Structures and Systems
+
+@node Chapter 4
+@chapter Graphs in Computer Software
+
+@node Chapter 5
+@chapter The Artist and the Engineer
+
+Artists have taken nature, and specifically the human form, as their muse since time immemorial.
+
+--
+
+
+
+Photo of lady.
+
+
+
+The purpose of copying.
+@enumerate
+@item Preservation of an items attribute
+@item Utilitarian need for multiple copies
+@item Eugenics
+The first person to have their brain scanned into a computer capable of simulating it will be a white man. Some say it will be a selfie.
+@end enumerate
+
+@node Chapter 6
+@chapter The textgraph Ecosystem
 
 @unnumbered Index
 @printindex cp
