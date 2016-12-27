@@ -11,10 +11,11 @@ for line in fileinput.input():
 		id,text,streets = json.loads(line)
 	except ValueError:
 		sys.exit("Line: "+str(lineno)+"\n"+line+"\nis invalid.")
-	print("sqr"+str(id)+":")
+	print("[s"+str(id)+"]")
 	for l in text.split("\n"):
-		print(" | "+l)
+		print(" "+l)
+	print(";")
 	for s in streets:
-		print(" → sqr"+str(s[1]))
 		for l in s[0].split("\n"):
-			print(" | "+l)
+			print(" "+l)
+		print("-> s"+str(s[1]))
