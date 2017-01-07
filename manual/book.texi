@@ -41,6 +41,15 @@ This is the extended textgraph user manual.
 * Chapter 6::
 @end menu
 @end ifnottex
+@quotation
+Software is invisible and unvisualizable. Geometric abstractions are powerful tools. The floor plan of a building helps both architect and client evaluate spaces, traffic flows, views. Contradictions and omissions become obvious. Scale drawings of mechanical parts and stick-figure models of molecules, although abstractions, serve the same purpose. A geometric reality is captured in a geometric abstraction.
+
+The reality of software is not inherently embedded in space. Hence, it has no ready geometric representation in the way that land has maps, silicon chips have diagrams, computers have connectivity schematics. As soon as we attempt to diagram software structure, we find it to constitute not one, but several, general directed graphs superimposed one upon another. The several graphs may represent the flow of control, the flow of data, patterns of dependency, time sequence, name-space relationships. These graphs are usually not even planar, much less hierarchical. Indeed, one of the ways of establishing conceptual control over such structure is to enforce link cutting until one or more of the graphs becomes hierarchical.
+
+In spite of progress in restricting and simplifying the structures of software, they remain inherently unvisualizable, and thus do not permit the mind to use some of its most powerful conceptual tools. This lack not only impedes the process of design within one mind, it severely hinders communication among minds.
+
+--- Frederick P. Brooks, Jr. No Silver Bullet: Essence and Accidents of Software Engineering
+@end quotation
 @unnumbered Notes
 This is an interdisciplinary work with a single author and I am not an expert on most disciplines here-in represented. Please send corrections to <timothy@@hobbs.cz>.
 
@@ -438,7 +447,7 @@ In these networks trees transfer nutrients and potentially hormonal information(
 @caption{The relationships between the trees in the forest can be seen as a kind of graph. (Copyright @copyright{} 2016 @url{http://timothy.hobbs.cz,Timothy Hobbs CC BY-SA 4.0})}
 @end float
 
- Like molecules, which I described as being an amorphous blob of electroniness with nuclii stuck in the middle, in these graphs of trees, it is much easier to distinguish the vertexes than the edges. I would say that the vertexes are discrete but the edges are not.
+ Like molecules, which I described as being an amorphous blob of electroniness with nuclii stuck in the middle, in these graphs of trees, it is much easier to distinguish the vertexes than the edges. I would say that the vertexes are discrete but that I'm not so sure about the edges.
 
 @float Figure, fungi-ether
 @image{./images/fungi-ether,,200pt,The relationships can also be seen as being less destinct, as a kind of fungi ether with which the trees interface,png}
@@ -536,6 +545,92 @@ When the outside of an object gets bigger over time by way of new material being
 @node Chapter 2,1.6,Chapter 3,Top
 @chapter The System
 
+@float Figure, solar-system
+@image{./images/solar-system,,300pt,The solar system is a system,jpg}
+@caption{The solar system is a system (Copyright @copyright{} 1972 @url{https://commons.wikimedia.org/wiki/Category:Rick_Guidice#/media/File:Solar_system_artwork.jpg,Rick Guidice - NASA Public Domain})}
+@end float
+
+In the previous chapter I tried to catalog structures that reminded me of graphs. Unfortunately, most structures that I was able to find were not actually that graph-like. The problem, is that graphs represent collections of discrete things and solid objects do not have discrete parts, at least not at the macro-level. For non-biological structures, I had to zoom into the nano-level and look at the molecules and atoms themselves to find any sort of structural discreteness. And on the biological side, I am able to see discreteness at the cellular level, seeing the nervous system as a discrete graph-like structure where each neuron is a discrete entity connected in a graph-like structure. I also identified another kind of discreteness, in the rose depicted in @ref{rose}, behavioral discreteness. In the spring and summer, the branches of the rose all look green, and appear to be a continuous whole. However, come winter, some branches turn brown and die, while others remain green. Different parts of the rose behave differently. 
+
+@page
+@section Black box thought experiments
+@cindex system
+@cindex behavior
+
+Imagine a box with two holes, one marked in and one marked out. Strange sounds and flashes of light are coming out of the out hole. But there seems to be a pattern. You watch for a while, you don't understand what is going on, but your brain tells you that there is some sense to it, that these sounds and lights are not random. Then you try throwing an old shoe into the in hole and the sounds and the flashes of light change.
+
+@float Figure, system
+@image{./images/system,,150pt,A system expresses a behavior and that behavior changes when you interact with the system,png}
+@caption{A system expresses a @emph{behavior} and that behavior changes when you interact with the system (Copyright @copyright{} 2016 @url{http://timothy.hobbs.cz/,Timothy Hobbs CC BY-SA 4.0})}
+@end float
+
+This box is a @emph{system}. For the purpose of this work a system is any "thing" which:
+
+@enumerate
+@item has a non-random behavior
+@item the behavior changes when you poke it or otherwise interact with it
+@end enumerate
+
+@cindex function
+This model of a system should remind you of a function from mathematics.
+
+@float Figure, function
+@image{./images/function,,150pt,A function takes a set of arguments and produces a value,png}
+@caption{A function takes a set of arguments and produces a value (Copyright @copyright{} 2016 @url{http://timothy.hobbs.cz/,Timothy Hobbs CC BY-SA 4.0})}
+@end float
+
+Indeed, if we were to have a system with no in-hole, then it is pretty easy to imagine how to represent it as a function @code{f(time)}.
+
+@float Figure, simple-system
+@image{./images/simple-system,,100pt,A supernova a million light years away expresses a behavior. This is a system, but we cannot interact with it.,png}
+@caption{A supernova a million light years away expresses a behavior. This is a system which can be modeled without our needing to take observer interaction into account. (Copyright @copyright{} 2016 @url{http://timothy.hobbs.cz/,Timothy Hobbs CC BY-SA 4.0})}
+@end float
+
+But when I add an in-hole, the function becomes much more difficult to meaningfully define. When I'm programming, I often imagine my applications to be systems. They express behaviors, such as displaying windows, and I can interact with them using a mouse or keyboard. If I want to test my applications, I think of them as a function like @code{f(timespan,list-of-things-thrown-into-in-hole-during-timespan)}. Then I ask myself @code{golden-file == f(timespan,list-of-things-thrown-into-in-hole-during-timespan)?}. This works well for testing my own applications, when I know what kind of behavior I want. However, it is of no use to me when trying to figure out how a system works or in trying to discern patterns in its behavior and reactions. When I try to figure out what an undocumented program does, I launch the program and begin to interact with it. I look at the screen and see what the program shows or tells me, I click on things, I type on the keyboard, but I don't click and type at random. I do so in reaction to the things that I see on the screen. For example, if I see a button in the top left corner and I want to know what the button does, I move my mouse over and click on it to see what happens. I don't just click at a random location on the screen.
+
+When I look at this process of a user interacting with an application, it isn't terribly clear which party is the observer and which is the system that is being observed. The application produces a behavior (content displayed on the screen, audio, ect.), and that behavior changes based on the user's input. But the user ALSO produces a behavior (mouse movements, keypresses) and that changes based on the application's output. So both the application AND the user are systems from the standpoint of being black boxes with in-holes and out-holes and some logic or pattern to their behavior.
+
+@float Figure, system-observer
+@image{./images/system-observer,,150pt,The system observer paradox,png}
+@caption{The system observer paradox: which party is the observer and which is the system? (Copyright @copyright{} 2016 @url{http://timothy.hobbs.cz,Timothy Hobbs CC BY-SA 4.0})}
+@end float
+
+@float Figure, system-observer-graph
+@image{./images/system-observer-graph,,150pt,We can look at this system-observer relationship as a tiny graph with two vertexes and two directional edges.,png}
+@caption{We can look at this system-observer relationship as a tiny graph with two vertexes and two directional edges. (Copyright @copyright{} 2016 @url{http://timothy.hobbs.cz/,Timothy Hobbs CC BY-SA 4.0})}
+@end float
+
+And that graph is really a system in its own right. It has a behavior and it can be interacted with. For example, if I am debugging an application by interacting with it and there is music playing in my headphones, then I might start tapping my foot the music. This could change the way I interact with the application. If the music is streaming from my computer, it could also effect the application as well, by diverting the computers resources to the task of streaming the audio. So I can see the process of me debugging an application as a system with two parts; me and the application.
+
+@float Figure, parts
+@image{./images/parts,,200pt,It makes sense to view our system-observer graph as being a two part system.,png}
+@caption{It makes sense to view our system-observer graph as being a two part system. (Copyright @copyright{} 2016 @url{http://timothy.hobbs.cz/,Timothy Hobbs CC BY-SA 4.0})}
+@end float
+
+@section Types of systems
+
+A function in mathematics takes a set of arguments and produces a result. For any given set of arguments passed to the function, the result is @b{always} the same. It has been posited that a system can be viewed as a function 
+
+@enumerate
+@item Existence
+
+A system, such as the solar system, actually exists. We can imagine a fake solar system that doesn't exist, and that fake solar system wouldn't exist. So existence is a property of a system. However, functions neither exist nor don't exist. They are purely theoretical constructs.
+
+@item Independence
+
+Systems often exhibit a behavior without anyone interacting with them. In the solar system, the earth continues to orbit the sun even though no one is interacting with the solar system in any meaningful way.
+
+@item Statefulness
+
+Two identical interactions with the same system happening at different times often lead to different behaviors/changes in behavior. So that famous quote "the definition of insanity is doing the same thing over and over and expecting different results"(Unknown author) does not apply for systems.
+
+@end enumerate
+
+@cindex Hume's problem of induction
+@cindex apriori
+Examining systems as boxes, it is very hard to understand what is going on inside. Some system's behaviors are predictable based on statistical methods alone, or by creating mathematical models for their function. The classic example of "black box predictability" is pre-heliocentric astronomy. Astronomers were able to predict the movements of the stars and the occurrence of eclipses, despite not being able to go in a space ship and look at the solar system from an angle which would enlighten them to the true nature of the solar system. They were wrong about what was in the box, but they were right about what was coming out of it. There is an entire branch of philosophy devoted to the "knowing what is in the box" problem, inspired by the fact that we can only observe behaviors with our "five senses" and therefore we can never really "look inside the box". If you want to learn more, you can look up "Hume's Problem of Induction". However, by examining the mathematical structure of various possible systems, we can determine some things about the potential insides of the box @emph{apriori}.  @emph{Apriori} means without experience, or in our case, without ever looking inside the box at all. Basically, we can postulate that the box contains a certain mechanism, and then ask ourselves, "does that mechanism make sense?" If the mechanism that we are imagining doesn't work in theory then it cannot possibly exist in real life (we hope).
+
+
 Behaviors that Turing completeness either does not guarantee or that Turing machines cannot express:
 @enumerate
 @item Concurrency
@@ -551,13 +646,23 @@ Behaviors that Turing completeness either does not guarantee or that Turing mach
 
 @node Chapter 3
 @chapter Artificial Graph-like Structures and Systems
+@section Roads and Paths
+http://www.patternlanguage.com/archive/cityisnotatree.html
+http://library.uniteddiversity.coop/Ecological_Building/A_Pattern_Language.pdf
+@section Water-systems
+@section Fabrics and other Materials
+@section 
 
 @node Chapter 4
 @chapter Graphs in Computer Software
+@section The ultimate data-type
+@section Ted Nelson's big dream
 
 @node Chapter 5
 @chapter The Artist and the Engineer
-
+@section Types of art and their history
+@subsection Pre-photograph art
+@subsection Post-photograph art
 Artists have taken nature, and specifically the human form, as their muse since time immemorial.
 
 --
@@ -579,6 +684,32 @@ The first person to have their brain scanned into a computer capable of simulati
 @node Chapter 6
 @chapter The textgraph Ecosystem
 
+"Designing Software for Ease of Extension and Contraction" http://www.cs.umd.edu/class/spring2003/cmsc838p/Design/family.pdf
+
+When I have tried to explain my textgraph project, I have often been confronted by objections, raised by listeners who criticized my project prematurely, without fully understanding textgraph. Invalid objections have included:
+
+@enumerate
+@item You cannot check visual information into git
+@item You cannot build complex graphs, the visual information will be confusing and incomprehensible
+@item Editing visual information is a pain, working with text is much easier
+@end enumerate
+
+These are problems which are all solved by using the textgraph ecosystem.
+
+@section The tg file format
+@section mge: The Myopic Graph Editor
+@section Filtering and querying graphs
+@section tg2dot: Drawing graphs with graphviz
+@section tgtemplate: Generating text
+@section tgflow: Generating code
+@subsection pycfg: Generating Python control flow graphs
+@subsection pydfg: Generating Python data flow graphs
+@section tgserve: Remote, interactive and infinite graphs
+@float Figure, quilt
+@image{./images/quilt,,200pt,A quilt is made up of patches and can extend to infinity.,jpg}
+@caption{A quilt is made up of patches and can extend to infinity. (Copyright @copyright{} 2009 @url{http://lilywyte.deviantart.com/art/Crazy-Quilt-Patches-109044964,Morgan Mayfair  CC BY 3.0})}
+@end float
+@section Dynamically structured graphs
 @unnumbered Index
 @printindex cp
 @bye
