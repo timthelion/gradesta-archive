@@ -1,0 +1,52 @@
+syntax = "proto3";
+package tg;
+
+message Message{
+ Get get = 1;
+ Square square = 2;
+ Street street = 3;
+ enum Event{
+  SYNC = 1;
+  SUBMIT = 2;
+ }
+ Event event = 4;
+}
+
+//1
+message Get{
+ repeated int64 id = 1;
+ int64 neighborhood_size = 2;
+ string path = 3;
+}
+
+//2
+message Interactions{
+ bool edit = 1; // From server: Is this square editable? From client: Has it been edited?
+ bool click = 2; // From server: Is this square clickable? From client: Has it been clicked?
+ bool delete = 3; // Delete is different in that the server needs to be able to tell the client to delete squares.
+ bool deletable = 4; // And not merely tell the client that things are deletable.
+}
+
+//3
+message SquareIdentifier{
+ int64 id = 1;
+ string path = 2;
+}
+
+//4
+message Square{
+ SquareIdentifier id = 1;
+ Interactions interactions = 2;
+ string text = 3;
+ bool acceptIncomming = 4;
+ bool acceptOutgoing = 5;
+}
+
+//5
+message Street{
+ SquareIdentifier origin = 1; 
+ SquareIdentifier destination = 2;
+ Interactions interactions = 3;
+ string text = 4;
+ int64 index = 5;
+}
