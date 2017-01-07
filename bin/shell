@@ -1,2 +1,2 @@
 #!/bin/bash
-PATH=$PATH:$PWD/bin /bin/bash
+PATH=$PATH:$PWD/bin $SHELL
