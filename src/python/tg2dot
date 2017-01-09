@@ -49,7 +49,7 @@ if __name__ == "__main__":
   else:
     markedSquares = {}
   if options.neighborhoodLevel is None:
-    neighborhood = tg.values()
+    neighborhood = tg.sorted_items(0)
     edge = []
   else:
     neighborhood, edge = tg.getNeighborhood(options.center,options.neighborhoodLevel)

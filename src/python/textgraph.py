@@ -148,30 +148,33 @@ class TextGraph(collections.abc.MutableMapping):
     self.applyChangesHandler = lambda: None
     self.server = TextGraphServer()
     self.edited = False
-
-  def _getAllSquares(self):
-    allSquares = {}
-    response,returnCodes = self.server.send([])
-    for square,permissions in zip(response,returnCodes):
-      allSquares[square[0]] = getSquareFromList(square,permissions)
-    return allSquares
+    self._cache = {}
 
   def __getitem__(self, key):
-    response,returnCodes = self.server.send([key])
-    return getSquareFromList(response[0],returnCodes[0])
+    if not key in self._cache:
+      response,returnCodes = self.server.send([key])
+      self._cache[key] = getSquareFromList(response[0],returnCodes[0])
+    return self._cache[key]
 
   def __setitem__(self, squareId, square):
-    self.server.send(square.list)
+    response,returnCodes = self.server.send(square.list)
+    for square,permissions in zip(response,returnCodes):
+      if square[1] is None:
+        try:
+          del self._cache[square[0]]
+        except KeyError:
+          pass
+      else:
+        self._cache[square[0]] = getSquareFromList(square,permissions)
 
   def __delitem__(self,key):
     self.__setitem__(key,Square(key,None,[]))
 
   def __iter__(self):
-    for square in self._getAllSquares():
-      yield square
+    raise NotImplementedError("Not implemented due to the need to support infinite graphs in the future!")
 
   def __len__(self):
-    return len(self._getAllSquares())
+    raise NotImplementedError("Not implemented due to the need to support infinite graphs in the future!")
 
   def allocSquare(self):
     """
@@ -315,14 +318,14 @@ class TextGraph(collections.abc.MutableMapping):
       self.stageSquare(Square(square,None,[]))
     self.applyChanges()
 
-  @property
-  def sorted_items(self):
-    return sorted(self.items(),key=lambda sqr:sqr[0])
+  def sorted_items(self,center=0):
+    neighborhood,_ = self.getNeighborhood(center)
+    return sorted(neighborhood,key=lambda sqr:sqr.squareId)
 
   @property
   def json(self):
     serialized = ""
-    for _,square in self.sorted_items:
+    for _,square in self.sorted_items():
       serialized += square.json
       serialized += "\n"
     return serialized
@@ -350,27 +353,38 @@ class TextGraph(collections.abc.MutableMapping):
         raise KeyError("No square with text "+text+" is linked to from square "+str(currentSquare))
     return currentSquare
 
-  def getNeighborhood(self,center,level):
+  def getNeighborhoodIds(self,center,level=None):
+    squareIdsInNeighborhood = set()
+    changed = True
+    edge = [self[center]]
+    oldEdge = []
+    ring = 0
+    while True:
+      if not changed:
+        return squareIdsInNeighborhood, oldEdge
+      if level is not None and ring >= level:
+        return squareIdsInNeighborhood, oldEdge
+      changed = False
+      ring += 1
+      newEdge = []
+      oldEdge = []
+      for square in edge:
+        if square.squareId not in squareIdsInNeighborhood:
+          changed = True
+          oldEdge.append(square.squareId)
+          squareIdsInNeighborhood.add(square.squareId)
+          for street in square.streets:
+            newEdge.append(self[street.destination])
+          for street in square.incommingStreets:
+            newEdge.append(self[street.origin])
+      edge = newEdge
+
+  def getNeighborhood(self,center,level=None):
     """
     Returns a list of squares around a given square.
     Level gives you some control over the size of the neighborhood.
     """
-    neighborhood = set()
-    squareIdsInNeighborhood = set()
-    edge = [self[center]]
-    # Build neighborhood
-    for _ in range(0,level):
-      newEdge = []
-      oldEdge = []
-      for square in edge:
-        if not square.squareId in squareIdsInNeighborhood:
-          oldEdge.append(square.squareId)
-          squareIdsInNeighborhood.add(square.squareId)
-        for street in square.streets:
-          newEdge.append(self[street.destination])
-        for street in square.incommingStreets:
-          newEdge.append(self[street.origin])
-      edge = newEdge
+    squareIdsInNeighborhood, oldEdge = self.getNeighborhoodIds(center,level) 
     # Remove streets that leave neighborhood.
     finalNeighborhood = []
     for squareId in squareIdsInNeighborhood:
