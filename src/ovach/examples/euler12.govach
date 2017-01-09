@@ -1,5 +1,0 @@
-[0, "# This is a script which solves project euler problem 12\n# https://projecteuler.net/index.php?section=problems&id=12\n# I solve it a certain number of factors and use it as a benchmark\n# http://stackoverflow.com/questions/6964392/speed-comparison-with-project-euler-c-vs-python-vs-erlang-vs-haskell\n# So far, govach is really slow.\n50 to b DesiredFactors. 2 to b Index. 1 to b Triangle.", [["true", 1]]]
-[1, "b Triangle + b Index to b Triangle. 0 to b NumFactors. b Triangle to b PotentialFactor. b Index + 1 to b Index.", [["true", 6]]]
-[3, "b NumFactors + 1 to b NumFactors.", [["b NumFactors >= b DesiredFactors", 5], ["b PotentialFactor == 1", 1], ["", 6]]]
-[5, "b Triangle", []]
-[6, "b PotentialFactor - 1 to b PotentialFactor", [["(b Triangle / b PotentialFactor) * b PotentialFactor == b Triangle", 3], ["true", 6]]]

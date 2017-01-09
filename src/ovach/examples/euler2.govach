@@ -1,5 +1,0 @@
-[0, "# Sum all even fibonacci numbers < 4 million\n# https://projecteuler.net/problem=2\n1 to b TermA\nb TermA\n2 to b TermB\nb TermB\n3 to b TermCount\n4000000 to b GoalValue\n2 to b Sum", [["", 2]]]
-[1, "b TermA + b TermB to h TermC\nb TermB to b TermA\nh TermC to b TermB\nb TermCount + 1 to b TermCount\nh TermC", [["(b TermB / 2) * 2 == b TermB", 3], ["", 2]]]
-[2, "", [["b TermB <= b GoalValue", 1], ["", 4]]]
-[3, "b Sum + b TermB to b Sum", [["", 2]]]
-[4, "\"Sum\"\nb Sum", []]
