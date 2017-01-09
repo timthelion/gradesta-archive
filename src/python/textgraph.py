@@ -319,13 +319,13 @@ class TextGraph(collections.abc.MutableMapping):
     self.applyChanges()
 
   def sorted_items(self,center=0):
-    neighborhood,_ = self.getNeighborhood(center)
-    return sorted(neighborhood,key=lambda sqr:sqr.squareId)
+    neighborhoodIds,_ = self.getNeighborhoodIds(center)
+    return [self[squareId] for squareId in neighborhoodIds]
 
   @property
   def json(self):
     serialized = ""
-    for _,square in self.sorted_items():
+    for square in self.sorted_items():
       serialized += square.json
       serialized += "\n"
     return serialized
