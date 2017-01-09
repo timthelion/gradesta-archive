@@ -661,6 +661,9 @@ http://library.uniteddiversity.coop/Ecological_Building/A_Pattern_Language.pdf
 @node Chapter 5
 @chapter The Artist and the Engineer
 @section Types of art and their history
+Decoration
+Imitation
+Cathedralism
 @subsection Pre-photograph art
 @subsection Post-photograph art
 Artists have taken nature, and specifically the human form, as their muse since time immemorial.
@@ -680,6 +683,10 @@ The purpose of copying.
 @item Eugenics
 The first person to have their brain scanned into a computer capable of simulating it will be a white man. Some say it will be a selfie.
 @end enumerate
+
+@subsection Idealization and Morality
+
+There are people who are not creative, and there are people who are. Those who are creative have ideas. Some of these ideas flit in and out of the mind, others stay long enough to be criticized and to evolve, and finally, the best survive long enough to become idealizedin the mind seen as far off and perfect goals. An inventive person, perhaps an artist or an engineer, will then set off to imitate their ideals. These ideals could represent a construct which is morally neuteral, morally good, or morally bad. When the ideal is morally neuteral, one has to ask, why did the artist wish to create this item? 
 
 @node Chapter 6
 @chapter The textgraph Ecosystem
