@@ -198,7 +198,8 @@ class TextGraph(collections.abc.MutableMapping):
         didSomething = True
     if didSomething:
       self.undone = []
-      self.server.send([square.list for square in self.stagedSquares])
+      for square in self.stagedSquares:
+        self[square.squareId] = square
       self.stagedSquares = []
       self.done.append(didNow)
       if len(self.done)%5 == 0:
