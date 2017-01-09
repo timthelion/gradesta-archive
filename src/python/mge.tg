@@ -183,7 +183,7 @@
 [215, "if command == 'right':", [["^\\t", 216]]]
 [216, "super(GraphView,self).keypress(size,'right')", []]
 [217, "if command == 'undo':", [["^\\t", 218]]]
-[218, "self.graph.undo()\nif self.selection >= len(self.graph):\n  self.selection = 0\nif self.selectedSquare.text is None:\n  self.selection = 0", []]
+[218, "self.graph.undo()\nif self.selection not in self.graph:\n  self.selection = 0\nif self.selectedSquare.text is None:\n  self.selection = 0", []]
 [219, "if command == 'redo':", [["^\\t", 220]]]
 [220, "self.graph.redo()", []]
 [224, "def getCommand(self,key):", [["^\\t", 225]]]
