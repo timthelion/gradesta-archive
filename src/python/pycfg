@@ -208,7 +208,7 @@ def __py_cfg_internal_function_print_function_line(__pycfg_bag__,*args):
 		[s,square] = list(args)
 		l = next(square.line_iter) # □:30
 		if l.strip().startswith("return "): # □:30
-		  l = l.replace("return ","return None,", 1) # □:30
+		  l = l.replace("return ","return None,None,", 1) # □:30
 		print("\t\t%s # □:%i" % (l,square.id),file=s.args.outfile) # □:30
 		pass # □:30
 	except StopIteration:

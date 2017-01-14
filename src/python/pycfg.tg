@@ -13,7 +13,7 @@
 [27, "initialize_state\ns = SimpleNamespace(squares=[],args=None,fd=None)", [["True; s", 26]]]
 [28, "take_first_line s square\nline = next(square.line_iter)", [["line.strip() == \"\"; s square", 29], ["except StopIteration; s square", 29], ["True; s square line", 35]]]
 [29, "blank_square s square\nname = \"__pycfg_anon_function\" + str(square.id)\nbag = []\nhand = []", [["True; s square name bag hand", 10]]]
-[30, "print_function_line s square\nl = next(square.line_iter)\nif l.strip().startswith(\"return \"):\n  l = l.replace(\"return \",\"return None,\", 1)\nprint(\"\\t\\t%s # \u25a1:%i\" % (l,square.id),file=s.args.outfile)", [["except StopIteration; s square", 31], ["True; s square", 30]]]
+[30, "print_function_line s square\nl = next(square.line_iter)\nif l.strip().startswith(\"return \"):\n  l = l.replace(\"return \",\"return None,None,\", 1)\nprint(\"\\t\\t%s # \u25a1:%i\" % (l,square.id),file=s.args.outfile)", [["except StopIteration; s square", 31], ["True; s square", 30]]]
 [31, "close_out_function_body s square\nprint(\"\\t\\tpass # \u25a1:%i\" % square.id,file=s.args.outfile)\n#csr = ConditionsReader\ncsr = SimpleNamespace(exceptions=[],conditions=[],streets_iter=iter(square.streets))", [["True; s square csr", 32]]]
 [32, "gather_exceptions_and_conditions s square csr\n#cr = ConditionReader\nstreet = next(csr.streets_iter)\ncr = SimpleNamespace(street = street,street_name_iter = iter(street[0]),condition=\"\")", [["except StopIteration; s square csr", 33], ["True; s square csr cr", 36]]]
 [33, "print_exceptions s square csr\nfor e in csr.exceptions:\n  print(e)\nprint(\"\\texcept Exception as e:\\n\\t\\traise e\",file=s.args.outfile)", [["True; s square csr", 34]]]
