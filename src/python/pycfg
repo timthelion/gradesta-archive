@@ -61,7 +61,8 @@ def __py_cfg_internal_function_json_load_line(__pycfg_bag__,*args):
 		raise e
 	if True:
 
-		return 28,__pycfg_bag__,[s,square]
+		__pycfg_bag__.s = s
+		return 28,__pycfg_bag__,[square]
 	return None,None,None
 def invalid_json(__pycfg_bag__,*args):
 	return __py_cfg_call(9,__pycfg_bag__,*args)
@@ -80,7 +81,11 @@ def start_function(__pycfg_bag__,*args):
 def __py_cfg_internal_function_start_function(__pycfg_bag__,*args):
 	try:
 
-		[s,square,name,bag,hand] = list(args)
+		s = __pycfg_bag__.s
+
+		__pycfg_bag__.__delattr__("s")
+
+		[square,name] = list(args)
 		print("def %s(__pycfg_bag__,*args):\n\treturn __py_cfg_call(%i,__pycfg_bag__,*args)\ndef __py_cfg_internal_function_%s(__pycfg_bag__,*args):\n\ttry:" % (name, square.id, name), file=s.args.outfile) # □:10
 		s.squares.append((square.id,name)) # □:10
 		pass # □:10
@@ -90,8 +95,7 @@ def __py_cfg_internal_function_start_function(__pycfg_bag__,*args):
 
 		__pycfg_bag__.s = s
 		__pycfg_bag__.square = square
-		__pycfg_bag__.hand = hand
-		return 58,__pycfg_bag__,[bag]
+		return 58,__pycfg_bag__,[]
 	return None,None,None
 def print_end(__pycfg_bag__,*args):
 	return __py_cfg_call(11,__pycfg_bag__,*args)
@@ -169,27 +173,27 @@ def take_first_line(__pycfg_bag__,*args):
 def __py_cfg_internal_function_take_first_line(__pycfg_bag__,*args):
 	try:
 
-		[s,square] = list(args)
+		[square] = list(args)
 		line = next(square.line_iter) # □:28
 		pass # □:28
 	except StopIteration:
 
-		return 29,__pycfg_bag__,[s,square]
+		return 29,__pycfg_bag__,[square]
 	except Exception as e:
 		raise e
 	if line.strip() == "":
 
-		return 29,__pycfg_bag__,[s,square]
+		return 29,__pycfg_bag__,[square]
 	if True:
 
-		return 35,__pycfg_bag__,[s,square,line]
+		return 35,__pycfg_bag__,[square,line]
 	return None,None,None
 def blank_square(__pycfg_bag__,*args):
 	return __py_cfg_call(29,__pycfg_bag__,*args)
 def __py_cfg_internal_function_blank_square(__pycfg_bag__,*args):
 	try:
 
-		[s,square] = list(args)
+		[square] = list(args)
 		name = "__pycfg_anon_function" + str(square.id) # □:29
 		bag = [] # □:29
 		hand = [] # □:29
@@ -198,7 +202,9 @@ def __py_cfg_internal_function_blank_square(__pycfg_bag__,*args):
 		raise e
 	if True:
 
-		return 10,__pycfg_bag__,[s,square,name,bag,hand]
+		__pycfg_bag__.hand = hand
+		__pycfg_bag__.bag = bag
+		return 10,__pycfg_bag__,[square,name]
 	return None,None,None
 def print_function_line(__pycfg_bag__,*args):
 	return __py_cfg_call(30,__pycfg_bag__,*args)
@@ -234,33 +240,39 @@ def __py_cfg_internal_function_close_out_function_body(__pycfg_bag__,*args):
 		raise e
 	if True:
 
-		return 32,__pycfg_bag__,[s,square,csr]
+		__pycfg_bag__.s = s
+		__pycfg_bag__.square = square
+		return 32,__pycfg_bag__,[csr]
 	return None,None,None
 def gather_exceptions_and_conditions(__pycfg_bag__,*args):
 	return __py_cfg_call(32,__pycfg_bag__,*args)
 def __py_cfg_internal_function_gather_exceptions_and_conditions(__pycfg_bag__,*args):
 	try:
 
-		[s,square,csr] = list(args)
-		#cr = ConditionReader # □:32
+		[csr] = list(args)
 		street = next(csr.streets_iter) # □:32
 		cr = SimpleNamespace(street = street,street_name_iter = iter(street[0]),condition="") # □:32
 		pass # □:32
 	except StopIteration:
 
-		return 33,__pycfg_bag__,[s,square,csr]
+		return 33,__pycfg_bag__,[csr]
 	except Exception as e:
 		raise e
 	if True:
 
-		return 36,__pycfg_bag__,[s,square,csr,cr]
+		__pycfg_bag__.csr = csr
+		return 36,__pycfg_bag__,[cr]
 	return None,None,None
 def print_exceptions(__pycfg_bag__,*args):
 	return __py_cfg_call(33,__pycfg_bag__,*args)
 def __py_cfg_internal_function_print_exceptions(__pycfg_bag__,*args):
 	try:
 
-		[s,square,csr] = list(args)
+		s = __pycfg_bag__.s
+
+		__pycfg_bag__.__delattr__("s")
+
+		[csr] = list(args)
 		for e in csr.exceptions: # □:33
 		  print(e) # □:33
 		print("\texcept Exception as e:\n\t\traise e",file=s.args.outfile) # □:33
@@ -269,14 +281,14 @@ def __py_cfg_internal_function_print_exceptions(__pycfg_bag__,*args):
 		raise e
 	if True:
 
-		return 34,__pycfg_bag__,[s,square,csr]
+		return 34,__pycfg_bag__,[s,csr]
 	return None,None,None
 def print_conditions(__pycfg_bag__,*args):
 	return __py_cfg_call(34,__pycfg_bag__,*args)
 def __py_cfg_internal_function_print_conditions(__pycfg_bag__,*args):
 	try:
 
-		[s,square,csr] = list(args)
+		[s,csr] = list(args)
 		for c in csr.conditions: # □:34
 		  print(c) # □:34
 		print("\treturn None,None,None",file=s.args.outfile) # □:34
@@ -292,7 +304,7 @@ def get_name_and_bag(__pycfg_bag__,*args):
 def __py_cfg_internal_function_get_name_and_bag(__pycfg_bag__,*args):
 	try:
 
-		[s,square,line] = list(args)
+		[square,line] = list(args)
 		name_and_unpackings = line.split(" ",1) # □:35
 		name = name_and_unpackings[0] # □:35
 		if len(name_and_unpackings) == 2: # □:35
@@ -311,38 +323,44 @@ def __py_cfg_internal_function_get_name_and_bag(__pycfg_bag__,*args):
 		raise e
 	if True:
 
-		return 10,__pycfg_bag__,[s,square,name,bag,hand]
+		__pycfg_bag__.bag = bag
+		__pycfg_bag__.hand = hand
+		return 10,__pycfg_bag__,[square,name]
 	return None,None,None
 def get_condition(__pycfg_bag__,*args):
 	return __py_cfg_call(36,__pycfg_bag__,*args)
 def __py_cfg_internal_function_get_condition(__pycfg_bag__,*args):
 	try:
 
-		[s,square,csr,cr] = list(args)
+		[cr] = list(args)
 		char = next(cr.street_name_iter) # □:36
 		pass # □:36
 	except StopIteration:
 
-		return 37,__pycfg_bag__,[square.id,cr.street]
+		return 37,__pycfg_bag__,[cr.street]
 	except Exception as e:
 		raise e
 	if char == "\"":
 
-		return 38,__pycfg_bag__,[s,square,csr,cr]
+		return 38,__pycfg_bag__,[cr]
 	if char == ";":
 
-		return 42,__pycfg_bag__,[s,square,csr,cr]
+		return 42,__pycfg_bag__,[cr]
 	if True:
 
-		return 56,__pycfg_bag__,[s,square,csr,cr,char]
+		return 56,__pycfg_bag__,[cr,char]
 	return None,None,None
 def malformed_condition(__pycfg_bag__,*args):
 	return __py_cfg_call(37,__pycfg_bag__,*args)
 def __py_cfg_internal_function_malformed_condition(__pycfg_bag__,*args):
 	try:
 
-		[id,street] = list(args)
-		print("Syntax error in street comming form square %i\n\n%s\n\nMalformed condition. The correct format is <condition>; args to pass on\nEx: True; foo bar\nEx1: line.startswith(\"lala\"); baz boop" % (id,street[0]), file=sys.stderr) # □:37
+		square = __pycfg_bag__.square
+
+		__pycfg_bag__.__delattr__("square")
+
+		[street] = list(args)
+		print("Syntax error in street comming form square %i\n\n%s\n\nMalformed condition. The correct format is <condition>; args to pass on\nEx: True; foo bar\nEx1: line.startswith(\"lala\"); baz boop" % (square.id,street[0]), file=sys.stderr) # □:37
 		pass # □:37
 	except Exception as e:
 		raise e
@@ -352,45 +370,45 @@ def read_string(__pycfg_bag__,*args):
 def __py_cfg_internal_function_read_string(__pycfg_bag__,*args):
 	try:
 
-		[s,square,csr,cr] = list(args)
+		[cr] = list(args)
 		cr.condition = cr.condition + "\"" # □:38
 		pass # □:38
 	except Exception as e:
 		raise e
 	if True:
 
-		return 39,__pycfg_bag__,[s,square,csr,cr]
+		return 39,__pycfg_bag__,[cr]
 	return None,None,None
 def read_string_char(__pycfg_bag__,*args):
 	return __py_cfg_call(39,__pycfg_bag__,*args)
 def __py_cfg_internal_function_read_string_char(__pycfg_bag__,*args):
 	try:
 
-		[s,square,csr,cr] = list(args)
+		[cr] = list(args)
 		char = next(cr.street_name_iter) # □:39
 		cr.condition = cr.condition + char # □:39
 		pass # □:39
 	except StopIteration:
 
-		return 37,__pycfg_bag__,[square.id,cr.street]
+		return 37,__pycfg_bag__,[cr.street]
 	except Exception as e:
 		raise e
 	if char == "\\":
 
-		return 40,__pycfg_bag__,[s,square,csr,cr]
+		return 40,__pycfg_bag__,[cr]
 	if char == "\"":
 
-		return 36,__pycfg_bag__,[s,square,csr,cr]
+		return 36,__pycfg_bag__,[cr]
 	if True:
 
-		return 39,__pycfg_bag__,[s,square,csr,cr]
+		return 39,__pycfg_bag__,[cr]
 	return None,None,None
 def read_string_escape(__pycfg_bag__,*args):
 	return __py_cfg_call(40,__pycfg_bag__,*args)
 def __py_cfg_internal_function_read_string_escape(__pycfg_bag__,*args):
 	try:
 
-		[s,square,csr,cr] = list(args)
+		[cr] = list(args)
 		cr.condition = cr.condition + next(cr.street_name_iter) # □:40
 		pass # □:40
 	except StopIteration:
@@ -400,83 +418,102 @@ def __py_cfg_internal_function_read_string_escape(__pycfg_bag__,*args):
 		raise e
 	if True:
 
-		return 39,__pycfg_bag__,[s,square,csr,cr]
+		return 39,__pycfg_bag__,[cr]
 	return None,None,None
 def read_bag(__pycfg_bag__,*args):
 	return __py_cfg_call(42,__pycfg_bag__,*args)
 def __py_cfg_internal_function_read_bag(__pycfg_bag__,*args):
 	try:
 
-		[s,square,csr,cr] = list(args)
+		[cr] = list(args)
 		br = SimpleNamespace(bag=[],hand=[],char=None) # □:42
 		pass # □:42
 	except Exception as e:
 		raise e
 	if True:
 
-		return 61,__pycfg_bag__,[s,square,csr,cr,br]
+		__pycfg_bag__.cr = cr
+		return 61,__pycfg_bag__,[br]
 	return None,None,None
 def hand_white_space(__pycfg_bag__,*args):
 	return __py_cfg_call(43,__pycfg_bag__,*args)
 def __py_cfg_internal_function_hand_white_space(__pycfg_bag__,*args):
 	try:
 
-		[s,square,csr,cr,br] = list(args)
+		cr = __pycfg_bag__.cr
+
+		__pycfg_bag__.__delattr__("cr")
+
+		[br] = list(args)
 		br.char = next(cr.street_name_iter) # □:43
 		pass # □:43
 	except StopIteration:
 
-		return 50,__pycfg_bag__,[s,square,csr,cr,br]
+		__pycfg_bag__.cr = cr
+		return 50,__pycfg_bag__,[br]
 	except Exception as e:
 		raise e
 	if br.char == " ":
 
-		return 43,__pycfg_bag__,[s,square,csr,cr,br]
+		__pycfg_bag__.cr = cr
+		return 43,__pycfg_bag__,[br]
 	if True:
 
-		return 47,__pycfg_bag__,[s,square,csr,cr,br]
+		__pycfg_bag__.cr = cr
+		return 47,__pycfg_bag__,[br]
 	return None,None,None
 def new_hand_item(__pycfg_bag__,*args):
 	return __py_cfg_call(47,__pycfg_bag__,*args)
 def __py_cfg_internal_function_new_hand_item(__pycfg_bag__,*args):
 	try:
 
-		[s,square,csr,cr,br] = list(args)
+		[br] = list(args)
 		br.hand.append("") # □:47
 		pass # □:47
 	except Exception as e:
 		raise e
 	if True:
 
-		return 48,__pycfg_bag__,[s,square,csr,cr,br]
+		return 48,__pycfg_bag__,[br]
 	return None,None,None
 def hand_item_char(__pycfg_bag__,*args):
 	return __py_cfg_call(48,__pycfg_bag__,*args)
 def __py_cfg_internal_function_hand_item_char(__pycfg_bag__,*args):
 	try:
 
-		[s,square,csr,cr,br] = list(args)
+		cr = __pycfg_bag__.cr
+
+		__pycfg_bag__.__delattr__("cr")
+
+		[br] = list(args)
 		br.hand[-1] = br.hand[-1] + br.char # □:48
 		br.char = next(cr.street_name_iter) # □:48
 		pass # □:48
 	except StopIteration:
 
-		return 50,__pycfg_bag__,[s,square,csr,cr,br]
+		__pycfg_bag__.cr = cr
+		return 50,__pycfg_bag__,[br]
 	except Exception as e:
 		raise e
 	if br.char == " ":
 
-		return 43,__pycfg_bag__,[s,square,csr,cr,br]
+		__pycfg_bag__.cr = cr
+		return 43,__pycfg_bag__,[br]
 	if True:
 
-		return 48,__pycfg_bag__,[s,square,csr,cr,br]
+		__pycfg_bag__.cr = cr
+		return 48,__pycfg_bag__,[br]
 	return None,None,None
 def build_continuation(__pycfg_bag__,*args):
 	return __py_cfg_call(50,__pycfg_bag__,*args)
 def __py_cfg_internal_function_build_continuation(__pycfg_bag__,*args):
 	try:
 
-		[s,square,csr,cr,br] = list(args)
+		cr = __pycfg_bag__.cr
+
+		__pycfg_bag__.__delattr__("cr")
+
+		[br] = list(args)
 		continuation = "" # □:50
 		for bag_item in br.bag: # □:50
 		  continuation += "\n\t\t__pycfg_bag__.%s = %s"%(bag_item,bag_item) # □:50
@@ -486,52 +523,60 @@ def __py_cfg_internal_function_build_continuation(__pycfg_bag__,*args):
 		raise e
 	if cr.condition.startswith("except "):
 
-		return 51,__pycfg_bag__,[s,square,csr,cr,continuation]
+		return 51,__pycfg_bag__,[cr,continuation]
 	if True:
 
-		return 53,__pycfg_bag__,[s,square,csr,cr,continuation]
+		return 53,__pycfg_bag__,[cr,continuation]
 	return None,None,None
 def add_exception(__pycfg_bag__,*args):
 	return __py_cfg_call(51,__pycfg_bag__,*args)
 def __py_cfg_internal_function_add_exception(__pycfg_bag__,*args):
 	try:
 
-		[s,square,csr,cr,continuation] = list(args)
+		csr = __pycfg_bag__.csr
+
+		__pycfg_bag__.__delattr__("csr")
+
+		[cr,continuation] = list(args)
 		csr.exceptions.append("\t%s:\n%s" % (cr.condition,continuation)) # □:51
 		pass # □:51
 	except Exception as e:
 		raise e
 	if True:
 
-		return 32,__pycfg_bag__,[s,square,csr]
+		return 32,__pycfg_bag__,[csr]
 	return None,None,None
 def add_condition(__pycfg_bag__,*args):
 	return __py_cfg_call(53,__pycfg_bag__,*args)
 def __py_cfg_internal_function_add_condition(__pycfg_bag__,*args):
 	try:
 
-		[s,square,csr,cr,continuation] = list(args)
+		csr = __pycfg_bag__.csr
+
+		__pycfg_bag__.__delattr__("csr")
+
+		[cr,continuation] = list(args)
 		csr.conditions.append("\tif %s:\n%s" % (cr.condition, continuation)) # □:53
 		pass # □:53
 	except Exception as e:
 		raise e
 	if True:
 
-		return 32,__pycfg_bag__,[s,square,csr]
+		return 32,__pycfg_bag__,[csr]
 	return None,None,None
 def condition_char(__pycfg_bag__,*args):
 	return __py_cfg_call(56,__pycfg_bag__,*args)
 def __py_cfg_internal_function_condition_char(__pycfg_bag__,*args):
 	try:
 
-		[s,square,csr,cr,char] = list(args)
+		[cr,char] = list(args)
 		cr.condition = cr.condition + char # □:56
 		pass # □:56
 	except Exception as e:
 		raise e
 	if True:
 
-		return 36,__pycfg_bag__,[s,square,csr,cr]
+		return 36,__pycfg_bag__,[cr]
 	return None,None,None
 def layout_hand(__pycfg_bag__,*args):
 	return __py_cfg_call(57,__pycfg_bag__,*args)
@@ -563,7 +608,9 @@ def unpack_bag(__pycfg_bag__,*args):
 def __py_cfg_internal_function_unpack_bag(__pycfg_bag__,*args):
 	try:
 
-		[bag] = list(args)
+		bag = __pycfg_bag__.bag
+
+		__pycfg_bag__.__delattr__("bag")
 		bag_iter = iter(bag) # □:58
 		pass # □:58
 	except Exception as e:
@@ -613,68 +660,88 @@ def bag_white_space(__pycfg_bag__,*args):
 def __py_cfg_internal_function_bag_white_space(__pycfg_bag__,*args):
 	try:
 
-		[s,square,csr,cr,br] = list(args)
+		cr = __pycfg_bag__.cr
+
+		__pycfg_bag__.__delattr__("cr")
+
+		[br] = list(args)
 		br.char = next(cr.street_name_iter) # □:61
 		pass # □:61
 	except StopIteration:
 
-		return 65,__pycfg_bag__,[s,square,csr,cr,br]
+		__pycfg_bag__.cr = cr
+		return 65,__pycfg_bag__,[br]
 	except Exception as e:
 		raise e
 	if br.char == "|":
 
-		return 43,__pycfg_bag__,[s,square,csr,cr,br]
+		__pycfg_bag__.cr = cr
+		return 43,__pycfg_bag__,[br]
 	if br.char == " ":
 
-		return 61,__pycfg_bag__,[s,square,csr,cr,br]
+		__pycfg_bag__.cr = cr
+		return 61,__pycfg_bag__,[br]
 	if True:
 
-		return 64,__pycfg_bag__,[s,square,csr,cr,br]
+		__pycfg_bag__.cr = cr
+		__pycfg_bag__.br = br
+		return 64,__pycfg_bag__,[]
 	return None,None,None
 def bag_item_char(__pycfg_bag__,*args):
 	return __py_cfg_call(63,__pycfg_bag__,*args)
 def __py_cfg_internal_function_bag_item_char(__pycfg_bag__,*args):
 	try:
 
-		[s,square,csr,cr,br,bag_item] = list(args)
+		cr = __pycfg_bag__.cr
+
+		__pycfg_bag__.__delattr__("cr")
+
+		br = __pycfg_bag__.br
+
+		__pycfg_bag__.__delattr__("br")
+
+		[bag_item] = list(args)
 		bag_item += br.char # □:63
 		br.char = next(cr.street_name_iter) # □:63
 		pass # □:63
 	except StopIteration:
 
-		return 66,__pycfg_bag__,[s,square,csr,cr,br,bag_item,True]
+		__pycfg_bag__.cr = cr
+		return 66,__pycfg_bag__,[br,bag_item,True]
 	except Exception as e:
 		raise e
 	if br.char == "|":
 
-		return 66,__pycfg_bag__,[s,square,csr,br,bag_item,False]
+		__pycfg_bag__.cr = cr
+		return 66,__pycfg_bag__,[br,bag_item,False]
 	if br.char == " ":
 
-		return 66,__pycfg_bag__,[s,square,csr,cr,br,bag_item,False]
+		__pycfg_bag__.cr = cr
+		return 66,__pycfg_bag__,[br,bag_item,False]
 	if True:
 
-		return 63,__pycfg_bag__,[s,square,csr,cr,br,bag_item]
+		__pycfg_bag__.cr = cr
+		__pycfg_bag__.br = br
+		return 63,__pycfg_bag__,[bag_item]
 	return None,None,None
 def new_bag_item(__pycfg_bag__,*args):
 	return __py_cfg_call(64,__pycfg_bag__,*args)
 def __py_cfg_internal_function_new_bag_item(__pycfg_bag__,*args):
 	try:
-
-		[s,square,csr,cr,br] = list(args)
 		bag_item = "" # □:64
 		pass # □:64
 	except Exception as e:
 		raise e
 	if True:
 
-		return 63,__pycfg_bag__,[s,square,csr,cr,br,bag_item]
+		return 63,__pycfg_bag__,[bag_item]
 	return None,None,None
 def no_bag_items_packed(__pycfg_bag__,*args):
 	return __py_cfg_call(65,__pycfg_bag__,*args)
 def __py_cfg_internal_function_no_bag_items_packed(__pycfg_bag__,*args):
 	try:
 
-		[s,square,csr,cr,br] = list(args)
+		[br] = list(args)
 		br.hand = br.bag # □:65
 		br.bag = [] # □:65
 		pass # □:65
@@ -682,14 +749,14 @@ def __py_cfg_internal_function_no_bag_items_packed(__pycfg_bag__,*args):
 		raise e
 	if True:
 
-		return 50,__pycfg_bag__,[s,square,csr,cr,br]
+		return 50,__pycfg_bag__,[br]
 	return None,None,None
 def add_bag_item(__pycfg_bag__,*args):
 	return __py_cfg_call(66,__pycfg_bag__,*args)
 def __py_cfg_internal_function_add_bag_item(__pycfg_bag__,*args):
 	try:
 
-		[s,square,csr,cr,br,bag_item,stopped] = list(args)
+		[br,bag_item,stopped] = list(args)
 		if bag_item and bag_item != "|": # □:66
 		  br.bag.append(bag_item) # □:66
 		pass # □:66
@@ -697,13 +764,13 @@ def __py_cfg_internal_function_add_bag_item(__pycfg_bag__,*args):
 		raise e
 	if stopped:
 
-		return 65,__pycfg_bag__,[s,square,csr,cr,br]
+		return 65,__pycfg_bag__,[br]
 	if br.char == "|":
 
-		return 43,__pycfg_bag__,[s,square,csr,cr,br]
+		return 43,__pycfg_bag__,[br]
 	if br.char == " ":
 
-		return 61,__pycfg_bag__,[s,square,csr,cr,br]
+		return 61,__pycfg_bag__,[br]
 	return None,None,None
 __pycfg_squares__ = {3:__py_cfg_internal_function_print_header,4:__py_cfg_internal_function_read_line,8:__py_cfg_internal_function_json_load_line,9:__py_cfg_internal_function_invalid_json,10:__py_cfg_internal_function_start_function,11:__py_cfg_internal_function_print_end,24:__py_cfg_internal_function_return_value,25:__py_cfg_internal_function_just_run,26:__py_cfg_internal_function_parse_args,0:__py_cfg_internal_function_initialize_state,28:__py_cfg_internal_function_take_first_line,29:__py_cfg_internal_function_blank_square,30:__py_cfg_internal_function_print_function_line,31:__py_cfg_internal_function_close_out_function_body,32:__py_cfg_internal_function_gather_exceptions_and_conditions,33:__py_cfg_internal_function_print_exceptions,34:__py_cfg_internal_function_print_conditions,35:__py_cfg_internal_function_get_name_and_bag,36:__py_cfg_internal_function_get_condition,37:__py_cfg_internal_function_malformed_condition,38:__py_cfg_internal_function_read_string,39:__py_cfg_internal_function_read_string_char,40:__py_cfg_internal_function_read_string_escape,42:__py_cfg_internal_function_read_bag,43:__py_cfg_internal_function_hand_white_space,47:__py_cfg_internal_function_new_hand_item,48:__py_cfg_internal_function_hand_item_char,50:__py_cfg_internal_function_build_continuation,51:__py_cfg_internal_function_add_exception,53:__py_cfg_internal_function_add_condition,56:__py_cfg_internal_function_condition_char,57:__py_cfg_internal_function_layout_hand,58:__py_cfg_internal_function_unpack_bag,59:__py_cfg_internal_function_next_bag_item,60:__py_cfg_internal_function_unpack_bag_item,61:__py_cfg_internal_function_bag_white_space,63:__py_cfg_internal_function_bag_item_char,64:__py_cfg_internal_function_new_bag_item,65:__py_cfg_internal_function_no_bag_items_packed,66:__py_cfg_internal_function_add_bag_item}
 def __pycfg_call__(__pycfg_square__,__pycfg_bag__,*args):
