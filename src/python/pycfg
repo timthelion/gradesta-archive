@@ -524,6 +524,12 @@ def __py_cfg_internal_function_build_continuation(__pycfg_bag__,*args):
 	if cr.condition.startswith("except "):
 
 		return 51,__pycfg_bag__,[cr,continuation]
+	if cr.condition.strip() == "end":
+
+		return 67,__pycfg_bag__,[cr,continuation]
+	if cr.condition.strip() == "":
+
+		return 68,__pycfg_bag__,[cr,continuation]
 	if True:
 
 		return 53,__pycfg_bag__,[cr,continuation]
@@ -772,7 +778,35 @@ def __py_cfg_internal_function_add_bag_item(__pycfg_bag__,*args):
 
 		return 61,__pycfg_bag__,[br]
 	return None,None,None
-__pycfg_squares__ = {3:__py_cfg_internal_function_print_header,4:__py_cfg_internal_function_read_line,8:__py_cfg_internal_function_json_load_line,9:__py_cfg_internal_function_invalid_json,10:__py_cfg_internal_function_start_function,11:__py_cfg_internal_function_print_end,24:__py_cfg_internal_function_return_value,25:__py_cfg_internal_function_just_run,26:__py_cfg_internal_function_parse_args,0:__py_cfg_internal_function_initialize_state,28:__py_cfg_internal_function_take_first_line,29:__py_cfg_internal_function_blank_square,30:__py_cfg_internal_function_print_function_line,31:__py_cfg_internal_function_close_out_function_body,32:__py_cfg_internal_function_gather_exceptions_and_conditions,33:__py_cfg_internal_function_print_exceptions,34:__py_cfg_internal_function_print_conditions,35:__py_cfg_internal_function_get_name_and_bag,36:__py_cfg_internal_function_get_condition,37:__py_cfg_internal_function_malformed_condition,38:__py_cfg_internal_function_read_string,39:__py_cfg_internal_function_read_string_char,40:__py_cfg_internal_function_read_string_escape,42:__py_cfg_internal_function_read_bag,43:__py_cfg_internal_function_hand_white_space,47:__py_cfg_internal_function_new_hand_item,48:__py_cfg_internal_function_hand_item_char,50:__py_cfg_internal_function_build_continuation,51:__py_cfg_internal_function_add_exception,53:__py_cfg_internal_function_add_condition,56:__py_cfg_internal_function_condition_char,57:__py_cfg_internal_function_layout_hand,58:__py_cfg_internal_function_unpack_bag,59:__py_cfg_internal_function_next_bag_item,60:__py_cfg_internal_function_unpack_bag_item,61:__py_cfg_internal_function_bag_white_space,63:__py_cfg_internal_function_bag_item_char,64:__py_cfg_internal_function_new_bag_item,65:__py_cfg_internal_function_no_bag_items_packed,66:__py_cfg_internal_function_add_bag_item}
+def expand_end(__pycfg_bag__,*args):
+	return __py_cfg_call(67,__pycfg_bag__,*args)
+def __py_cfg_internal_function_expand_end(__pycfg_bag__,*args):
+	try:
+
+		[cr,continuation] = list(args)
+		cr.condition = "except StopIteration" # □:67
+		pass # □:67
+	except Exception as e:
+		raise e
+	if True:
+
+		return 51,__pycfg_bag__,[cr,continuation]
+	return None,None,None
+def default_to_true(__pycfg_bag__,*args):
+	return __py_cfg_call(68,__pycfg_bag__,*args)
+def __py_cfg_internal_function_default_to_true(__pycfg_bag__,*args):
+	try:
+
+		[cr,continuation] = list(args)
+		cr.condition = "True" # □:68
+		pass # □:68
+	except Exception as e:
+		raise e
+	if True:
+
+		return 53,__pycfg_bag__,[cr,continuation]
+	return None,None,None
+__pycfg_squares__ = {3:__py_cfg_internal_function_print_header,4:__py_cfg_internal_function_read_line,8:__py_cfg_internal_function_json_load_line,9:__py_cfg_internal_function_invalid_json,10:__py_cfg_internal_function_start_function,11:__py_cfg_internal_function_print_end,24:__py_cfg_internal_function_return_value,25:__py_cfg_internal_function_just_run,26:__py_cfg_internal_function_parse_args,0:__py_cfg_internal_function_initialize_state,28:__py_cfg_internal_function_take_first_line,29:__py_cfg_internal_function_blank_square,30:__py_cfg_internal_function_print_function_line,31:__py_cfg_internal_function_close_out_function_body,32:__py_cfg_internal_function_gather_exceptions_and_conditions,33:__py_cfg_internal_function_print_exceptions,34:__py_cfg_internal_function_print_conditions,35:__py_cfg_internal_function_get_name_and_bag,36:__py_cfg_internal_function_get_condition,37:__py_cfg_internal_function_malformed_condition,38:__py_cfg_internal_function_read_string,39:__py_cfg_internal_function_read_string_char,40:__py_cfg_internal_function_read_string_escape,42:__py_cfg_internal_function_read_bag,43:__py_cfg_internal_function_hand_white_space,47:__py_cfg_internal_function_new_hand_item,48:__py_cfg_internal_function_hand_item_char,50:__py_cfg_internal_function_build_continuation,51:__py_cfg_internal_function_add_exception,53:__py_cfg_internal_function_add_condition,56:__py_cfg_internal_function_condition_char,57:__py_cfg_internal_function_layout_hand,58:__py_cfg_internal_function_unpack_bag,59:__py_cfg_internal_function_next_bag_item,60:__py_cfg_internal_function_unpack_bag_item,61:__py_cfg_internal_function_bag_white_space,63:__py_cfg_internal_function_bag_item_char,64:__py_cfg_internal_function_new_bag_item,65:__py_cfg_internal_function_no_bag_items_packed,66:__py_cfg_internal_function_add_bag_item,67:__py_cfg_internal_function_expand_end,68:__py_cfg_internal_function_default_to_true}
 def __pycfg_call__(__pycfg_square__,__pycfg_bag__,*args):
 	__pycfg_hand__ = list(args)
 	while __pycfg_square__ is not None:
