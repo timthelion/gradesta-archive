@@ -1,3 +1,0 @@
-#!/bin/bash
-DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
-tgfilter --street-neq=\#submap --rezero 12 $DIR/../mge.tg | tg2dot --horizontal --display

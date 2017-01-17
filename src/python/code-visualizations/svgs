@@ -1,0 +1,9 @@
+#!/bin/bash
+DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+mkdir $DIR/svg/
+tgfilter --street-neq=\#submap --rezero 12 $DIR/../mge.tg | tg2dot --horizontal | dot -Tsvg > $DIR/svg/keymap-hierarchy.svg
+tgfilter --street-prefix=\# $DIR/../mge.tg | tg2dot --horizontal | dot -Tsvg > $DIR/svg/mge-nocomments.svg
+cat $DIR/../mge.tg  | tg2dot --horizontal | dot -Tsvg > $DIR/svg/mge.svg
+cat $DIR/../mge-config.tg  | tg2dot --horizontal | dot -Tsvg > $DIR/svg/mge-config.svg
+cat $DIR/../pycfg.tg  | tg2dot | dot -Tsvg > $DIR/svg/pycfg.svg
+
