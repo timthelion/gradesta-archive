@@ -35,6 +35,7 @@ if __name__ == "__main__":
   parser.add_option("--clip", dest="clip",type="int",default=None,help="Clip square text to a certain length.")
   parser.add_option("--center", dest="center",type="int",default=None,help="Highlight a center square.")
   parser.add_option("--neighborhood", dest="neighborhoodLevel",type="int",default=None,help="Only show squares within the neighborhood of the center square. Set to an integer to specify the size of the neighborhood in terms of the maximum distance from the center.")
+  parser.add_option("--downstream", dest="downstream",action="store_true",default=False,help="Only show squares which are downstream of the center.")
   options,args = parser.parse_args(sys.argv[1:])
   if "TG_CENTER" in os.environ:
     try:
@@ -50,6 +51,9 @@ if __name__ == "__main__":
     markedSquares = {}
   if options.neighborhoodLevel is None:
     neighborhood = tg.sorted_items(0)
+    edge = []
+  if options.downstream:
+    neighborhood = tg.getDownstream(options.center)
     edge = []
   else:
     neighborhood, edge = tg.getNeighborhood(options.center,options.neighborhoodLevel)

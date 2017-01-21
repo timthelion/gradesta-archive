@@ -1,5 +1,5 @@
 #!/usr/bin/python3
-#pycfg is a compiler which compiles text graph python controll flow graphs to normal executable python code. # □:0
+#pycfg is a compiler which compiles text graph python controll flow graphs to normal executable python code.
 # # □:23
 #imports # □:12
 import sys # □:12
@@ -86,7 +86,7 @@ def __py_cfg_internal_function_start_function(__pycfg_bag__,*args):
 		__pycfg_bag__.__delattr__("s")
 
 		[square,name] = list(args)
-		print("def %s(__pycfg_bag__,*args):\n\treturn __py_cfg_call(%i,__pycfg_bag__,*args)\ndef __py_cfg_internal_function_%s(__pycfg_bag__,*args):\n\ttry:" % (name, square.id, name), file=s.args.outfile) # □:10
+		print("def %s(__pycfg_bag__,*__pycfg_args__):\n\treturn __py_cfg_call(%i,__pycfg_bag__,*__pycfg_args__)\ndef __py_cfg_internal_function_%s(__pycfg_bag__,*__pycfg_args__):\n\ttry:" % (name, square.id, name), file=s.args.outfile) # □:10
 		s.squares.append((square.id,name)) # □:10
 		pass # □:10
 	except Exception as e:
@@ -601,7 +601,7 @@ def __py_cfg_internal_function_layout_hand(__pycfg_bag__,*args):
 
 		__pycfg_bag__.__delattr__("hand")
 		if hand: # □:57
-		  print("\n\t\t[%s] = list(args)"% ",".join(hand),file=s.args.outfile) # □:57
+		  print("\n\t\t[%s] = list(__pycfg_args__)"% ",".join(hand),file=s.args.outfile) # □:57
 		pass # □:57
 	except Exception as e:
 		raise e

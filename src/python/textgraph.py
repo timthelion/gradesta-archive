@@ -234,9 +234,9 @@ class TextGraph(collections.abc.MutableMapping):
     self.done.append(transaction)
     self.applyChangesHandler()
 
-  def newLinkedSquare(self,streetedSquareId,streetName,index = None):
+  def newLinkedSquare(self,streetedSquareId,streetName,index = None,squareText=""):
     newSquareId = self.allocSquare()
-    newSquare = Square(newSquareId,"",[])
+    newSquare = Square(newSquareId,squareText,[])
     selectedSquare = copy.deepcopy(self[streetedSquareId])
     newStreet = Street(streetName,newSquareId,selectedSquare.squareId)
     if index is None:
@@ -280,7 +280,7 @@ class TextGraph(collections.abc.MutableMapping):
     self.stageSquareForDeletion(squareId)
     self.applyChanges()
 
-  def getSubgraph(self,squareId,subgraph=None):
+  def getDownstreamIds(self,squareId,subgraph=None):
     square = self[squareId]
     if subgraph is None:
       subgraph = set([square.squareId])
@@ -288,7 +288,14 @@ class TextGraph(collections.abc.MutableMapping):
       subgraph.update([square.squareId])
     for street in square.streets:
       if not street.destination in subgraph:
-        subgraph.update(self.getSubgraph(street.destination,subgraph=subgraph))
+        subgraph.update(self.getDownstreamIds(street.destination,subgraph=subgraph))
+    return subgraph
+
+  def getDownstream(self,squareId):
+    subgraphIds = self.getDownstreamIds(squareId)
+    subgraph = []
+    for squareId in subgraphIds:
+      subgraph.append(self[squareId])
     return subgraph
 
   def getNextSibling(self,squareId):
@@ -305,8 +312,8 @@ class TextGraph(collections.abc.MutableMapping):
             return street.destination
     return squareId
 
-  def deleteTree(self,squareId):
-    squaresForDeletion = set(self.getTree(squareId))
+  def deleteDownstream(self,squareId):
+    squaresForDeletion = set(self.getDownstream(squareId))
     for square in self:
       if not square.squareId in squaresForDeletion:
         newStreets = []
@@ -395,12 +402,14 @@ class TextGraph(collections.abc.MutableMapping):
     return finalNeighborhood, oldEdge
 
 class TextGraphFile(TextGraph):
-  def __init__(self,filename):
+  def __init__(self,filename=None,file=None):
     TextGraph.__init__(self)
     self.filename = filename
     self.header = ""
     if filename is None:
-      pass
+      if file is not None:
+        filename = file.name 
+        self.json = file.read()
     elif filename.startswith("http://"):
       import urllib.request
       try:
