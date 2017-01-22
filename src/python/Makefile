@@ -21,3 +21,16 @@ mge-debug:pycfg mge.tg
 all:tg2make pycfg mge
 	
 
+code-visualizations/svgs:
+	
+
+code-visualizations/keybindings-filled.tg:code-visualizations/keypress-callgraph.tg mge-config.tg code-visualizations/modes.tg code-visualizations/keybindings-generator
+	./code-visualizations/keybindings-generator --config-file=mge-config.tg --modes-file=code-visualizations/modes.tg --keypress-call-graph-file=code-visualizations/keypress-callgraph.tg --out=code-visualizations/keybindings-filled.tg
+
+code-visualizations/keypress-callgraph.tg:mge.tg
+	tgfilter --street-neq=\#submap --rezero 12 mge.tg > code-visualizations/keypress-callgraph.tg
+
+code-visualizations/keybindings-generator:pycfg code-visualizations/keybindings-generator.tg
+	tgtemplate code-visualizations/keybindings-generator.tg --comment-prefix=\ \# --dont-comment-square-zero > code-visualizations/keybindings-generator
+	chmod +x code-visualizations/keybindings-generator
+

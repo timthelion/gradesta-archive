@@ -1,1 +1,9 @@
 mge
+tg2make
+tg_pb2.py
+mge-debug
+code-visualizations/keypress-handlers.py
+code-visualizations/keypress-callgraph.tg
+code-visualizations/keybindings-generator
+code-visualizations/keybindings-filled.tg
+
