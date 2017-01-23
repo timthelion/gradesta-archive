@@ -251,8 +251,8 @@ class TextGraph(collections.abc.MutableMapping):
   def interjectSquare(self,origionalSquareId,streetIndex):
     newSquareId = self.allocSquare()
     selectedSquare = copy.deepcopy(self[origionalSquareId])
-    newSquare = Square(newSquareId,"",[selectedSquare.streets[streetIndex]])
-    newStreet = Street("",newSquareId,selectedSquare.squareId)
+    newSquare = Square(newSquareId,"",[Street("",selectedSquare.streets[streetIndex].destination,newSquareId)])
+    newStreet = Street(selectedSquare.streets[streetIndex].name,newSquareId,selectedSquare.squareId)
     selectedSquare.streets[streetIndex] = newStreet
     self.stageSquare(newSquare)
     self.stageSquare(selectedSquare)
