@@ -42,21 +42,21 @@ if __name__ == "__main__":
       options.center = int(os.environ["TG_CENTER"])
     except ValueError:
       sys.exit("TG_CENTER env var set, but not a valid integer.")
-  tg = TextGraph()
-  for line in iter(sys.stdin.readline,''):
-    tg.server.send_raw(line[:-1])
+  tg = TextGraphFile(file=sys.stdin)
   if options.center is not None:
     markedSquares = {options.center:{"style":"filled","fillcolor":"black","fontcolor":"white"}}
   else:
     markedSquares = {}
   if options.neighborhoodLevel is None:
-    neighborhood = tg.sorted_items(0)
+    neighborhood,_ = tg.getNeighborhood(0)
     edge = []
   if options.downstream:
     neighborhood = tg.getDownstream(options.center)
     edge = []
-  else:
+  if options.neighborhoodLevel is not None and options.center is not None:
     neighborhood, edge = tg.getNeighborhood(options.center,options.neighborhoodLevel)
+  elif options.neighborhoodLevel is not None:
+    sys.exit("In order to use the neighborhood option you must set a center for your neighborhood with the --center flag.")
   dot = "digraph graphname{\n"
   if options.horizontal:
     dot += "  rankdir=LR\n"
