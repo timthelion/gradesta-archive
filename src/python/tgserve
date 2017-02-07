@@ -37,12 +37,7 @@ class TextGraphServer():
       else:
         sys.exit(error)
     self.lineNo += 1
-    resultingSquares = []
-    returnValues = []
-    if self.readonly:
-      readWritePermissions = "Read only"
-    else:
-      readWritePermissions = None
+    updatedSquares = set()
     # An empty list returns all squares
     if inputObject == []:
       for squareId in self.graph.keys():
@@ -82,8 +77,7 @@ class TextGraphServer():
         else:
           sys.exit(error)
       if self.readonly:
-        resultingSquares.append(self.graph[squareId]+[])
-        returnValues.append([squareId,"Read only",["Read only"]])
+        updatedSquares.add(squareId)
         continue
       try:
         text = square[1]
@@ -91,8 +85,7 @@ class TextGraphServer():
         try:
           _,text,streets = self.graph[squareId]
         except KeyError:
-          resultingSquares.append([squareId,None,[],[]])
-          returnValues.append([squareId,"Square does not exist.","Square does not exist."])
+          updatedSquares.add(squareId)
           continue
       try:
         streets = square[2]
@@ -100,8 +93,7 @@ class TextGraphServer():
         try:
           _,_,streets = self.graph[squareId]
         except KeyError:
-          resultingSquares.append([squareId,None,[],[]])
-          returnValues.append([squareId,"Square does not exist.","Square does not exist."])
+          updatedSquares.add(squareId)
           continue
       if text is None:
         try:
@@ -110,11 +102,11 @@ class TextGraphServer():
           for destination in self.streetsByDestination.keys():
             self.streetsByDestination[destination] = [s for s in self.streetsByDestination[destination] if s[0] != squareId]
         except KeyError:
-          resultingSquares.append([squareId,None,[],[]])
-          returnValues.append([squareId,"Square does not exist.","Square does not exist."])
+          updatedSquares.add(squareId)
           continue
       else:
         if squareId in self.graph:
+          # Remove cached incomming streats from old version of square.
           for street in self.graph[squareId][2]:
             try:
               self.streetsByDestination[street[1]] = [incommingStreet for incommingStreet in self.streetsByDestination[street[1]] if incommingStreet[0] != squareId]
@@ -122,6 +114,7 @@ class TextGraphServer():
               pass
         self.graph[squareId] = [squareId,text,streets]
         for name,destination in streets:
+          updatedSquares.add(destination)
           if not destination in self.streetsByDestination:
             self.streetsByDestination[destination] = []
           self.streetsByDestination[destination].append([squareId,name])
@@ -130,8 +123,8 @@ class TextGraphServer():
         incommingStreets = self.streetsByDestination[squareId]
       else:
         incommingStreets = []
-      resultingSquares.append([squareId,text,streets,incommingStreets])
-      returnValues.append([squareId,readWritePermissions,[readWritePermissions for _ in streets]])
+      updatedSquares.add(squareId)
+    resultingSquares, returnValues = self.buildResponce(updatedSquares)
     sys.stdout.write(json.dumps(resultingSquares)+"\n")
     sys.stdout.flush()
     sys.stdout.write(json.dumps(returnValues)+"\n")
@@ -140,6 +133,28 @@ class TextGraphServer():
       print(">>" + json.dumps(resultingSquares), file=sys.stderr)
       print(">>" + json.dumps(returnValues), file=sys.stderr)
       print("", file=sys.stderr)
+
+  def buildResponce(self,updatedSquares):
+    resultingSquares = []
+    returnValues = []
+    if self.readonly:
+      readWritePermissions = "Read only"
+    else:
+      readWritePermissions = None
+    for squareId in updatedSquares:
+      try:
+        square = self.graph[squareId]
+      except KeyError:
+        resultingSquares.append([squareId,None,[],[]])
+        returnValues.append([squareId,"Square does not exist.","Square does not exist."])
+        continue
+      try:
+        squareWithIncommingStreets = square+[self.streetsByDestination[squareId]]
+      except KeyError:
+        squareWithIncommingStreets = square+[[]]
+      resultingSquares.append(squareWithIncommingStreets)
+      returnValues.append([squareId,readWritePermissions,[readWritePermissions for _ in square[2]]])
+    return resultingSquares,returnValues
 
   def repl(self):
     import readline

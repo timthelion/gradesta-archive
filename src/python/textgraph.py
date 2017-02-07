@@ -107,7 +107,8 @@ def getSquareFromList(square,permissions):
   return Square(squareId,text,streets,readonly = textPermission is not None,incommingStreets = incommingStreets)
 
 class TextGraphServer():
-  def __init__(self):
+  def __init__(self,logger=None):
+    self.logger = logger
     self.proc = subprocess.Popen(["tgserve"],stdin=subprocess.PIPE,stdout=subprocess.PIPE,stderr=subprocess.PIPE,close_fds=True)
 
   def send(self,query):
@@ -138,23 +139,30 @@ class TextGraphServer():
       returnCodes = json.loads(returnCodesString)
     except ValueError:
       sys.exit("Response:"+responseString+"\nMalformed return code: "+returnCodeString)
+    if self.logger is not None:
+      self.logger.log("query:"+queryString)
+      self.logger.log("response:"+responseString)
+      self.logger.log("return code:"+returnCodesString)
     return (response,returnCodes)
 
 class TextGraph(collections.abc.MutableMapping):
-  def __init__(self):
+  def __init__(self,logger=None):
     self.stagedSquares = []
     self.undone = []
     self.done = []
+    self.logger = logger
     self.applyChangesHandler = lambda: None
-    self.server = TextGraphServer()
+    self.server = TextGraphServer(logger=logger)
     self.edited = False
     self._cache = {}
 
   def __getitem__(self, key):
     if not key in self._cache:
-      response,returnCodes = self.server.send([key])
-      self._cache[key] = getSquareFromList(response[0],returnCodes[0])
-    return self._cache[key]
+      responses,returnCodes = self.server.send([key])
+      for response,returnCode in zip(responses,returnCodes):
+        square = getSquareFromList(response,returnCode)
+        self._cache[square.squareId] = square
+    return copy.deepcopy(self._cache[key])
 
   def __setitem__(self, squareId, square):
     response,returnCodes = self.server.send(square.list)
@@ -184,6 +192,8 @@ class TextGraph(collections.abc.MutableMapping):
     return response[0][0]
 
   def stageSquare(self,square):
+    self.logger.log("Staging square %i."%square.squareId)
+    self.logger.log("Staging square %i."%square.squareId)
     self.stagedSquares.append(copy.deepcopy(square))
 
   def applyChanges(self):
@@ -191,12 +201,21 @@ class TextGraph(collections.abc.MutableMapping):
     didSomething = False
     for square in self.stagedSquares:
       prevState = self[square.squareId]
+      self.logger.log("Checking if staged square, "+str(square.squareId)+" has changed.")
+      self.logger.log("before: "+str(prevState))
+      self.logger.log("after: "+str(square))
       didNow.append((copy.deepcopy(prevState),copy.deepcopy(square)))
       if square.text is None:
         didSomething = True
-      elif not (prevState.text == square.text and prevState.streets == square.streets):
+      if not prevState.text == square.text:
         didSomething = True
+      for street1,street2 in zip(square.streets,prevState.streets):
+        if not street1 == street2:
+          didSomething = True
+      if len(square.streets) != len(prevState.streets):
+          didSomething = True
     if didSomething:
+      self.logger.log("Changed.")
       self.undone = []
       for square in self.stagedSquares:
         self[square.squareId] = square
@@ -402,8 +421,8 @@ class TextGraph(collections.abc.MutableMapping):
     return finalNeighborhood, oldEdge
 
 class TextGraphFile(TextGraph):
-  def __init__(self,filename=None,file=None):
-    TextGraph.__init__(self)
+  def __init__(self,filename=None,file=None,logger=None):
+    TextGraph.__init__(self,logger=logger)
     self.filename = filename
     self.header = ""
     if filename is None:
