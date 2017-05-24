@@ -18,7 +18,7 @@ mge-debug:pycfg mge.tg
 	tgtemplate mge.tg --comment-prefix=\ \# --dont-comment-square-zero > mge-debug
 	chmod +x ./mge-debug
 
-all:tg2make pycfg mge
+all:tg2make mge module-explorer
 	
 
 code-visualizations/svgs:
@@ -33,4 +33,8 @@ code-visualizations/keypress-callgraph.tg:mge.tg
 code-visualizations/keybindings-generator:pycfg code-visualizations/keybindings-generator.tg
 	tgtemplate code-visualizations/keybindings-generator.tg --comment-prefix=\ \# --dont-comment-square-zero > code-visualizations/keybindings-generator
 	chmod +x code-visualizations/keybindings-generator
+
+module-explorer:pycfg module-explorer.tg
+	tgtemplate module-explorer.tg --comment-prefix=\ \# --dont-comment-square-zero > module-explorer
+	chmod +x ./module-explorer
 
