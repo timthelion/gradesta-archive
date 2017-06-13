@@ -18,7 +18,7 @@ mge-debug:pycfg mge.tg
 	tgtemplate mge.tg --comment-prefix=\ \# --dont-comment-square-zero > mge-debug
 	chmod +x ./mge-debug
 
-all:tg2make mge module-explorer
+all:tg2make mge module-explorer gradesta_pb2.py
 	
 
 code-visualizations/svgs:
@@ -37,4 +37,7 @@ code-visualizations/keybindings-generator:pycfg code-visualizations/keybindings-
 module-explorer:pycfg module-explorer.tg
 	tgtemplate module-explorer.tg --comment-prefix=\ \# --dont-comment-square-zero > module-explorer
 	chmod +x ./module-explorer
+
+gradesta_pb2.py:gradesta.proto
+	protoc gradesta.proto --python_out=./
 
