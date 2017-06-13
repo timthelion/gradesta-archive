@@ -22,6 +22,8 @@ Affero General Public License along with this
 program. If not, see
 <http://www.gnu.org/licenses/>.
 */
+syntax         =          "proto3"            ;
+package                    gradesta           ;
 //Index
 // §1 What is a Gradesta graph?
 // §2 What is the architecture of the Gradesta
@@ -364,11 +366,7 @@ message   Identifier                          {
 //   *************************************   //
 //    §5 Back to the protocol definition
 //   *************************************   //
-// -------------------------------
 //
-syntax         =          "proto3"            ;
-package                    tg                 ;
-
 //   *************************************   //
 //              §6 Starting up               //
 //   *************************************   //
@@ -498,6 +496,27 @@ repeated  Cell          cells            = 3; }
 // The manager will automatically notify
 // clients to whom the changes are relevant.
 //
+// Creating new cells is also done through the
+// set command. It is the clients
+// responsibility to make sure that new cells
+// have unique IDs. The ID should be
+// constructed in the form
+// "<client-id>-<iso-8601-timestamp:
+// 2017-06-12T22:19:39+00:00>-<differentiator>"
+// Where the timestamp refers to the current
+// time and the differentiator is a number and
+// is only used when creating multiple cells at
+// the same time (within the same second).
+//
+// Set can also be used to re-order stacks.
+// When setting a cell's prev link, the next
+// link of the newly linked cell will be
+// automatically set by the manager and
+// whatever was linked previously will be
+// dissconnected. The same applies when setting
+// next links. This ensures that the stacks
+// always remain doubly linked lists.
+//
 // ┌─────────────┬────────────┬───────────────┐
 // │ Service     │ Manager    │ Client        │
 // ├─────────────┼────────────┼───────────────┤
@@ -546,7 +565,7 @@ repeated  Resource      resources        = 4; }
 // │Set          │            │               │
 // ├─────────────┼────────────┼───────────────┤
 // │             │ PUB   via →│               │
-r/ │             │update.sock │               │
+// │             │update.sock │               │
 // │             │Set         │               │
 // ├─────────────┼────────────┼───────────────┤
 // │             │← REPLY via │               │
@@ -578,10 +597,6 @@ r/ │             │update.sock │               │
 // │             │NULL        │               │
 // └─────────────┴────────────┴───────────────┘
 //
-message   NeighborhoodSubscription            {
-          string        client_id        = 1;
-          Neighborhood  neighborhood     = 2; }
-
 //   *************************************   //
 //     §11 Interacting with cells            //
 //   *************************************   //
