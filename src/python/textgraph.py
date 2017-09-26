@@ -156,13 +156,16 @@ class TextGraph(collections.abc.MutableMapping):
     self.edited = False
     self._cache = {}
 
-  def __getitem__(self, key):
+  def get_item_no_copy(self,key):
     if not key in self._cache:
       responses,returnCodes = self.server.send([key])
       for response,returnCode in zip(responses,returnCodes):
         square = getSquareFromList(response,returnCode)
         self._cache[square.squareId] = square
-    return copy.deepcopy(self._cache[key])
+    return self._cache[key]
+
+  def __getitem__(self, key):
+    return copy.deepcopy(self.get_item_no_copy(key))
 
   def __setitem__(self, squareId, square):
     response,returnCodes = self.server.send(square.list)
@@ -362,12 +365,14 @@ class TextGraph(collections.abc.MutableMapping):
     for line in text.splitlines():
       self.server.send_raw(line)
 
-  def lookupStreetedSquare(self,squareId,text):
+  def lookupStreetedSquare(self,squareId,text,no_copy=False):
     """
     Look up square which is connected to squareId. If no matching square exists, returns None.
     """
-    for street in self[squareId].streets:
-      if self[street.destination].text == text:
+    for street in self.get_item_no_copy(squareId).streets:
+      if self.get_item_no_copy(street.destination).text == text:
+        if no_copy:
+          return self.get_item_no_copy(street.destination)
         return self[street.destination]
     return None
 
@@ -375,10 +380,10 @@ class TextGraph(collections.abc.MutableMapping):
     currentSquare = root
     for text in contents:
       try:
-        currentSquare = self.lookupStreetedSquare(currentSquare,text).squareId
+        currentSquare = self.lookupStreetedSquare(currentSquare,text,no_copy=True).squareId
       except AttributeError:
         raise KeyError("No square with text "+text+" is linked to from square "+str(currentSquare))
-    return currentSquare
+    return copy.deepcopy(currentSquare)
 
   def getNeighborhoodIds(self,center,level=None):
     squareIdsInNeighborhood = set()

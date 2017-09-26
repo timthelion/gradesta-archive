@@ -41,3 +41,10 @@ module-explorer:pycfg module-explorer.tg
 gradesta_pb2.py:gradesta.proto
 	protoc gradesta.proto --python_out=./
 
+gradesta.proto:gradesta.proto.tg
+	tgtemplate gradesta.proto.tg --comment-prefix=\ \/\/ --dont-comment-square-zero > gradesta.proto
+
+gradesta-manager:gradesta_pb2.py gradesta-manager.tg
+	tgtemplate gradesta-manager.tg --comment-prefix=\ \# --dont-comment-square-zero > gradesta-manager
+	chmod +x ./gradesta-manager
+

@@ -65,7 +65,7 @@ if __name__ == "__main__":
   edges = ""
   for square in neighborhood:
     if square.text is not None:
-      markings = ""
+      markings = ",fontname = \"courier\""
       if square.squareId in markedSquares:
         for attr,value in markedSquares[square.squareId].items():
           markings += "," + attr + " = " + value

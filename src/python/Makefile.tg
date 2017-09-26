@@ -17,6 +17,7 @@
 [20, "module-explorer\ntgtemplate module-explorer.tg --comment-prefix=\\ \\# --dont-comment-square-zero > module-explorer\nchmod +x ./module-explorer", [["", 12]]]
 [21, "module-explorer.tg", [["", 20]]]
 [22, "gradesta_pb2.py\nprotoc gradesta.proto --python_out=./", [["", 12], ["", 24]]]
-[23, "gradesta.proto", [["", 22]]]
+[23, "gradesta.proto\ntgtemplate gradesta.proto.tg --comment-prefix=\\ \\/\\/ --dont-comment-square-zero > gradesta.proto", [["", 22]]]
 [24, "gradesta-manager\ntgtemplate gradesta-manager.tg --comment-prefix=\\ \\# --dont-comment-square-zero > gradesta-manager\nchmod +x ./gradesta-manager", []]
 [25, "gradesta-manager.tg", [["", 24]]]
+[26, "gradesta.proto.tg", [["", 23]]]

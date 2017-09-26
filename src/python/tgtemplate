@@ -22,10 +22,12 @@ parser.add_argument('--comment-prefix', dest='commentPrefix', default=None, help
 parser.add_argument('--dont-comment-square-zero', dest='dont_comment_square_zero',action="store_true", default=False, help='Don\'t add a squareId comment for square zero.')
 args = parser.parse_args()
 indentation = ""
+printed_squares = set()
 
 for file in args.files:
   tg = TextGraphFile(file)
   def printSquares(square,indentation):
+    printed_squares.add(square)
     squareIdComment = ""
     if not args.commentPrefix is None:
       if not (square == 0 and args.dont_comment_square_zero):
@@ -59,5 +61,6 @@ for file in args.files:
         newIndentation = indentation + json.loads('"' + street.name[1:] + '"')
       else:
         newIndentation = indentation
-      printSquares(street.destination,newIndentation)
+      if street.destination not in printed_squares:
+        printSquares(street.destination,newIndentation)
   printSquares(0,"")

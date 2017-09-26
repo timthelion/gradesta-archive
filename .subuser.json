@@ -1,1 +1,10 @@
-{"image-sources-dir": "subuser"}
+{
+ "image-sources-dir": "subuser",
+ "explicit-image-sources": {
+  "tg": {
+   "image-file": "./subuser/tg/image/SubuserImagefile",
+   "permissions-file": "./subuser/tg/permissions.json",
+   "build-context": "./"
+  }
+ }
+}

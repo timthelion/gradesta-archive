@@ -1,0 +1,11 @@
+#!/usr/bin/python3
+import urwid
+
+def show_or_exit(key):
+    if key is 'q':
+        raise urwid.ExitMainLoop()
+
+edit = urwid.Edit(u"",multiline=True)
+fill = urwid.Filler(urwid.Pile([edit]), 'top')
+loop = urwid.MainLoop(fill, unhandled_input=show_or_exit,handle_mouse=False)
+loop.run()
