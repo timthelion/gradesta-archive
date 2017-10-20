@@ -206,7 +206,7 @@
 [245, "if command == \"new-square-end-of-streets\":", [["^\\t", 246]]]
 [246, "self.view.selection = self.view.mgv.streets.newStreetToNewSquare(useDefaultStreetName=True)\nself.view.mgv.focus_item = self.view.mgv.currentSquareWidget\nself.view.mode = 'insert'", []]
 [247, "if command == \"new-square-beginning-of-streets\":", [["^\\t", 248]]]
-[248, "self.view.selection = self.view.streets.newStreetToNewSquare(useDefaultStreetName=True, index = 0)\nself.view.focus_item = self.view.currentSquareWidget\nself.view.mode = 'insert'", []]
+[248, "self.view.selection = self.view.mgv.streets.newStreetToNewSquare(useDefaultStreetName=True, index = 0)\nself.view.focus_item = self.view.mgv.currentSquareWidget\nself.view.mode = 'insert'", []]
 [256, "return super(ViEdit,self).keypress(size,'delete')", []]
 [259, "if command == \"send-key-onwards\":", [["^\\t", 260]]]
 [260, "value = super(CurrentSquare,self).keypress(size,key)\nreturn value", []]

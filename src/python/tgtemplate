@@ -58,7 +58,10 @@ for file in args.files:
         continue
       if street.name.startswith('^'):
         # The json load here is in order to parse escape characters such as '\t'...
-        newIndentation = indentation + json.loads('"' + street.name[1:] + '"')
+        try:
+          newIndentation = indentation + json.loads('"' + street.name[1:] + '"')
+        except json.decoder.JSONDecodeError as e:
+          sys.exit("Failed to load street name %s at square %i.\n%s"%(street.name, square,str(e)))
       else:
         newIndentation = indentation
       if street.destination not in printed_squares:

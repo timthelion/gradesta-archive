@@ -48,3 +48,14 @@ gradesta-manager:gradesta_pb2.py gradesta-manager.tg
 	tgtemplate gradesta-manager.tg --comment-prefix=\ \# --dont-comment-square-zero > gradesta-manager
 	chmod +x ./gradesta-manager
 
+test:gradesta-manager test/gradesta/clients/initialize-get-bookmarks test/gradesta/services/echo-service
+	
+
+test/gradesta/clients/initialize-get-bookmarks:gradesta_pb2.py gradesta-manager test/gradesta/clients/initialize-get-bookmarks.tg
+	tgtemplate test/gradesta/clients/initialize-get-bookmarks.tg --comment-prefix=\ \# --dont-comment-square-zero > test/gradesta/clients/initialize-get-bookmarks
+	chmod +x ./test/gradesta/clients/initialize-get-bookmarks
+
+test/gradesta/services/echo-service:gradesta_pb2.py test/gradesta/services/echo-service.tg
+	tgtemplate ./test/gradesta/services/echo-service.tg --comment-prefix=\ \# --dont-comment-square-zero > test/gradesta/services/echo-service
+	chmod +x ./test/gradesta/services/echo-service
+
