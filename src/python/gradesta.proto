@@ -14,25 +14,26 @@ message ServiceState { // □:43
 } // □:43
 message Cell { // □:3
  optional string     text        =  1; // □:3
- optional string     tags        =  2; // □:3
  // □:3
- optional string     up          =  3; // □:3
- optional string     down        =  4; // □:3
- optional Link       left        =  5; // □:3
- optional Link       right       =  6; // □:3
+ optional string     up          =  2; // □:3
+ optional string     down        =  3; // □:3
+ optional Link       left        =  4; // □:3
+ optional Link       right       =  5; // □:3
+ // □:3
+ map<string, Link>   related     = 6; // □:3
  // □:3
  message Runtime { // □:3
   optional bool       editable    =  1;  // □:3
  // □:3
-  optional int64      edit_count  =  2; // □:3
-  optional int64      click_count =  3; // □:3
+  optional uint64     edit_count  =  2; // □:3
+  optional uint64     click_count =  3; // □:3
   enum Status { // □:3
-   NORMAL       = 0; // □:3
-   DELETED      = 1; // □:3
-   IN_VIEW      = 2; // □:3
-   OUT_OF_VIEW  = 3; // □:3
-   NON_EXISTANT = 4; // □:3
-   EDIT_FAILED  = 5; // □:3
+   NORMAL       = 1; // □:3
+   DELETED      = 2; // □:3
+   IN_VIEW      = 3; // □:3
+   OUT_OF_VIEW  = 4; // □:3
+   NON_EXISTANT = 5; // □:3
+   EDIT_FAILED  = 6; // □:3
   } // □:3
   optional Status     status      =  4; // □:3
   optional string     edit_error  =  5;  // □:3
@@ -40,41 +41,52 @@ message Cell { // □:3
  optional Runtime    runtime     = 7; // □:3
 } // □:3
 message Link { // □:5
- required string service = 1; // □:5
- required string path    = 2; // □:5
- required string cell_id = 3; // □:5
+ required string service  = 1; // □:5
+ required string path     = 2; // □:5
+ required string cell_id  = 3; // □:5
+ optional bool   boundary = 4; // □:5
 } // □:5
 message Bookmark { // □:45
  optional string cell_id = 1; // □:45
  enum Status { // □:45
-  NORMAL  = 1; // □:45
-  DELETED = 2; // □:45
+  NORMAL       = 1; // □:45
+  DELETED      = 2; // □:45
  } // □:45
- optional Status status  = 2; // □:45
+ optional Status status  = 2 [default = NORMAL] ; // □:45
 } // □:45
 message Client { // □:46
- map<string,Cursor>    cursors           = 1; // Map cursor_name to Cursor objects. // □:46
+ map<string,Selection> selections        = 1; // Map selection_name to Selection objects. // □:46
  enum Status { // □:46
-  NORMAL         = 0; // □:46
-  INITIALIZING   = 1; // □:46
-  DISCONNECTING  = 2; // □:46
+  NORMAL         = 1; // □:46
+  INITIALIZING   = 2; // □:46
+  DISCONNECTING  = 3; // □:46
  } // □:46
  optional Status       status            = 2; // □:46
  // client metadata // □:46
  optional string       name              = 3; // □:46
  optional string       source_url        = 4; // □:46
 } // □:46
-message Cursor { // □:47
+message Selection { // □:47
  required string     name               = 1; // □:47
- optional string     center             = 2; // □:47
- optional int64      center_stack_depth = 3; // □:47
- optional uint32     directions         = 4; // □:47
- optional int64      max_distance       = 5; // □:47
- optional int64      max_cells          = 6; // □:47
+ repeated Cursor     selected           = 2; // □:47
+ optional uint64     update_count       = 3; // □:47
  enum Status { // □:47
   PRIMARY      = 1; // □:47
   SECONDARY    = 2; // □:47
-  DELETED      = 3; // □:47
+  INTERNAL     = 3; // □:47
+  DELETED      = 4; // □:47
  } // □:47
- optional Status     status             = 7; // □:47
+ optional Status     status             = 4; // □:47
 } // □:47
+message Cursor { // □:99
+ optional string     center             = 1; // □:99
+ optional uint64     center_stack_depth = 2; // □:99
+ optional uint32     directions         = 3; // □:99
+ optional uint64     max_distance       = 4; // □:99
+ optional uint64     max_cells          = 5; // □:99
+ repeated TextCursor text_cursors       = 6; // □:99
+} // □:99
+message TextCursor { // □:104
+ optional uint64     index              = 1; // □:104
+ optional uint64     len                = 2; // □:104
+} // □:104

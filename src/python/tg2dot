@@ -35,6 +35,8 @@ if __name__ == "__main__":
   parser.add_option("--just-dots", dest="just_dots",action="store_true",default=False,help="Don't show labels, just the shape of the graph.")
   parser.add_option("--clip", dest="clip",type="int",default=None,help="Clip square text to a certain length.")
   parser.add_option("--center", dest="center",type="int",default=None,help="Highlight a center square.")
+  parser.add_option("--no-square-numbers", dest="squareNumbers",action="store_false",default=True,help="Don't include square numbers")
+  parser.add_option("--no-street-numbers", dest="streetNumbers",action="store_false",default=True,help="Don't include street numbers")
   parser.add_option("--neighborhood", dest="neighborhoodLevel",type="int",default=None,help="Only show squares within the neighborhood of the center square. Set to an integer to specify the size of the neighborhood in terms of the maximum distance from the center.")
   parser.add_option("--downstream", dest="downstream",action="store_true",default=False,help="Only show squares which are downstream of the center.")
   options,args = parser.parse_args(sys.argv[1:])
@@ -84,7 +86,8 @@ if __name__ == "__main__":
         labelstring += str(square.squareId)
       else:
         labelstring += '"' + text.replace('\\','\\\\').replace('\n','\\l').replace('"','\\"') + '\\l'
-        labelstring += str(square.squareId)
+        if options.squareNumbers:
+          labelstring += str(square.squareId)
         labelstring += '\\r\"'
       labels += str(square.squareId)+"[shape=rect ordering=out"
       labels += " label="+labelstring
@@ -98,7 +101,10 @@ if __name__ == "__main__":
           edgeColoring = ",style = bold, color = red"
         if street.origin == options.center:
           edgeColoring = ",style = bold, color = green"
-        labelstring = str(n)+":"+street.name.replace('\\','\\\\').replace('"','\\"')
+        labelstring = ""
+        if options.streetNumbers:
+          labelstring += str(n)+":"
+        labelstring += street.name.replace('\\','\\\\').replace('"','\\"')
         edges += str(square.squareId)+" -> "+str(street.destination)
         if not options.just_dots:
           edges += " [label=\""+labelstring+'" '+edgeColoring+"]"
