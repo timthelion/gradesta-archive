@@ -217,19 +217,27 @@ function build_states() {
   respond("manager.gradesock");
  }
 
- function flicker(sockets, attr) {
-  console.log(sockets);
-  for (i in state.sockets) {
-   if (sockets.includes(state.sockets[i].name)) {
-    state.sockets[i][attr] = true;
+ function flicker_(fdict) {
+  function set_flag(value) {
+   for (i in state.sockets) {
+    for (sock in fdict) {
+     if (sock == state.sockets[i].name) {
+      state.sockets[i][fdict[sock]] = value;
+     }
+    }
    }
   } 
+  set_flag(true);
   next_state();
-  for (i in state.sockets) {
-   if (sockets.includes(state.sockets[i].name)) {
-    state.sockets[i][attr] = false;
-   }
-  }  
+  set_flag(false);
+ }
+
+ function flicker(sockets, attr) {
+  fdict = {}
+  for (i in sockets) {
+   fdict[sockets[i]] = attr
+  }
+  flicker_(fdict);
  }
 
  function sends(sockets) {
@@ -242,12 +250,24 @@ function build_states() {
  function respond(socket) {
   flicker([socket],"responding");
  }
+ function respond_to_client(client) {
+  respond("clients/C"+client+"/client.gradesock");
+ }
  function send_to_all_clients() {
   clients = []
   for (i = 1; i <= num_clients; i++) {
    clients.push("clients/C"+i+"/client.gradesock");
   }
   sends(clients)
+ }
+ function send_to_all_clients_with_response(client_to_respond_to) {
+  c = client_to_respond_to;
+  fdict = {}
+  for (i = 1; i <= num_clients; i++) {
+   fdict["clients/C"+i+"/client.gradesock"] = client_to_respond_to == i ? "responding" : "sending"
+  }
+  console.log(fdict);
+  flicker_(fdict);
  }
  ////
  bookmark("Startup");
@@ -319,8 +339,38 @@ function build_states() {
  next_state();
  state.status = "The same procedure applies for service side updates to the service error_log and cell_template.";
  next_state();
- bookmark("Setting a cell client side");
- state.status = "";
+ bookmark("Setting service state fields client side");
+ state.status = "When a client sets service state fields such as bookmarks and cells, it passes the changes to the client-manager.";
+ send("clients/C1/manager.gradesock");
+ state.status = "The source of truth about the service state is the service itself. Therefore, the client-manager does NOT send these changes directly to the clients via the notification-manager, but rather sends them first to the manager.";
+ send("manager/clients.gradesock");
+ state.status = "The manager then sends the changes on to the service.";
+ send("service.gradesock");
+ state.status = "Which then accepts/rejects/modifies them and sends them (potentially along with a series of unrelated changes) back to the manager.";
+ respond("manager.gradesock");
+ state.status = "If these changes efected graph topology, the manager will send more requests on to the service untill satisfied. Otherwise, it sends the changes on to the notification-manager.";
+ send("manager/notifications.gradesock");
+ state.status = "The notification manager will then forward the changes on to all clients.";
+ send_to_all_clients_with_response(1);
+ next_state(); 
+ bookmark("When client side changes are rejected by the service");
+ state.status = "Sometimes, client side changes will be rejected by the service.";
+ next_state(); 
+ state.status = "When this happens, the client which originated the request should still be passed back the request object which it origionally sent. That way it will know that its change request was rejected.";
+ next_state();
+ send("clients/C2/manager.gradesock");
+ next_state();
+ send("manager/clients.gradesock");
+ next_state();
+ send("service.gradesock");
+ next_state();
+ respond("manager.gradesock");
+ next_state();
+ send("manager/notifications.gradesock");
+ next_state();
+ state.status = "Request objects need only be sent to the client_of_origin.";
+ respond_to_client(2);
+ next_state();
 }
 build_states();
 console.log(states)
