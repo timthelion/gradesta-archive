@@ -19,19 +19,23 @@ states[0] =
  {"actors":
  [
   {"name":"S"
+  ,"long_name":"service"
   ,"x":40
   ,"y":0
   ,"active": t>1},
 
   {"name":"M"
+  ,"long_name":"manager"
   ,"x":125
   ,"y":0},
 
   {"name":"CM"
+  ,"long_name":"client-manager"
   ,"x":sm_offset
   ,"y":-spread},
 
   {"name":"NM"
+  ,"long_name":"notification-manager"
   ,"x":sm_offset
   ,"y":spread},
  ]
@@ -131,7 +135,7 @@ function build_states() {
    ,"active": true
    }]
   client = "C"+num_clients
-  state.actors.push({"name":client,"x": x,"y":0,"active":true})
+  state.actors.push({"name":client,"long_name":"client"+num_clients,"x": x,"y":0,"active":true})
   state.sockets.push({"name":"clients/"+client+"/manager.gradesock","seg":[[x,0],[x,-spread+6]],"active":true})
   state.sockets.push({"name":"clients/"+client+"/client.gradesock","seg":[[x,spread],[x,24]],"active":true})
   next_state();
@@ -157,13 +161,13 @@ function build_states() {
   next_state();
   state.status = "The client then looks at the bookmarks and creates some selections/cursors";
   next_state();
-  request_selection(client); 
+  request_selection(num_clients); 
  }
 
  function request_selection(client) {
   bookmark("Request selection");
   state.status = "The client sends updated selections on to the client-manager.";
-  send("clients/"+client+"/manager.gradesock");
+  send("clients/C"+client+"/manager.gradesock");
   next_state();
   state.status = "The client-manager passes the selections on to the manager.";
   send("manager/clients.gradesock");
@@ -202,8 +206,11 @@ function build_states() {
   state.status = "The manager can now send the cells in the selection on to the client which requested them via the notification-manager.";
   send("manager/notifications.gradesock");
   next_state();
-  state.status = "The notification-manager now passes the cells onto any clients which are subscribed to the given selection.";
-  respond("clients/"+client+"/client.gradesock");
+  state.status = "The notification-manager now passes the cells onto any clients which are subscribed to the given selection.  ";
+  if (num_clients > 1) {
+   state.status += "While the newly aquired cells only get sent to the client which subscribed to the selection, if the selection is new, all clients are informed that the selection has been created, and in the case of a newly created client, the updated clients list.";
+  } 
+  send_to_all_clients_with_response(client);
   next_state();
  }
 
@@ -246,6 +253,9 @@ function build_states() {
 
  function send(socket) {
   flicker([socket],"sending");
+ }
+ function send_from_client(client) {
+  send("clients/C"+client+"/manager.gradesock");
  }
  function respond(socket) {
   flicker([socket],"responding");
@@ -371,6 +381,35 @@ function build_states() {
  state.status = "Request objects need only be sent to the client_of_origin.";
  respond_to_client(2);
  next_state();
+ bookmark("Setting cells client side");
+ state.status = "When setting only cells, the patern differs slightly, in that only clients who's selections can see the modified cells are informed of the change.";
+ send_from_client(2);
+ next_state();
+ send("manager/clients.gradesock");
+ next_state();
+ send("service.gradesock");
+ next_state();
+ respond("manager.gradesock");
+ next_state();
+ send("manager/notifications.gradesock");
+ next_state();
+ flicker_({"clients/C1/client.gradesock":"sending","clients/C2/client.gradesock":"responding"});
+ next_state();
+ bookmark("Subscribing to selections");
+ state.status = "When a client subscribes to an existing selection, the manager will already have cached versions of the cells viewed by that selection. The manager can send these cells to the new subscriber without contacting the service. The other clients which are subscribed to the same selection will also be informed of the new subscriber. For example, if C2 has a selection and C1 subscribes to it, C1 will be sent the cells which are viewed by the selection, along with the selection metadata and C2 will be sent the updated subscribers list.";
+ send_from_client(1);
+ send("manager/clients.gradesock");
+ send("manager/notifications.gradesock");
+ flicker_({"clients/C1/client.gradesock":"responding","clients/C2/client.gradesock":"sending"});
+ next_state(); 
+ bookmark("Changing client metadata");
+ state.status = "While it is not typical that client metadata would change at runtime, it is not forbiden either. If a client changes its metadata, this change will be broadcast to all clients.";
+ send_from_client(1);
+ send("manager/clients.gradesock");
+ send("manager/notifications.gradesock");
+ send_to_all_clients_with_response(1); 
+ next_state();
+ 
 }
 build_states();
 console.log(states)
@@ -412,7 +451,8 @@ socket
  .attr("x2", d => d.seg[1][0])
  .attr("y2", d => d.seg[1][1]+middle)
  .attr("stroke", d => d.active ? (d.sending ? sending : (d.responding ? responding :active)) : inactive)
- .attr("marker-end", d => d.active ? (d.sending ? "url(#sending-triangle)" : (d.responding ? "url(#responding-triangle)" : "url(#active-triangle)")) : "url(#inactive-triangle)");
+ .attr("marker-end", d => d.active ? (d.sending ? "url(#sending-triangle)" : (d.responding ? "url(#responding-triangle)" : "url(#active-triangle)")) : "url(#inactive-triangle)")
+ .append("title").text(d => d.name);
 
 socket.data(states[t].sockets).exit().remove();
 
@@ -427,7 +467,8 @@ actor
  .attr("r",18)
  .attr("cy", d => middle+d.y)
  .attr("cx", d => d.x)
- .attr("fill", d => d.active ? active : inactive);
+ .attr("fill", d => d.active ? active : inactive)
+ .append("title").text(d => d.long_name);
 actor.data(states[t].actors).exit().remove();
 
 svg.selectAll(".actor-label")
@@ -443,7 +484,8 @@ svg.selectAll(".actor-label")
  .attr("dy",".3em")
  .text(d => d.name)
  .attr("x",d => d.x)
- .attr("y",d => middle+d.y);
+ .attr("y",d => middle+d.y)
+ .append("title").text(d => d.long_name);
 
 d3.selectAll(".status-label")
  .data([]).exit().remove();
@@ -483,6 +525,14 @@ svg.selectAll(".title")
  .attr("x", 40)
  .attr("y",10);
 
+d3.selectAll(".bookmarks-heading")
+ .data([]).exit().remove();
+d3.select("body").selectAll(".bookmarks-heading")
+ .data([""])
+ .enter()
+ .append("h3")
+ .attr("class","bookmarks-heading")
+ .text("Chapters");
 
 d3.selectAll(".bookmark")
  .data([]).exit().remove();
