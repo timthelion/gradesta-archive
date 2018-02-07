@@ -117,7 +117,7 @@ function build_states() {
   }
  }
  function add_client() {
-  state.status = "When a client launches, it binds its clients/<client-id>/client.gradesock and manager.gradesock sockets and waits.";
+  state.status = "When a client launches, it binds its clients/<client-id>/client.gradesock and clients/<client-id>/manager.gradesock sockets and waits.";
   num_clients++;
   x = client_center(num_clients)
   state.lines = [{
@@ -156,7 +156,7 @@ function build_states() {
   state.status = "The manager then sends its own metadata, along with bookmarks, service meta data, selections data, and client data to the notifications manager."
   send("manager/notifications.gradesock");
   next_state();
-  state.status = "And the notifications-manager then passes that on to the client.";
+  state.status = "The notifications-manager then passes that on to the client.";
   send("clients/"+client+"/client.gradesock");
   next_state();
   state.status = "The client then looks at the bookmarks and creates some selections/cursors";
@@ -190,7 +190,7 @@ function build_states() {
   state.status = "While the manager is trying to fulfill a requested selection the service may update the graph and inform the manager of the update."
   send("manager.gradesock");
   next_state();
-  state.status = "If the topology of the part of the graph that the current selection belongs to changed, this may mean that previously requested 'rings' around the cursor may need to be requested again.";
+  state.status = "If the topology of the graph has changed, this may mean that previously requested 'rings' around some cursors may need to be requested again.";
   next_state();
   request_cells();
   next_state();
@@ -200,7 +200,7 @@ function build_states() {
   next_state();
   send_requested_cells();
   next_state();
-  state.status = "Unless the graph's topology changes too quickly for the manager to keep up, however, the manager will eventually be able to gather all cells within range of the requested cursors.";
+  state.status = "Unless the graph's topology changes too quickly for the manager to keep up, the manager will eventually be able to gather all cells within range of the requested cursors.";
   next_state();
   bookmark("Sending the client the cells in the requested selection");
   state.status = "The manager can now send the cells in the selection on to the client which requested them via the notification-manager.";
@@ -303,12 +303,12 @@ function build_states() {
  state.status = "The manager then launches its subcomponents, the client-manager and the notification-manager.";
  next_state();
  //// 
- state.status = "Once the manager has started it informs the service that manager is ready and sends its metadata.";
+ state.status = "Once the manager has started it informs the service that manager is ready by sending its metadata.";
  send("service.gradesock");
- state.status = "The service then sends its metadata and bookmarks to manager.";
+ state.status = "The service then sends its metadata and bookmarks to the manager.";
  respond("manager.gradesock");
  next_state();
- state.status = "It is possible that while the manager is still waiting for clients to connect, the service will send updates to bookmarks to the manager, which the manager then caches.";
+ state.status = "It is possible that while the manager is still waiting for clients to connect, the service will send updates to bookmarks to the manager. The manager updates its cache but otherwise does nothing in this case.";
  send("manager.gradesock");
  ////
  bookmark("Client connection");
@@ -354,9 +354,8 @@ function build_states() {
  send("clients/C1/manager.gradesock");
  state.status = "The source of truth about the service state is the service itself. Therefore, the client-manager does NOT send these changes directly to the clients via the notification-manager, but rather sends them first to the manager.";
  send("manager/clients.gradesock");
- state.status = "The manager then sends the changes on to the service.";
+ state.status = "The manager then sends the changes on to the service. Which then accepts/rejects/modifies them and sends them (potentially along with a series of unrelated changes) back to the manager.";
  send("service.gradesock");
- state.status = "Which then accepts/rejects/modifies them and sends them (potentially along with a series of unrelated changes) back to the manager.";
  respond("manager.gradesock");
  state.status = "If these changes efected graph topology, the manager will send more requests on to the service untill satisfied. Otherwise, it sends the changes on to the notification-manager.";
  send("manager/notifications.gradesock");
@@ -366,7 +365,7 @@ function build_states() {
  bookmark("When client side changes are rejected by the service");
  state.status = "Sometimes, client side changes will be rejected by the service.";
  next_state(); 
- state.status = "When this happens, the client which originated the request should still be passed back the request object which it origionally sent. That way it will know that its change request was rejected.";
+ state.status = "When this happens, the client which originated the request should still be passed back the Round object which it origionally sent along with any error string the service might have set. That way it will know that its change request was rejected.";
  next_state();
  send("clients/C2/manager.gradesock");
  next_state();
@@ -409,7 +408,7 @@ function build_states() {
  send("manager/notifications.gradesock");
  send_to_all_clients_with_response(1); 
  next_state();
- 
+  
 }
 build_states();
 console.log(states)
