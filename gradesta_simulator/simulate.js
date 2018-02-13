@@ -14,6 +14,7 @@ function client_center(i) {
 
 states = {}
 bookmarks = []
+gcells = {"abc":{"cell":{"data":"Hello world!"}}}
 
 states[0] =
  {"actors":
@@ -23,39 +24,47 @@ states[0] =
   ,"x":40
   ,"y":0
   ,"active": t>1
-  ,"state":{"cells":{"abc":{"cell":{"data":"Hello world!"}}}}},
+  ,"state":{"cells":JSON.parse(JSON.stringify(gcells))}},
 
   {"name":"M"
   ,"long_name":"manager"
   ,"x":125
-  ,"y":0},
+  ,"y":0
+  ,"state":{"manager":{"metadata":{"name":"gradesta-manager-py"}}}},
 
   {"name":"CM"
   ,"long_name":"client-manager"
   ,"x":sm_offset
-  ,"y":-spread},
+  ,"y":-spread
+  ,"state":{}},
 
   {"name":"NM"
   ,"long_name":"notification-manager"
   ,"x":sm_offset
-  ,"y":spread},
+  ,"y":spread
+  ,"state":{}},
  ]
  ,"sockets":
  [ 
   {"name": "manager.gradesock"
-  ,"seg": [[spread,5],[100,5]]}
+  ,"seg": [[spread,5],[100,5]]
+  ,"type": "ServiceState"}
 
  ,{"name": "service.gradesock"
-  ,"seg": [[125,-5],[65,-5]]}
+  ,"seg": [[125,-5],[65,-5]]
+  ,"type": "ServiceState"}
 
  ,{"name": "manager/clients.gradesock"
-  ,"seg": [[sm_offset,-spread],[145,-15]]}
+  ,"seg": [[sm_offset,-spread],[145,-15]]
+  ,"type": "ClientState"}
 
  ,{"name": "manager/notifications.gradesock"
-  ,"seg": [[125,0],[sm_offset-20,spread-14]]}
+  ,"seg": [[125,0],[sm_offset-20,spread-14]]
+  ,"type": "Notification"}
 
  ,{"name": "manager/notifications.gradesock(1)"
-  ,"seg": [[sm_offset,-spread+15],[sm_offset,spread-25]]}
+  ,"seg": [[sm_offset,-spread+15],[sm_offset,spread-25]]
+  ,"type": "Notification"}
  ]
  ,"lines":[]
  ,"status":"Use the left/right arrow keys to navigate through the simulation."
@@ -85,6 +94,7 @@ function tchange(event){
 var state = states[0]
 function build_states() {
  s = 0
+ round = 1
  function bookmark(desc) {
   for (i in bookmarks) {
    if (bookmarks[i].text == desc) {
@@ -198,9 +208,15 @@ function build_states() {
  function get_selection_from_service(long_version) {
   bookmark("Getting the cells seen by a selection from the service")
   state.status = "The manager requests the center cell of the selection from the service.";
-  send("service.gradesock");
+  round++;
+  msg =
+   {
+    "cells": {"abc":{"status":2}}
+   ,"current_round":{"request":round}
+   }
+  send("service.gradesock",msg);
   next_state();
-  send_requested_cells();
+  send_requested_cells(["abc"]);
   next_state();
   request_cells();
   next_state();
@@ -230,14 +246,43 @@ function build_states() {
   next_state();
  }
 
- function request_cells() {
+ function request_cells(cells) {
   state.status = "The manager looks at the newly received cells, and requests neighbors from the service in acordance with the given cursor's LineOfSight state-machines."; 
+  round++;
+  cellsd = {}
+  for (i in cells) {
+   cellsd[cells[i]] = {"status":2}
+  }
+  msg =
+   {
+    "cells": cellsd
+   ,"current_round":{"request":round}
+   }
   send("service.gradesock");
  }
 
- function send_requested_cells() {
+ function send_requested_cells(cells) {
   state.status = "The service sends the requested cells to the manager.";
-  respond("manager.gradesock");
+  cellsd = {}
+  for (i in cells) {
+   cellsd[cells[i]] = JSON.parse(JSON.stringify(gcells[cells[i]]))
+  }
+  msg =
+   {
+    "cells": cellsd
+   ,"current_round":{"request":round}
+   }
+  respond("manager.gradesock",msg);
+  for (i in state.actors) {
+   if (state.actors[i].name == "M") {
+    if (!("service-state" in state.actors[i].state)) {
+     state.actors[i]["state"]["service-state"] = {}
+     state.actors[i]["state"]["service-state"]["cells"] = {}
+    }
+    console.log(state.actors[i]);
+    state.actors[i]["state"]["service-state"]["cells"] = Object.assign(state.actors[i]["state"]["service-state"]["cells"],cellsd)
+   }
+  } 
  }
 
  function flicker_(fdict) {
@@ -263,18 +308,31 @@ function build_states() {
   flicker_(fdict);
  }
 
+ function set_socket_msg (socket,msg) {
+  for (i in state.sockets) {
+   if (state.sockets[i].name == socket) {
+    state.sockets[i].msg = msg 
+   }
+  } 
+ }
+
  function sends(sockets) {
   flicker(sockets,"sending");
  }
 
- function send(socket) {
+
+ function send(socket,msg) {
+  set_socket_msg(socket,msg);
   flicker([socket],"sending");
+  set_socket_msg(socket,null);
  }
  function send_from_client(client) {
   send("clients/C"+client+"/manager.gradesock");
  }
- function respond(socket) {
+ function respond(socket,msg) {
+  set_socket_msg(socket,msg);
   flicker([socket],"responding");
+  set_socket_msg(socket,null);
  }
  function respond_to_client(client) {
   respond("clients/C"+client+"/client.gradesock");
@@ -326,10 +384,42 @@ function build_states() {
  state.status = "The manager then launches its subcomponents, the client-manager and the notification-manager.";
  next_state();
  //// 
- state.status = "Once the manager has started it informs the service that manager is ready by sending its metadata.";
- send("service.gradesock");
- state.status = "The service then sends its metadata and the index pointer to the manager.";
- respond("manager.gradesock");
+ state.status = "Once the manager has started it informs the service that manager is ready by sending protocol defaults to the service.";
+ msg = {
+        "layers":["base"]
+       ,"on_disk_state":1
+       ,"current-round":{"request":round}
+       ,"cell_template":
+         {
+          "cell": {"encoding":1,"mime":"text/plain","dims":[{},{}]}
+         ,"status": 1
+         ,"cell_modes": {1:1,2:1,3:1,4:1,5:0,200:0}
+         ,"link_modes": {1:1,2:1,3:1}
+         }
+       ,"service_state_modes":{1:1,2:1,3:2,4:1,6:2,7:2,8:2}
+       ,"supported_topology":
+        {
+         "states":
+          [
+           {"forth":{"var":0,"cont_true":-1,"cont_false":-1}
+           ,"back": {"var":0,"cont_true":-1,"cont_false":-1}
+           ,"next_dim":1}
+          ]
+        ,"vars": [1]
+        }
+       };
+
+ send("service.gradesock",msg);
+ state.status = "The service then sends its metadata and the index pointer to the manager along with any changes to the defaults.";
+ msg = {
+        "index":"abc"
+       ,"current-round":{"request":round}
+       ,"metadata":{"name":"example-service","source_url":"example.com"}
+       ,"supported_encodings":{1:true,2:true}
+       };
+
+
+ respond("manager.gradesock",msg);
  next_state();
  state.status = "The manager now constructs the default index selection and requests the cells in the index stack from the service.";
  next_state();
@@ -575,8 +665,9 @@ d3.select("body").append('table').attr("rules","rows")
  .data(states[t].sockets)
  .enter()
  .append("tr")
+ .append("td")
  .append("pre")
- .text(d => d.name+"\n"+(d.state ? JSON.stringify(d.state, null, " ") : ""));
+ .text(d => d.name+"\n"+d.type+"\n"+(d.msg ? JSON.stringify(d.msg, null, " ") : ""));
 
 svg.selectAll(".index")
  .data([]).exit().remove();
