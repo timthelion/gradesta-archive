@@ -85,12 +85,12 @@ var state = states[0]
 function build_states() {
  s = 0
  function bookmark(desc) {
-  state.title = desc
   for (i in bookmarks) {
    if (bookmarks[i].text == desc) {
     return
    }
   }
+  state.title = desc
   bookmarks.push({"text":desc,"index":s})
  }
  function next_state() {
@@ -164,26 +164,34 @@ function build_states() {
   next_state();
  }
 
- function request_selection(client, long_version) {
-  bookmark("Request selection");
-  state.status = "The client sends updated selections on to the client-manager.";
+ function fulfill_selection(client, long_version) {
   send("clients/C"+client+"/manager.gradesock");
   next_state();
   state.status = "The client-manager passes the selections on to the manager.";
   send("manager/clients.gradesock");
   next_state();
   get_selection_from_service(long_version);
-  bookmark("Sending the client the cells in the requested selection");
   state.status = "The manager can now send the cells in the selection on to the client which requested them via the notification-manager.";
   send("manager/notifications.gradesock");
   next_state();
   state.status = "The notification-manager now passes the cells onto any clients which are subscribed to the given selection.  ";
+ }
+
+ function request_selection(client, long_version) {
+  state.status = "The client sends the new selections on to the client-manager.";
+  fulfill_selection(client,long_version);
   if (num_clients > 1) {
    state.status += "While the newly aquired cells only get sent to the client which subscribed to the selection, if the selection is new, all clients are informed that the selection has been created, and in the case of a newly created client, the updated clients list.";
   } 
-  send_to_all_clients_with_response(client);
+  send_to_all_clients();
   next_state();
+ }
 
+ function update_selection(client,subscribers) {
+  state.status = "The client sends the updated selections on to the client-manager.";
+  fulfill_selection(client,false);
+  send_to_clients(subscribers);
+  next_state();
  }
 
  function get_selection_from_service(long_version) {
@@ -270,12 +278,19 @@ function build_states() {
  function respond_to_client(client) {
   respond("clients/C"+client+"/client.gradesock");
  }
+ function send_to_clients(clients) {
+  client_sockets = []
+  for (i in clients) {
+   client_sockets.push("clients/C"+clients[i]+"/client.gradesock");
+  }
+  sends(client_sockets)
+ }
  function send_to_all_clients() {
   clients = []
   for (i = 1; i <= num_clients; i++) {
-   clients.push("clients/C"+i+"/client.gradesock");
+   clients.push(i);
   }
-  sends(clients)
+  send_to_clients(clients)
  }
  function send_to_all_clients_with_response(client_to_respond_to) {
   c = client_to_respond_to;
@@ -330,6 +345,78 @@ function build_states() {
  add_client();
  bookmark("Adding a third client");
  add_client();
+ ///////////
+ bookmark("Creating a selection");
+ request_selection(2,true);
+
+ bookmark("Subscribing to selections");
+ state.status = "When a client subscribes to an existing selection, the manager will already have cached versions of the cells viewed by that selection. The manager can send these cells to the new subscriber without contacting the service. The other clients which are subscribed to the same selection will also be informed of the new subscriber. For example, if C2 has a selection and C1 subscribes to it, C1 will be sent the cells which are viewed by the selection, along with the selection metadata and C2 will be sent the updated subscribers list.";
+ send_from_client(1);
+ send("manager/clients.gradesock");
+ send("manager/notifications.gradesock");
+ flicker_({"clients/C1/client.gradesock":"sending","clients/C2/client.gradesock":"sending"});
+ next_state(); 
+
+ bookmark("Moving cursors");
+ update_selection(2,[1,2]); 
+
+ bookmark("Setting service state fields client side");
+ state.status = "When a client sets service state fields such as the index pointer and cells, it passes the changes to the client-manager.";
+ send("clients/C1/manager.gradesock");
+ state.status = "The source of truth about the service state is the service itself. Therefore, the client-manager does NOT send these changes directly to the clients via the notification-manager, but rather sends them first to the manager.";
+ send("manager/clients.gradesock");
+ state.status = "The manager then sends the changes on to the service. Which then accepts/rejects/modifies them and sends them (potentially along with a series of unrelated changes) back to the manager.";
+ send("service.gradesock");
+ respond("manager.gradesock");
+ state.status = "If these changes effected graph topology, the manager will send more requests on to the service untill satisfied. Otherwise, it sends the changes on to the notification-manager.";
+ send("manager/notifications.gradesock");
+ state.status = "If the index pointer has changed, the notification manager will forward the change on to all clients.";
+ send_to_all_clients_with_response(1);
+ next_state(); 
+
+ bookmark("When client side changes are rejected by the service");
+ state.status = "Sometimes, client side changes will be rejected by the service.";
+ next_state(); 
+ state.status = "When this happens, the client which originated the request should still be passed back the Round object which it origionally sent along with any error string the service might have set. That way it will know that its change request was rejected.";
+ next_state();
+ send("clients/C2/manager.gradesock");
+ next_state();
+ send("manager/clients.gradesock");
+ next_state();
+ send("service.gradesock");
+ next_state();
+ respond("manager.gradesock");
+ next_state();
+ send("manager/notifications.gradesock");
+ next_state();
+ state.status = "Request objects need only be sent to the client_of_origin.";
+ respond_to_client(2);
+ next_state();
+
+ bookmark("Setting cells client side");
+ state.status = "When setting only cells, the patern differs slightly, in that only clients who's selections can see the modified cells are informed of the change.";
+ send_from_client(2);
+ next_state();
+ send("manager/clients.gradesock");
+ next_state();
+ send("service.gradesock");
+ next_state();
+ respond("manager.gradesock");
+ next_state();
+ send("manager/notifications.gradesock");
+ next_state();
+ flicker_({"clients/C1/client.gradesock":"sending","clients/C2/client.gradesock":"responding"});
+ next_state();
+
+ bookmark("Changing client metadata");
+ state.status = "While it is not typical that client metadata would change at runtime, it is not forbiden either. If a client changes its metadata, this change will be broadcast to all clients.";
+ send_from_client(1);
+ send("manager/clients.gradesock");
+ send("manager/notifications.gradesock");
+ send_to_all_clients(); 
+ next_state();
+
+ // service originated events
  bookmark("Changing a cell service side");
  state.status = "If a cell is changed by the service, that change needs to be propogated to the clients.";
  next_state();
@@ -352,6 +439,7 @@ function build_states() {
  state.status = "The notification manager then passon the cells to the clients who's selections view the changed cells."
  sends(["clients/C1/client.gradesock","clients/C3/client.gradesock"]); 
  next_state();
+
  bookmark("Setting the index pointer service side");
  state.status = "When the service sets the index pointer it sends the updated pointer to the manager";
  send("manager.gradesock");
@@ -362,67 +450,9 @@ function build_states() {
  next_state();
  state.status = "The same procedure applies for service side updates to the service error_log and cell_template.";
  next_state();
- bookmark("Setting service state fields client side");
- state.status = "When a client sets service state fields such as the index pointer and cells, it passes the changes to the client-manager.";
- send("clients/C1/manager.gradesock");
- state.status = "The source of truth about the service state is the service itself. Therefore, the client-manager does NOT send these changes directly to the clients via the notification-manager, but rather sends them first to the manager.";
- send("manager/clients.gradesock");
- state.status = "The manager then sends the changes on to the service. Which then accepts/rejects/modifies them and sends them (potentially along with a series of unrelated changes) back to the manager.";
- send("service.gradesock");
- respond("manager.gradesock");
- state.status = "If these changes effected graph topology, the manager will send more requests on to the service untill satisfied. Otherwise, it sends the changes on to the notification-manager.";
- send("manager/notifications.gradesock");
- state.status = "If the index pointer has changed, the notification manager will forward the change on to all clients.";
- send_to_all_clients_with_response(1);
- next_state(); 
- bookmark("When client side changes are rejected by the service");
- state.status = "Sometimes, client side changes will be rejected by the service.";
- next_state(); 
- state.status = "When this happens, the client which originated the request should still be passed back the Round object which it origionally sent along with any error string the service might have set. That way it will know that its change request was rejected.";
- next_state();
- send("clients/C2/manager.gradesock");
- next_state();
- send("manager/clients.gradesock");
- next_state();
- send("service.gradesock");
- next_state();
- respond("manager.gradesock");
- next_state();
- send("manager/notifications.gradesock");
- next_state();
- state.status = "Request objects need only be sent to the client_of_origin.";
- respond_to_client(2);
- next_state();
- bookmark("Setting cells client side");
- state.status = "When setting only cells, the patern differs slightly, in that only clients who's selections can see the modified cells are informed of the change.";
- send_from_client(2);
- next_state();
- send("manager/clients.gradesock");
- next_state();
- send("service.gradesock");
- next_state();
- respond("manager.gradesock");
- next_state();
- send("manager/notifications.gradesock");
- next_state();
- flicker_({"clients/C1/client.gradesock":"sending","clients/C2/client.gradesock":"responding"});
- next_state();
- request_selection(2,true);
- bookmark("Moving cursors TODO");
- bookmark("Subscribing to selections");
- state.status = "When a client subscribes to an existing selection, the manager will already have cached versions of the cells viewed by that selection. The manager can send these cells to the new subscriber without contacting the service. The other clients which are subscribed to the same selection will also be informed of the new subscriber. For example, if C2 has a selection and C1 subscribes to it, C1 will be sent the cells which are viewed by the selection, along with the selection metadata and C2 will be sent the updated subscribers list.";
- send_from_client(1);
- send("manager/clients.gradesock");
- send("manager/notifications.gradesock");
- flicker_({"clients/C1/client.gradesock":"responding","clients/C2/client.gradesock":"sending"});
- next_state(); 
- bookmark("Changing client metadata");
- state.status = "While it is not typical that client metadata would change at runtime, it is not forbiden either. If a client changes its metadata, this change will be broadcast to all clients.";
- send_from_client(1);
- send("manager/clients.gradesock");
- send("manager/notifications.gradesock");
- send_to_all_clients_with_response(1); 
- next_state();
+
+ // Rounds and race conditions
+ bookmark("Rounds and race conditions");
 }
 build_states();
 console.log(states)
