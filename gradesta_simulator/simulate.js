@@ -22,7 +22,8 @@ states[0] =
   ,"long_name":"service"
   ,"x":40
   ,"y":0
-  ,"active": t>1},
+  ,"active": t>1
+  ,"state":{"cells":{"abc":{"cell":{"data":"Hello world!"}}}}},
 
   {"name":"M"
   ,"long_name":"manager"
@@ -538,6 +539,44 @@ d3.select("body").selectAll(".status-label")
  .append("p")
  .attr("class","status-label")
  .text(d => d);
+
+d3.selectAll(".actors-heading")
+ .data([]).exit().remove();
+d3.select("body").selectAll(".actors-heading")
+ .data([""])
+ .enter()
+ .append("h3")
+ .attr("class","actors-heading")
+ .text("Actors");
+
+d3.selectAll(".actor-state")
+ .data([]).exit().remove();
+d3.select("body").append('table').attr("rules","cols")
+ .attr("class","actor-state").selectAll(".actor-state")
+ .data(states[t].actors)
+ .enter()
+ .append("td")
+ .append("pre")
+ .text(d => d.name+"\n"+(d.state ? JSON.stringify(d.state, null, " ") : ""));
+
+d3.selectAll(".sockets-heading")
+ .data([]).exit().remove();
+d3.select("body").selectAll(".sockets-heading")
+ .data([""])
+ .enter()
+ .append("h3")
+ .attr("class","sockets-heading")
+ .text("Sockets");
+
+d3.selectAll(".socket-msg")
+ .data([]).exit().remove();
+d3.select("body").append('table').attr("rules","rows")
+ .attr("class","socket-msg").selectAll(".socket-msg")
+ .data(states[t].sockets)
+ .enter()
+ .append("tr")
+ .append("pre")
+ .text(d => d.name+"\n"+(d.state ? JSON.stringify(d.state, null, " ") : ""));
 
 svg.selectAll(".index")
  .data([]).exit().remove();
