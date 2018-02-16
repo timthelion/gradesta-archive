@@ -14,7 +14,7 @@ function client_center(i) {
 
 states = {}
 bookmarks = []
-gcells = {"abc":{"cell":{"data":"Hello world!"}}}
+gcells = {"abc":{"cell":{"data":"Hello world!"},"dims":[{"forth":[{"cell_id":"fdg"}]}]},"fdg":{"cell":{"data":"foo"}}}
 
 initial_service_state = {"cells":JSON.parse(JSON.stringify(gcells))}
 initial_manager_state = {"manager":{"metadata":{"name":"gradesta-manager-py"}}}
@@ -361,7 +361,6 @@ function build_states() {
   for (i = 1; i <= num_clients; i++) {
    fdict["clients/C"+i+"/client.gradesock"] = client_to_respond_to == i ? "responding" : "sending"
   }
-  console.log(fdict);
   flicker_(fdict);
  }
  function update_actor_state(actor,f) {
@@ -648,21 +647,12 @@ svg.selectAll(".actor-label")
 
 d3.selectAll(".status-label")
  .data([]).exit().remove();
-d3.select("body").selectAll(".status-label")
+d3.select("body").select("#step").selectAll(".status-label")
  .data([states[t].status])
  .enter()
  .append("p")
  .attr("class","status-label")
  .text(d => d);
-
-d3.selectAll(".actors-heading")
- .data([]).exit().remove();
-d3.select("body").selectAll(".actors-heading")
- .data([""])
- .enter()
- .append("h3")
- .attr("class","actors-heading")
- .text("Actors");
 
 function comp(s1,s2) {
  var changed = {};
@@ -672,9 +662,7 @@ function comp(s1,s2) {
    unchanged[k] = s2[k];
   }else{
    if (k == "service-state") {
-    console.log("foo")
     if (s1[k]) {
-     console.log("bar")
      changed[k] = comp(s1[k],s2[k]);
     }else{
      changed[k] = s2[k];
@@ -704,52 +692,75 @@ function comp(s1,s2) {
 
 d3.selectAll(".actor-state")
  .data([]).exit().remove();
-d3.select("body").append('table').attr("rules","cols")
- .attr("class","actor-state").selectAll(".actor-state")
+actors_tab = d3.select("body").select("#actors-tab")
+ .selectAll(".actor-state")
  .data(states[t].actors)
  .enter()
- .append("td")
- .append("pre")
- .text(d => d.name+"\n"+ comp(d.prev_state,d.state));
+ .append("div")
+ .attr("class","actor-state ui card");
 
-d3.selectAll(".sockets-heading")
- .data([]).exit().remove();
-d3.select("body").selectAll(".sockets-heading")
- .data([""])
+actors_tab
+ .append("div")
+ .attr("class","header")
+ .text(d => d.name);
+
+actors_tab
+ .append("div")
+ .attr("class","meta")
+ .text(d => d.long_name);
+
+actors_tab
+ .append("pre")
+ .text(d => comp(d.prev_state,d.state));
+
+num_msgs = 0
+for (k in states[t].sockets) {
+ if (states[t].sockets[k].msg) {
+  num_msgs++;
+ }
+} 
+console.log("Msgs:"+num_msgs);
+d3.selectAll(".socket-msg-counter").data([]).exit().remove();
+if(num_msgs) {
+console.log("hi");
+d3.select("body").select("#sockets-tab-btn").selectAll(".socket-msg-counter")
+ .data([num_msgs])
  .enter()
- .append("h3")
- .attr("class","sockets-heading")
- .text("Sockets");
+ .append("div")
+ .text(d => d)
+ .attr("class","socket-msg-counter ui floated right label black");
+}
 
 d3.selectAll(".socket-msg")
  .data([]).exit().remove();
-d3.select("body").append('table').attr("rules","rows")
- .attr("class","socket-msg").selectAll(".socket-msg")
+sockets_tab = d3.select("body").select("#sockets-tab")
+ .selectAll(".socket-msg")
  .data(states[t].sockets)
  .enter()
- .append("tr")
- .append("td")
- .append("pre")
- .text(d => d.name+"\n"+d.type+"\n"+(d.msg ? JSON.stringify(d.msg, null, " ") : ""));
+ .append("div")
+ .attr("class","socket-msg ui card");
 
-svg.selectAll(".index")
- .data([]).exit().remove();
-svg.selectAll(".index")
+sockets_tab.append("div")
+ .attr("class","header")
+ .text(d => d.name);
+sockets_tab.append("div")
+ .attr("class","meta")
+ .text(d => d.type);
+
+sockets_tab.append("pre")
+ .text(d => (d.msg ? JSON.stringify(d.msg, null, " ") : ""));
+
+d3.selectAll(".index").data([]).exit().remove();
+d3.select("body").select("#step-counter").selectAll(".title")
  .data([states[t].index])
  .enter()
  .append("text")
- .attr("class","index")
- .attr("text-anchor","middle")
- .attr("style","fill:black;")
- .attr("stroke-width","2px")
- .attr("dy",".3em")
  .text(d => d)
- .attr("x", 20)
- .attr("y",10);
+ .attr("class","index")
 
-svg.selectAll(".title")
+d3.selectAll(".title")
  .data([]).exit().remove();
-svg.selectAll(".title")
+d3.select("body").select("#step-title").selectAll(".title")
  .data([states[t].title])
  .enter()
  .append("text")
@@ -761,26 +772,19 @@ svg.selectAll(".title")
  .attr("x", 40)
  .attr("y",10);
 
-d3.selectAll(".bookmarks-heading")
- .data([]).exit().remove();
-d3.select("body").selectAll(".bookmarks-heading")
- .data([""])
- .enter()
- .append("h3")
- .attr("class","bookmarks-heading")
- .text("Chapters");
-
-d3.selectAll(".bookmark")
- .data([]).exit().remove();
-
-d3.select("body").selectAll(".bookmark")
+d3.selectAll(".bookmark").data([]).exit().remove();
+d3.select("body").select("#contents-tab").selectAll(".bookmark")
  .data(bookmarks)
  .enter()
- .append("p")
- .attr("class","bookmark")
- .text(d => "→ "+d.text)
+ .append("a")
+ .attr("class","bookmark item")
+ .text(d => d.text)
  .attr("onclick",d => "update_t("+d.index+")")
- .attr("style",d => d.index == t ? "font-weight:bold;" : (d.index < t ? "font-style:italic;":"font-weight:normal;"));
+ .attr("style",d => d.index == t ? "font-weight:bold;" : (d.index < t ? "font-style:italic;":"font-weight:normal;"))
+ .append("div")
+ .attr("class","ui floated right")
+ .attr("style","float:right;")
+ .text(d => d.index);
 }
 
 //arrow http://jsfiddle.net/igbatov/v0ekdzw1/
@@ -836,3 +840,5 @@ update();
 
 d3.select('body')
    .on("keydown", tchange);
+
+$('.menu .item').tab();
