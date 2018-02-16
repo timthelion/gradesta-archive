@@ -16,6 +16,9 @@ states = {}
 bookmarks = []
 gcells = {"abc":{"cell":{"data":"Hello world!"}}}
 
+initial_service_state = {"cells":JSON.parse(JSON.stringify(gcells))}
+initial_manager_state = {"manager":{"metadata":{"name":"gradesta-manager-py"}}}
+
 states[0] =
  {"actors":
  [
@@ -24,25 +27,31 @@ states[0] =
   ,"x":40
   ,"y":0
   ,"active": t>1
-  ,"state":{"cells":JSON.parse(JSON.stringify(gcells))}},
+  ,"state":initial_service_state
+  ,"prev_state":initial_service_state
+  },
 
   {"name":"M"
   ,"long_name":"manager"
   ,"x":125
   ,"y":0
-  ,"state":{"manager":{"metadata":{"name":"gradesta-manager-py"}}}},
+  ,"state":initial_manager_state
+  ,"prev_state":initial_manager_state
+  },
 
   {"name":"CM"
   ,"long_name":"client-manager"
   ,"x":sm_offset
   ,"y":-spread
-  ,"state":{}},
+  ,"state":{}
+  },
 
   {"name":"NM"
   ,"long_name":"notification-manager"
   ,"x":sm_offset
   ,"y":spread
-  ,"state":{}},
+  ,"state":{}
+  },
  ]
  ,"sockets":
  [ 
@@ -275,11 +284,6 @@ function build_states() {
   respond("manager.gradesock",msg);
   for (i in state.actors) {
    if (state.actors[i].name == "M") {
-    if (!("service-state" in state.actors[i].state)) {
-     state.actors[i]["state"]["service-state"] = {}
-     state.actors[i]["state"]["service-state"]["cells"] = {}
-    }
-    console.log(state.actors[i]);
     state.actors[i]["state"]["service-state"]["cells"] = Object.assign(state.actors[i]["state"]["service-state"]["cells"],cellsd)
    }
   } 
@@ -360,7 +364,15 @@ function build_states() {
   console.log(fdict);
   flicker_(fdict);
  }
- ////
+ function update_actor_state(actor,f) {
+  for (i in state.actors) {
+   if (state.actors[i].name == actor) {
+    state.actors[i]["prev_state"] = JSON.parse(JSON.stringify(state.actors[i]["state"]))
+    state.actors[i]["state"] = f(state.actors[i]["state"])
+   }
+  }
+ }
+ ////START
  bookmark("Startup");
  next_state();
  activate_actor("S")
@@ -393,7 +405,7 @@ function build_states() {
          {
           "cell": {"encoding":1,"mime":"text/plain","dims":[{},{}]}
          ,"status": 1
-         ,"cell_modes": {1:1,2:1,3:1,4:1,5:0,200:0}
+         ,"cell_modes": {1:1,2:1,3:1,4:1}
          ,"link_modes": {1:1,2:1,3:1}
          }
        ,"service_state_modes":{1:1,2:1,3:2,4:1,6:2,7:2,8:2}
@@ -409,18 +421,31 @@ function build_states() {
         }
        };
 
+
  send("service.gradesock",msg);
- state.status = "The service then sends its metadata and the index pointer to the manager along with any changes to the defaults.";
- msg = {
+
+ msg = Object.assign(msg,{
         "index":"abc"
-       ,"current-round":{"request":round}
        ,"metadata":{"name":"example-service","source_url":"example.com"}
        ,"supported_encodings":{1:true,2:true}
-       };
+       });
+
+ update_actor_state("S",as => Object.assign(as,msg));
+
+ next_state();
+ update_actor_state("S",as => as);
+
+ state.status = "The service then sends its metadata and the index pointer to the manager along with the defaults. Everything is sent back to the manager, even the defaults that the manager just sent, because the service is always the source of truth about it's state.";
 
 
+ update_actor_state("M",function(as){
+  as["service-state"] = msg;
+  as["service-state"]["cells"] = {};
+  return as});
  respond("manager.gradesock",msg);
  next_state();
+
+ update_actor_state("M",as => as);
  state.status = "The manager now constructs the default index selection and requests the cells in the index stack from the service.";
  next_state();
  get_selection_from_service(false); 
@@ -639,6 +664,44 @@ d3.select("body").selectAll(".actors-heading")
  .attr("class","actors-heading")
  .text("Actors");
 
+function comp(s1,s2) {
+ var changed = {};
+ var unchanged = {};
+ for (k in s2) {
+  if (JSON.stringify(s1[k]) == JSON.stringify(s2[k])) {
+   unchanged[k] = s2[k];
+  }else{
+   if (k == "service-state") {
+    console.log("foo")
+    if (s1[k]) {
+     console.log("bar")
+     changed[k] = comp(s1[k],s2[k]);
+    }else{
+     changed[k] = s2[k];
+    }
+   }else{
+    changed[k] = s2[k];
+   }
+  }
+ } 
+ desc = "{\n//Changed\n";
+ for (k in changed) {
+  desc += "\""+k+"\":"
+  if (typeof changed[k] == "string") {
+   desc += changed[k];
+  } else {
+   desc += JSON.stringify(changed[k],null," ");
+  }
+  desc += "\n";
+ } 
+ desc += "\n//Unchanged\n";
+ for (k in unchanged) {
+  desc += "\""+k+"\":"+JSON.stringify(unchanged[k],null," ")+"\n";
+ }
+ desc += "\n}";
+ return desc
+}
+
 d3.selectAll(".actor-state")
  .data([]).exit().remove();
 d3.select("body").append('table').attr("rules","cols")
@@ -647,7 +710,7 @@ d3.select("body").append('table').attr("rules","cols")
  .enter()
  .append("td")
  .append("pre")
- .text(d => d.name+"\n"+(d.state ? JSON.stringify(d.state, null, " ") : ""));
+ .text(d => d.name+"\n"+ comp(d.prev_state,d.state));
 
 d3.selectAll(".sockets-heading")
  .data([]).exit().remove();
