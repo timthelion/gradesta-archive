@@ -245,7 +245,7 @@ function build_states() {
   next_state();
   request_cells();
   next_state();
-  send_requested_cells();
+  send_requested_cells(["fdg"]);
   next_state();
   if (long_version) {
    request_cells();
@@ -682,39 +682,35 @@ d3.select("body").select("#step").selectAll(".status-label")
  .attr("class","status-label")
  .text(d => d);
 
+function indent(t) {
+ return t.replace(/^(?=.)/gm, " ");
+}
+
 function comp(s1,s2) {
- var changed = {};
- var unchanged = {};
+ desc = "{";
+ start = true;
  for (k in s2) {
+  if(!start){
+  desc += "\n,";
+  }
+  start = false
   if (JSON.stringify(s1[k]) == JSON.stringify(s2[k])) {
-   unchanged[k] = s2[k];
+   desc += "\""+k + "\":";
+   desc += JSON.stringify(s2[k],null," ");
   }else{
-   if (k == "service-state") {
-    if (s1[k]) {
-     changed[k] = comp(s1[k],s2[k]);
+   if (s1[k] && JSON.stringify(s1[k]).startsWith("{")) {
+     desc += "\""+k + "\":";
+     desc += indent(comp(s1[k],s2[k])); 
     }else{
-     changed[k] = s2[k];
+     desc_p = "<span style='color:green;'><pre>"
+     desc_p += "\""+k + "\":";
+     desc_p += JSON.stringify(s2[k],null," "); 
+     desc_p += "</pre></span>";
+     desc += indent(desc_p);
     }
-   }else{
-    changed[k] = s2[k];
-   }
   }
  } 
- desc = "{\n//Changed\n";
- for (k in changed) {
-  desc += "\""+k+"\":"
-  if (typeof changed[k] == "string") {
-   desc += changed[k];
-  } else {
-   desc += JSON.stringify(changed[k],null," ");
-  }
-  desc += "\n";
- } 
- desc += "\n//Unchanged\n";
- for (k in unchanged) {
-  desc += "\""+k+"\":"+JSON.stringify(unchanged[k],null," ")+"\n";
- }
- desc += "\n}";
+ desc += "\n}"
  return desc
 }
 
@@ -739,7 +735,7 @@ actors_tab
 
 actors_tab
  .append("pre")
- .text(d => comp(d.prev_state,d.state));
+ .html(d => comp(d.prev_state,d.state));
 
 function get_cells(s) {
  if (!s) {
