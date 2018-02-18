@@ -733,7 +733,10 @@ actor_graphs_tab = d3.select("body").select("#graph-views-tab")
  .data(states[t].actors)
  .enter()
  .append("div")
- .attr("class","actor-graph ui item");
+ .attr("class","actor-graph ui item")
+ .append("div")
+ .attr("class","content");
+
 
 actor_graphs_tab
  .append("div")
@@ -741,9 +744,12 @@ actor_graphs_tab
  .text(a => a.name);
 
 actor_graphs_tab
- .append("iframe")
- .attr("frameborder",0)
- .attr("src",a => "./graph.html?graph="+encodeURIComponent(JSON.stringify(get_cells(a.state))));
+ .append("div")
+ .attr("class","meta")
+ .append("div")
+ .text("Click here to view graph")
+ .attr("class","ui button")
+ .attr("onclick",a=>"this.setAttribute('class','content');f = document.createElement('iframe');f.setAttribute(\"src\",\"./graph.html?graph="+encodeURIComponent(JSON.stringify(get_cells(a.state)))+"\");f.setAttribute('width','100%');f.setAttribute('height','70%');f.setAttribute('frameBorder',0);this.innerText='';this.appendChild(f);");
 
 num_msgs = 0
 for (k in states[t].sockets) {
