@@ -12,9 +12,25 @@ function client_center(i) {
  return sm_offset+(i)*50
 }
 
+active_tab = ""
+
 states = {}
 bookmarks = []
-gcells = {"abc":{"cell":{"data":"Hello world!"},"dims":[{"forth":[{"cell_id":"fdg"}]}]},"fdg":{"cell":{"data":"foo"},"dims":[{"forth":[{"cell_id":"efd"}]}]},"efd":{"cell":{"data":"foo"}}}
+gcells = 
+ {"abc":
+  {"cell":{"data":"Hello world!"
+  ,"dims":[{"forth":[{"cell_id":"fdg"}]}]}}
+ ,"fdg":
+  {"cell":{"data":"foo"
+          ,"dims":[{"back":[{"cell_id":"abc"}],"forth":[{"cell_id":"efd"}]}
+                  ,{"forth":[{"cell_id":"did"}]}]}}
+ ,"efd":
+  {"cell":{"data":"bar"
+          ,"dims":[{"back":[{"cell_id":"fdg"}]}]}}
+ ,"did":
+  {"cell":{"data":"blob"
+          ,"dims":[{}
+                  ,{"back":[{"cell_id":"fdg"}]}]}}}
 
 initial_service_state = {"cells":JSON.parse(JSON.stringify(gcells))}
 initial_manager_state = {"manager":{"metadata":{"name":"gradesta-manager-py"}}}
@@ -578,6 +594,18 @@ function update_t(time){
  update();
 }
 
+function load_graph(elem) {
+ console.log(elem);
+ elem.setAttribute('class','content');
+ f = document.createElement('iframe');
+ f.setAttribute("src","./graph.html?graph="+elem.getAttribute("data-graph"));
+ f.setAttribute('width',"100%");
+ f.setAttribute('height',"70%");
+ f.setAttribute('frameBorder',0);
+ elem.innerText='';
+ elem.appendChild(f);
+}
+
 function update() {
 console.log(t)
 line = svg.selectAll(".port");//Don't know why this is needed. Don't care either. It works.
@@ -714,6 +742,9 @@ actors_tab
  .text(d => comp(d.prev_state,d.state));
 
 function get_cells(s) {
+ if (!s) {
+  return {}
+ }
  if (s["service-state"]) {
   cells = s["service-state"]["cells"];
  } else {
@@ -722,7 +753,7 @@ function get_cells(s) {
  if (cells) {
   return cells
  } else {
-  console.log(s);
+  return {}
  }
 }
 
@@ -737,7 +768,6 @@ actor_graphs_tab = d3.select("body").select("#graph-views-tab")
  .append("div")
  .attr("class","content");
 
-
 actor_graphs_tab
  .append("div")
  .attr("class","ui header")
@@ -747,9 +777,10 @@ actor_graphs_tab
  .append("div")
  .attr("class","meta")
  .append("div")
- .text("Click here to view graph")
- .attr("class","ui button")
- .attr("onclick",a=>"this.setAttribute('class','content');f = document.createElement('iframe');f.setAttribute(\"src\",\"./graph.html?graph="+encodeURIComponent(JSON.stringify(get_cells(a.state)))+"\");f.setAttribute('width','100%');f.setAttribute('height','70%');f.setAttribute('frameBorder',0);this.innerText='';this.appendChild(f);");
+ .attr("class","actor-graph-container")
+ .attr("data-graph",a=>encodeURIComponent(JSON.stringify(get_cells(a.state))));
+
+activate_graphs();
 
 num_msgs = 0
 for (k in states[t].sockets) {
@@ -757,10 +788,8 @@ for (k in states[t].sockets) {
   num_msgs++;
  }
 } 
-console.log("Msgs:"+num_msgs);
 d3.selectAll(".socket-msg-counter").data([]).exit().remove();
 if(num_msgs) {
-console.log("hi");
 d3.select("body").select("#sockets-tab-btn").selectAll(".socket-msg-counter")
  .data([num_msgs])
  .enter()
@@ -879,4 +908,16 @@ update();
 d3.select('body')
    .on("keydown", tchange);
 
-$('.menu .item').tab();
+$('.menu .item').tab({'onVisible':function(elem){
+  active_tab = elem;
+  activate_graphs();
+   }});
+
+function activate_graphs() {
+ if (active_tab == "graph-views"){
+  Array.from(document.getElementsByClassName("actor-graph-container")).forEach(
+   function(element, index, array) {
+    load_graph(element)
+   })
+ }
+}

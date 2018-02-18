@@ -2,11 +2,11 @@ function get_graph(cells) {
  g = new Graph(); 
  if (cells) {
   for (k in cells) {
-   cell = cells[k];
-   g.addNode(k,{label:cell.cell.data});
+   cell = cells[k].cell;
+   g.addNode(k,{label:k+":"+cell.data});
   }
   for (k in cells) {
-   cell = cells[k];
+   cell = cells[k].cell;
    for (d in cell.dims) {
     if (cell.dims[d].forth) {
      for (i in cell.dims[d].forth) {
@@ -25,12 +25,6 @@ function get_graph(cells) {
  }
  return g
 }
-/*
-graph_divs = document.getElementsByClassName("graph-view");
-if(graph_divs.length){
-for (i in graph_divs) {
- graph_divs[i].remove();
-}}*/
 
 function getParameterByName(name) {
  var match = RegExp('[?&]' + name + '=([^&]*)').exec(window.location.search);
@@ -40,6 +34,6 @@ cells = JSON.parse(getParameterByName("graph"));
 g = get_graph(cells);
 var layouter = new Graph.Layout.Spring(g);
 layouter.layout();
-var renderer = new Graph.Renderer.Raphael("canvas", g, 400, 400);
+var renderer = new Graph.Renderer.Raphael("canvas", g, 400, 200);
 console.log(renderer);
 renderer.draw();
