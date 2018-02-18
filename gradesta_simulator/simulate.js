@@ -702,10 +702,10 @@ function comp(s1,s2) {
      desc += "\""+k + "\":";
      desc += indent(comp(s1[k],s2[k])); 
     }else{
-     desc_p = "<span style='color:green;'><pre>"
+     desc_p = "<span style='color:green;'>"
      desc_p += "\""+k + "\":";
      desc_p += JSON.stringify(s2[k],null," "); 
-     desc_p += "</pre></span>";
+     desc_p += "</span>";
      desc += indent(desc_p);
     }
   }
