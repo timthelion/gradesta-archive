@@ -14,7 +14,7 @@ function client_center(i) {
 
 states = {}
 bookmarks = []
-gcells = {"abc":{"cell":{"data":"Hello world!"},"dims":[{"forth":[{"cell_id":"fdg"}]}]},"fdg":{"cell":{"data":"foo"}}}
+gcells = {"abc":{"cell":{"data":"Hello world!"},"dims":[{"forth":[{"cell_id":"fdg"}]}]},"fdg":{"cell":{"data":"foo"},"dims":[{"forth":[{"cell_id":"efd"}]}]},"efd":{"cell":{"data":"foo"}}}
 
 initial_service_state = {"cells":JSON.parse(JSON.stringify(gcells))}
 initial_manager_state = {"manager":{"metadata":{"name":"gradesta-manager-py"}}}
@@ -712,6 +712,38 @@ actors_tab
 actors_tab
  .append("pre")
  .text(d => comp(d.prev_state,d.state));
+
+function get_cells(s) {
+ if (s["service-state"]) {
+  cells = s["service-state"]["cells"];
+ } else {
+  cells = s["cells"];
+ }
+ if (cells) {
+  return cells
+ } else {
+  console.log(s);
+ }
+}
+
+d3.selectAll(".actor-graph")
+ .data([]).exit().remove();
+actor_graphs_tab = d3.select("body").select("#graph-views-tab")
+ .selectAll(".actor-graph")
+ .data(states[t].actors)
+ .enter()
+ .append("div")
+ .attr("class","actor-graph ui item");
+
+actor_graphs_tab
+ .append("div")
+ .attr("class","ui header")
+ .text(a => a.name);
+
+actor_graphs_tab
+ .append("iframe")
+ .attr("frameborder",0)
+ .attr("src",a => "./graph.html?graph="+encodeURIComponent(JSON.stringify(get_cells(a.state))));
 
 num_msgs = 0
 for (k in states[t].sockets) {

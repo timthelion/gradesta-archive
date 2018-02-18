@@ -4,9 +4,6 @@
 <title> Simulation of gradesta protocol message passing patterns </title>
 <script type="text/javascript" src="./depends/d3.v5.js"></script>
 <script type="text/javascript" src="./depends/jquery-3.3.1.js"></script>
-<script type="text/javascript" src="./depends/raphael-min.js"></script>
-<script type="text/javascript" src="./depends/graffle.js"></script>
-<script type="text/javascript" src="./depends/graph.js"></script>
 <script type="text/javascript" src="./depends/semantic.js"></script>
 <link rel="stylesheet" type="text/css" class="ui" href="./depends/semantic.css">
 </head>
@@ -22,6 +19,7 @@
 <div class="ui top attached tabular menu">
   <a class="item" data-tab="contents">Contents</a>
   <a class="item" data-tab="actors">Actor states</a>
+  <a class="item" data-tab="graph-views">Graph views</a>
   <a class="item" data-tab="sockets" id="sockets-tab-btn">Socket messages</a>
   <a class="item" data-tab="protobuf-spec">Protobuf spec</a>
 </div>
@@ -33,12 +31,19 @@
  <div class="ui cards" id="actors-tab" >
  </div>
 </div>
+
+<div class="ui bottom attached tab segment" data-tab="graph-views">
+
+  <div id="canvas"></div>
+ <div id="graph-views-tab" class="ui divided items">
+ </div>
+</div>
 <div class="ui bottom attached tab segment" data-tab="sockets">
  <div class="ui cards" id="sockets-tab" >
  </div>
 </div>
 <div class="ui bottom attached tab segment" data-tab="protobuf-spec">
- <iframe src="spec.html" width = "100%" height="100%" scrolling="no"></iframe>
+ <iframe src="spec.html" width = "100%" height="100%" scrolling="no"  frameBorder="0"></iframe>
 </div>
 <script type="text/javascript" src="simulate.js"></script>
 </body>
