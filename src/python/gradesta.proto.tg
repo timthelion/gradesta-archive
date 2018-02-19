@@ -93,7 +93,7 @@
 [176, "message MessageFromClient {\n optional ClientState client_state          = 1;\n optional string      origin                = 2;\n}", []]
 [177, "message Round {\n optional string client_of_origin = 1;\n optional string errors           = 2;\n optional uint64 request          = 3;\n}", []]
 [178, "The round object\n\nRequests are made by clients and processed by the\nservice. They are stored in the ServiceState as a\nmap mapping from a uuid4 request_id to a Request\nobject.\n\nThe request object consists of the id of the client\nwhich originated the request and a string containing\nany errors which occured when processing the request.\nThe service should leave ensure that the client_of_origin\nstring is still set when responding to a request.", [["", 177]]]
-[180, "message LineOfSight {\n repeated LOSState   states             = 1;\n repeated uint64     vars               = 2;\n repeated string     cells              = 8;\n}", [["#", 181]]]
+[180, "message LineOfSight {\n repeated LOSState   states             = 1;\n repeated uint64     vars               = 2;\n repeated string     cells              = 3;\n}", [["#", 181]]]
 [181, "message LOSState {\n optional Condition forth    = 1;\n optional Condition back     = 2;\n optional int32     next_dim = 3;\n}", [["#", 182]]]
 [182, "message Condition {\n enum Requirement {\n  UNIQUE = 1;\n  NO_BOUNDARY = 2;\n }\n repeated Requirement requirements = 1;\n optional uint32 var               = 2;\n optional int32  cont_true         = 3;\n optional int32  cont_false        = 4;\n}", []]
 [183, "message Dims {\n repeated Dim dims = 1;\n}", [["", 184]]]

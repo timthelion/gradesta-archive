@@ -57,10 +57,6 @@ function get_graph(cells) {
  return g
 }
 
-function getParameterByName(name) {
- var match = RegExp('[?&]' + name + '=([^&]*)').exec(window.location.search);
- return match && decodeURIComponent(match[1].replace(/\+/g, ' '));
-}
 cells = JSON.parse(getParameterByName("graph"));
 g = get_graph(cells);
 var layouter = new Graph.Layout.Spring(g);
