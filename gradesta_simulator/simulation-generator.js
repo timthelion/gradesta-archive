@@ -561,7 +561,3 @@ function build_states() {
  bookmark("Rounds and race conditions");
 }
 build_states();
-console.log(states)
-console.log(bookmarks);
-
-
