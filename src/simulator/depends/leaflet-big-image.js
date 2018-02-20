@@ -13,7 +13,7 @@ var map = L.map('gradesta-spec', {
 // dimensions of the image
 var w = 2302,
     h = 1801,
-    url = 'gradesta.proto.png';
+    url = '../code-visualizations/gradesta.proto.png';
 
 // calculate the edges of the image, in coordinate space
 var southWest = map.unproject([0, h], map.getMaxZoom()-1);

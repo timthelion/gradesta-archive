@@ -1,0 +1,11 @@
+#!/usr/bin/python3
+import subprocess
+import sys
+file = sys.argv[1]
+while True:
+ subprocess.call(["vim",file])
+ with open(file) as fd:
+  print(fd.read())
+ if input("Press enter to continue:"):
+  sys.exit()
+ subprocess.call(["python3","-i",file])
