@@ -1,6 +1,5 @@
+{ //initial states
 num_clients = 0
-active_tab = ""
-
 states = {}
 bookmarks = []
 gcells = 
@@ -83,13 +82,13 @@ states[0] =
  ,"index":0
  ,"title":""
  }
-
-
-
+}
 var state = states[0]
 function build_states() {
  s = 0
  round = 1
+////////////////////////////////////////////////////
+ {// helpers
  function bookmark(desc) {
   for (i in bookmarks) {
    if (bookmarks[i].text == desc) {
@@ -104,15 +103,12 @@ function build_states() {
   states[s] = state
   // create new state as copy of old state
   s++;
-  state = JSON.parse(JSON.stringify(state))
-  state.index = s
+  state = JSON.parse(JSON.stringify(state));
+  state.index = s;
  }
-
  function client_center(i) { 
   return sm_offset+(i)*50 
  } 
-
-
  function activate_actor(a) {
   for (i in state.actors) {
    if (state.actors[i].name == a) {
@@ -174,7 +170,6 @@ function build_states() {
   send_to_all_clients();
   next_state();
  }
-
  function fulfill_selection(client, long_version) {
   send("clients/C"+client+"/manager.gradesock");
   next_state();
@@ -187,7 +182,6 @@ function build_states() {
   next_state();
   state.status = "The notification-manager now passes the cells onto any clients which are subscribed to the given selection.  ";
  }
-
  function request_selection(client, long_version) {
   state.status = "The client sends the new selections on to the client-manager.";
   fulfill_selection(client,long_version);
@@ -197,30 +191,13 @@ function build_states() {
   send_to_all_clients();
   next_state();
  }
-
  function update_selection(client,subscribers) {
   state.status = "The client sends the updated selections on to the client-manager.";
   fulfill_selection(client,false);
   send_to_clients(subscribers);
   next_state();
  }
-
  function get_selection_from_service(long_version) {
-  bookmark("Getting the cells seen by a selection from the service")
-  state.status = "The manager requests the center cell of the selection from the service.";
-  round++;
-  msg =
-   {
-    "cells": {"abc":{"status":2}}
-   ,"current_round":{"request":round}
-   }
-  send("service.gradesock",msg);
-  next_state();
-  send_requested_cells(["abc"]);
-  next_state();
-  request_cells();
-  next_state();
-  send_requested_cells(["fdg"]);
   next_state();
   if (long_version) {
    request_cells();
@@ -245,9 +222,7 @@ function build_states() {
   state.status = "Unless the graph's topology changes too quickly for the manager to keep up, the manager will eventually be able to gather all cells within range of the requested cursors.";
   next_state();
  }
-
  function request_cells(cells) {
-  state.status = "The manager looks at the newly received cells, and requests neighbors from the service in acordance with the given cursor's LineOfSight state-machines."; 
   round++;
   cellsd = {}
   for (i in cells) {
@@ -258,9 +233,8 @@ function build_states() {
     "cells": cellsd
    ,"current_round":{"request":round}
    }
-  send("service.gradesock");
+  send("service.gradesock",msg);
  }
-
  function send_requested_cells(cells) {
   state.status = "The service sends the requested cells to the manager.";
   cellsd = {}
@@ -279,7 +253,6 @@ function build_states() {
    }
   } 
  }
-
  function flicker_(fdict) {
   function set_flag(value) {
    for (i in state.sockets) {
@@ -294,7 +267,6 @@ function build_states() {
   next_state();
   set_flag(false);
  }
-
  function flicker(sockets, attr) {
   fdict = {}
   for (i in sockets) {
@@ -302,7 +274,6 @@ function build_states() {
   }
   flicker_(fdict);
  }
-
  function set_socket_msg (socket,msg) {
   for (i in state.sockets) {
    if (state.sockets[i].name == socket) {
@@ -310,12 +281,9 @@ function build_states() {
    }
   } 
  }
-
  function sends(sockets) {
   flicker(sockets,"sending");
  }
-
-
  function send(socket,msg) {
   set_socket_msg(socket,msg);
   flicker([socket],"sending");
@@ -362,7 +330,9 @@ function build_states() {
    }
   }
  }
- ////START
+ }
+ {// sceenplay
+ {////START
  bookmark("Startup");
  next_state();
  activate_actor("S")
@@ -411,7 +381,6 @@ function build_states() {
         }
        };
 
-
  send("service.gradesock",msg);
 
  msg = Object.assign(msg,{
@@ -427,7 +396,6 @@ function build_states() {
 
  state.status = "The service then sends its metadata and the index pointer to the manager along with the defaults. Everything is sent back to the manager, even the defaults that the manager just sent, because the service is always the source of truth about it's state.";
 
-
  update_actor_state("M",function(as){
   as["service-state"] = msg;
   as["service-state"]["cells"] = {};
@@ -438,20 +406,33 @@ function build_states() {
  update_actor_state("M",as => as);
  state.status = "The manager now constructs the default index selection and requests the cells in the index stack from the service.";
  next_state();
- get_selection_from_service(false); 
+ bookmark("Getting the cells seen by the default index selection")
+ state.status = "The manager requests the center cell of the selection from the service.";
+ request_cells(["abc"]);
+ next_state();
+ send_requested_cells(["abc"]);
+ next_state();
+ update_actor_state("M",as => as);
+ state.status = "The manager looks at the newly received cells, and requests neighbors from the service in acordance with the given cursor's LineOfSight state-machines."; 
+ request_cells(["fdg"]);
+ next_state();
+ send_requested_cells(["fdg"]);
  bookmark("The service and manager in their ready state");
  state.status = "The manager and service are now ready and await connections from clients.";
  next_state();
  state.status = "It is possible that while the manager is still waiting for clients to connect, the service will send updates to the index/pointer and or cells in the index tack to the manager. The manager updates its cache. If graph topology has changed the manager may also need to request more cells from the index stack, or inform the service that some cells have gone out of view.";
  send("manager.gradesock");
  ////
+ }
+ {// Adding clients
  bookmark("Client connection");
  add_client();
  bookmark("Adding a second client");
  add_client();
  bookmark("Adding a third client");
  add_client();
- ///////////
+ }
+ {// Working with selections
  bookmark("Creating a selection");
  request_selection(2,true);
 
@@ -465,7 +446,8 @@ function build_states() {
 
  bookmark("Moving cursors");
  update_selection(2,[1,2]); 
-
+ }
+ {// Changing the service state client side
  bookmark("Setting service state fields client side");
  state.status = "When a client sets service state fields such as the index pointer and cells, it passes the changes to the client-manager.";
  send("clients/C1/manager.gradesock");
@@ -513,7 +495,8 @@ function build_states() {
  next_state();
  flicker_({"clients/C1/client.gradesock":"sending","clients/C2/client.gradesock":"responding"});
  next_state();
-
+ }
+ { // setting client metadata
  bookmark("Changing client metadata");
  state.status = "While it is not typical that client metadata would change at runtime, it is not forbiden either. If a client changes its metadata, this change will be broadcast to all clients.";
  send_from_client(1);
@@ -521,8 +504,8 @@ function build_states() {
  send("manager/notifications.gradesock");
  send_to_all_clients(); 
  next_state();
-
- // service originated events
+ }
+ {// service originated events
  bookmark("Changing a cell service side");
  state.status = "If a cell is changed by the service, that change needs to be propogated to the clients.";
  next_state();
@@ -556,8 +539,9 @@ function build_states() {
  next_state();
  state.status = "The same procedure applies for service side updates to the service error_log and cell_template.";
  next_state();
-
+ }
  // Rounds and race conditions
  bookmark("Rounds and race conditions");
+ }
 }
 build_states();

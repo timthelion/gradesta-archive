@@ -1,4 +1,5 @@
 t = 0
+active_tab = ""
 var svg = d3.selectAll("svg");
 var socket = svg.selectAll(".socket")
 var line = svg.selectAll(".port")
