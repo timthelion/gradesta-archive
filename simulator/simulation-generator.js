@@ -418,9 +418,13 @@ function build_states() {
  next_state();
  send_requested_cells(["fdg"]);
  bookmark("The service and manager in their ready state");
+ state.status = "The manager looks at the newly received cells, and requests neighbors from the service in acordance with the given cursor's LineOfSight state-machines."; 
+ request_cells(["efd"]);
+ next_state();
+ send_requested_cells(["efd"]);
+ next_state();
  state.status = "The manager and service are now ready and await connections from clients.";
  next_state();
- state.status = "It is possible that while the manager is still waiting for clients to connect, the service will send updates to the index/pointer and or cells in the index tack to the manager. The manager updates its cache. If graph topology has changed the manager may also need to request more cells from the index stack, or inform the service that some cells have gone out of view.";
  send("manager.gradesock");
  ////
  }
