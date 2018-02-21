@@ -16,7 +16,7 @@ var question = function(r, n) {
  /* the Raphael set is obligatory, containing all you want to display */
  var set = r.set().push(
  /* custom objects go here */
- r.image("./depends/question.svg",n.point[0]-5,n.point[1]-10,10,10).attr({"fill": "#fa8", "stroke-width": 1, r : "2px"})).push(
+ r.image("../js/question.svg",n.point[0]-5,n.point[1]-10,10,10).attr({"fill": "#fa8", "stroke-width": 1, r : "2px"})).push(
    r.text(n.point[0], n.point[1] + 10, n.label).attr({"font-size":"8px"}));
    return set;
  };
@@ -38,7 +38,7 @@ function get_graph(cells) {
      for (i in cell.dims[d].forth) {
       link = cell.dims[d].forth[i];
       if (!cell_ids.includes(link.cell_id)) {
-       g.addNode(link.cell_id,{label:k,render:question});
+       g.addNode(link.cell_id,{label:link.cell_id,render:question});
       }
       g.addEdge(k,link.cell_id,{directed:true,label: d,stroke : "#4286f4"});//, fill : "#56f"});
      }
