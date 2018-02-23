@@ -19,7 +19,7 @@ gcells =
                   ,{"back":[{"cell_id":"fdg"}]}]}}}
 
 initial_service_state = {"cells":JSON.parse(JSON.stringify(gcells))}
-initial_manager_state = {"manager":{"metadata":{"name":"gradesta-manager-py"}}}
+initial_manager_state = {"client_state":{"manager":{"metadata":{"name":"gradesta-manager-py"}}}}
 
 states[0] =
  {"actors":
@@ -226,11 +226,11 @@ function build_states() {
   round++;
   cellsd = {}
   for (i in cells) {
-   cellsd[cells[i]] = {"status":2}
+   cellsd[cells[i]] = true
   }
   msg =
    {
-    "cells": cellsd
+    "in_view": cellsd
    ,"current_round":{"request":round}
    }
   send("service.gradesock",msg);
@@ -249,7 +249,7 @@ function build_states() {
   respond("manager.gradesock",msg);
   for (i in state.actors) {
    if (state.actors[i].name == "M") {
-    state.actors[i]["state"]["service-state"]["cells"] = Object.assign(state.actors[i]["state"]["service-state"]["cells"],cellsd)
+    state.actors[i]["state"]["service_state"]["cells"] = Object.assign(state.actors[i]["state"]["service_state"]["cells"],cellsd)
    }
   } 
  }
@@ -360,7 +360,7 @@ function build_states() {
  msg = {
         "layers":["base"]
        ,"on_disk_state":1
-       ,"current-round":{"request":round}
+       ,"current_round":{"request":round}
        ,"cell_template":
          {
           "cell": {"encoding":1,"mime":"text/plain","dims":[{},{}]}
@@ -397,15 +397,48 @@ function build_states() {
  state.status = "The service then sends its metadata and the index pointer to the manager along with the defaults. Everything is sent back to the manager, even the defaults that the manager just sent, because the service is always the source of truth about it's state.";
 
  update_actor_state("M",function(as){
-  as["service-state"] = msg;
-  as["service-state"]["cells"] = {};
+  as["service_state"] = msg;
+  as["service_state"]["cells"] = {};
   return as});
  respond("manager.gradesock",msg);
  next_state();
 
  update_actor_state("M",as => as);
- state.status = "The manager now constructs the default index selection and requests the cells in the index stack from the service.";
+ state.status = "The manager now constructs the default index selection and state machine and requests the cells in the index stack from the service.";
  next_state();
+ update_actor_state("M", function(as){
+   as["state_machines"] = {};
+   as["client_state"]["selections"] = {};
+   as["client_state"].selections["index"] =
+    {"name":"Index"
+    ,"update_count":1
+    ,"cursors":[
+      {"name":""
+      ,"cell":"abc"
+      ,"los":
+       {"states":[
+          {"forth":
+           {"var":0
+           ,"cont_true":0
+           ,"cont_false":-1
+           }
+          ,"back":
+           {"var":1
+           ,"cont_true":-1
+           ,"cont_false":-1
+           }
+          ,"next_dim":-1}]
+       ,"vars":[1000,0]
+       }
+      }]
+    ,"clients": {}
+    };
+   as.state_machines[as["service_state"].index] =
+    {"state":as.client_state.selections.index.cursors[0].los.states[0]
+    ,"vars":as.client_state.selections.index.cursors[0].los.vars
+    ,"cursor":["index",0]};
+   return as;
+   });
  bookmark("Getting the cells seen by the default index selection")
  state.status = "The manager requests the center cell of the selection from the service.";
  request_cells(["abc"]);
