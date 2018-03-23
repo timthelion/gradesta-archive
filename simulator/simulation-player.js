@@ -1,4 +1,9 @@
 t = 0
+var url = new URL(window.location.href)
+t_ = url.searchParams.get("state")
+if (t_) {
+ t = Number(t_)
+}
 active_tab = ""
 var svg = d3.selectAll("svg");
 var socket = svg.selectAll(".socket")
@@ -6,14 +11,22 @@ var line = svg.selectAll(".port")
 var actor = svg.selectAll(".actor")
 var actor_label = svg.selectAll(".actor-label")
 
+window.onpopstate = function(event) {
+ t = event.state;
+ update();
+};
+
 function tchange(event){
  if (d3.event.keyCode == 37 && t > 0){
   t--;
+  history.pushState(t, 'state '+t, '/simulator/simulate.html?state='+t);
   update();
  }else if (d3.event.keyCode == 39){
   t++;
   if(!states[t]){
    t--;
+  }else{
+   history.pushState(t, 'state '+t, '/simulator/simulate.html?state='+t);
   }
   update();
  }
@@ -130,16 +143,16 @@ function comp(s1,s2) {
   }else{
    if (s1[k] && JSON.stringify(s1[k]).startsWith("{")) {
      desc += "\""+k + "\":";
-     desc += indent(comp(s1[k],s2[k])); 
+     desc += indent(comp(s1[k],s2[k]));
     }else{
      desc_p = "<span style='color:green;'>"
      desc_p += "\""+k + "\":";
-     desc_p += JSON.stringify(s2[k],null," "); 
+     desc_p += JSON.stringify(s2[k],null," ");
      desc_p += "</span>";
      desc += indent(desc_p);
     }
   }
- } 
+ }
  desc += "\n}"
  return desc
 }
@@ -213,7 +226,7 @@ for (k in states[t].sockets) {
  if (states[t].sockets[k].msg) {
   num_msgs++;
  }
-} 
+}
 d3.selectAll(".socket-msg-counter").data([]).exit().remove();
 if(num_msgs) {
 d3.select("body").select("#sockets-tab-btn").selectAll(".socket-msg-counter")
@@ -248,7 +261,7 @@ d3.select("body").select("#step-counter").selectAll(".title")
  .data([states[t].index])
  .enter()
  .append("text")
- .text(d => d)
+ .text(d => d + (states[t]["passed"] ? "" : "✗"))
  .attr("class","index")
 
 d3.selectAll(".title")
