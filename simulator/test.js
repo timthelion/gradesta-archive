@@ -6,6 +6,11 @@ tests = [
 ["sockets[4].active"],
 ["sockets[1].msg"],
 ["actors[0].state.on_disk_state"],
+["sockets[0].msg.current_round.request == 1"],
+["actors[1].state.service_state.on_disk_state"],
+["actors[1].state.client_state.selections.index"],
+["sockets[1].msg.in_view.abc"],
+["sockets[0].msg.cells.abc"],
 ]
 
 for (t in tests) {

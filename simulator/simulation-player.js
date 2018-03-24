@@ -5,6 +5,11 @@ if (t_) {
  t = Number(t_)
 }
 active_tab = ""
+tab_ = url.searchParams.get("tab")
+if (tab_) {
+ active_tab = tab_;
+ $.tab('change tab', active_tab);
+}
 var svg = d3.selectAll("svg");
 var socket = svg.selectAll(".socket")
 var line = svg.selectAll(".port")
@@ -12,21 +17,27 @@ var actor = svg.selectAll(".actor")
 var actor_label = svg.selectAll(".actor-label")
 
 window.onpopstate = function(event) {
- t = event.state;
+ t = event.state["state"];
+ active_tab = event.state.tab;
+ $.tab('change tab', active_tab);
  update();
 };
+
+function push_state(){
+  history.pushState({"state":t,"tab":active_tab}, 'state '+t, '/simulator/simulate.html?state='+t+"&tab="+active_tab);
+}
 
 function tchange(event){
  if (d3.event.keyCode == 37 && t > 0){
   t--;
-  history.pushState(t, 'state '+t, '/simulator/simulate.html?state='+t);
+  push_state();
   update();
  }else if (d3.event.keyCode == 39){
   t++;
   if(!states[t]){
    t--;
   }else{
-   history.pushState(t, 'state '+t, '/simulator/simulate.html?state='+t);
+   push_state()
   }
   update();
  }
@@ -38,7 +49,6 @@ function update_t(time){
 }
 
 function load_graph(elem) {
- console.log(elem);
  elem.setAttribute('class','content');
  f = document.createElement('iframe');
  f.setAttribute("src","./graph.html?graph="+elem.getAttribute("data-graph"));
@@ -50,7 +60,8 @@ function load_graph(elem) {
 }
 
 function update() {
-console.log(t)
+console.log(t);
+console.log(states[t].stack);
 line = svg.selectAll(".port");//Don't know why this is needed. Don't care either. It works.
 line.data([]).exit().remove();
 line = svg.selectAll(".port");
@@ -184,8 +195,8 @@ function get_cells(s) {
  if (!s) {
   return {}
  }
- if (s["service-state"]) {
-  cells = s["service-state"]["cells"];
+ if (s["service_state"]) {
+  cells = s["service_state"]["cells"];
  } else {
   cells = s["cells"];
  }
@@ -255,6 +266,26 @@ sockets_tab.append("div")
 
 sockets_tab.append("pre")
  .text(d => (d.msg ? JSON.stringify(d.msg, null, " ") : ""));
+/*
+d3.selectAll(".state-machine-msg")
+ .data([]).exit().remove();
+state_machines_tab = d3.select("body").select("#state-machines-tab")
+ .selectAll(".state-machine-msg")
+ .data(states[t].state_machines)
+ .enter()
+ .append("div")
+ .attr("class","state-machine-msg ui card");
+
+state_machines_tab.append("div")
+ .attr("class","header")
+ .text(d => d.name);
+state_machines_tab.append("div")
+ .attr("class","meta")
+ .text(d => d.type);
+
+state_machines_tab.append("pre")
+ .text(d => (d.msg ? JSON.stringify(d.msg, null, " ") : ""));
+*/
 
 d3.selectAll(".index").data([]).exit().remove();
 d3.select("body").select("#step-counter").selectAll(".title")
@@ -350,6 +381,7 @@ d3.select('body')
 $('.menu .item').tab({'onVisible':function(elem){
   active_tab = elem;
   activate_graphs();
+  push_state();
    }});
 
 function activate_graphs() {

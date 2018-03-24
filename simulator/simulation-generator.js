@@ -12,13 +12,17 @@ gcells =
                   ,{"forth":[{"cell_id":"did"}]}]}}
  ,"efd":
   {"cell":{"data":"bar"
-          ,"dims":[{"back":[{"cell_id":"fdg"}]}]}}
+          ,"dims":[{"back":[{"cell_id":"fdg"}],"forth":[{"cell_id":"xyz"}]}]}}
  ,"did":
   {"cell":{"data":"blob"
           ,"dims":[{}
-                  ,{"back":[{"cell_id":"fdg"}]}]}}}
+                  ,{"back":[{"cell_id":"fdg"}]}]}}
+ ,"xyz":
+  {"cell":{"data":"lala"
+          ,"dims":[{"back":[{"cell_id":"efd"}]}]}}
+}
 
-initial_service_state = {"cells":JSON.parse(JSON.stringify(gcells))}
+initial_service_state = {"cells":copy(gcells)}
 initial_manager_state = {"client_state":{"manager":{"metadata":{"name":"gradesta-manager-py"}}}}
 
 states[0] =
@@ -83,6 +87,9 @@ states[0] =
  ,"title":""
  }
 }
+function copy(o){
+ return JSON.parse(JSON.stringify(o));
+}
 var state = states[0]
 function build_states() {
  s = 0
@@ -99,11 +106,13 @@ function build_states() {
   bookmarks.push({"text":desc,"index":s})
  }
  function next_state() {
+  var stack = new Error().stack
+  state.stack = stack
   //save the old state
   states[s] = state
   // create new state as copy of old state
   s++;
-  state = JSON.parse(JSON.stringify(state));
+  state = copy(state);
   state.index = s;
  }
  function client_center(i) {
@@ -239,7 +248,7 @@ function build_states() {
   state.status = "The service sends the requested cells to the manager.";
   cellsd = {}
   for (i in cells) {
-   cellsd[cells[i]] = JSON.parse(JSON.stringify(gcells[cells[i]]))
+   cellsd[cells[i]] = copy(gcells[cells[i]])
   }
   msg =
    {
@@ -325,7 +334,7 @@ function build_states() {
  function update_actor_state(actor,f) {
   for (i in state.actors) {
    if (state.actors[i].name == actor) {
-    state.actors[i]["prev_state"] = JSON.parse(JSON.stringify(state.actors[i]["state"]))
+    state.actors[i]["prev_state"] = copy(state.actors[i]["state"])
     state.actors[i]["state"] = f(state.actors[i]["state"])
    }
   }
@@ -382,6 +391,7 @@ function build_states() {
        };
 
  send("service.gradesock",msg);
+ msg = copy(msg);
 
  msg = Object.assign(msg,{
         "index":"abc"
@@ -401,13 +411,11 @@ function build_states() {
   as["service_state"]["cells"] = {};
   return as});
  respond("manager.gradesock",msg);
+ update_actor_state("M",as => as);
  next_state();
 
- update_actor_state("M",as => as);
  state.status = "The manager now constructs the default index selection and state machine and requests the cells in the index stack from the service.";
- next_state();
  update_actor_state("M", function(as){
-   as["state_machines"] = {};
    as["client_state"]["selections"] = {};
    as["client_state"].selections["index"] =
     {"name":"Index"
@@ -426,23 +434,20 @@ function build_states() {
            {"var":1
            ,"cont_true":-1
            ,"cont_false":-1
-           }
+	   }
           ,"next_dim":-1}]
        ,"vars":[1000,0]
        }
       }]
     ,"clients": {}
     };
-   as.state_machines[as["service_state"].index] =
-    {"state":as.client_state.selections.index.cursors[0].los.states[0]
-    ,"vars":as.client_state.selections.index.cursors[0].los.vars
-    ,"cursor":["index",0]};
    return as;
    });
+ next_state();
+ update_actor_state("M",as => as);
  bookmark("Getting the cells seen by the default index selection")
  state.status = "The manager requests the center cell of the selection from the service.";
  request_cells(["abc"]);
- next_state();
  send_requested_cells(["abc"]);
  next_state();
  update_actor_state("M",as => as);
