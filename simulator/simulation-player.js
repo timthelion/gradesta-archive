@@ -266,33 +266,67 @@ sockets_tab.append("div")
 
 sockets_tab.append("pre")
  .text(d => (d.msg ? JSON.stringify(d.msg, null, " ") : ""));
-/*
+
+state_machines = []
+for (selid in states[15].actors[1].state.client_state.selections) {
+ sel = states[15].actors[1].state.client_state.selections[selid]
+ for (cursi in sel.cursors) {
+  cursor = sel.cursors[cursi]
+  for (cellid in cursor.los.cells) {
+   for (dimi in cursor.los.cells[cellid]){
+    dim = cursor.los.cells[cellid][dimi]
+    for (sti in dim) {
+     state_machines.push(
+      [selid + "." + cursi + "." + cellid + "." + dimi + "." + sti,
+      copy(dim[sti])
+      ]);
+    }
+   }
+  }
+ }
+}
+
 d3.selectAll(".state-machine-msg")
  .data([]).exit().remove();
 state_machines_tab = d3.select("body").select("#state-machines-tab")
  .selectAll(".state-machine-msg")
- .data(states[t].state_machines)
+ .data(state_machines)
  .enter()
  .append("div")
  .attr("class","state-machine-msg ui card");
 
 state_machines_tab.append("div")
  .attr("class","header")
- .text(d => d.name);
-state_machines_tab.append("div")
- .attr("class","meta")
- .text(d => d.type);
-
+ .text(d => d[0]);
+function mk_state_table(machine_state) {
+ html = "<table class=\"ui celled table\">";
+ html += "<thead><tr><th></th><th>var</th><th>cont_true</th><th>cont_false</th></tr></thead>";
+ html += "<tbody>";
+ html += "<tr><td>forth</td><td>"+machine_state.forth.var+"</td><td>"+machine_state.forth.cont_true+"</td><td>"+machine_state.forth.cont_true+"</td></tr>";
+ html += "<tr><td>back</td><td>"+machine_state.back.var+"</td><td>"+machine_state.back.cont_true+"</td><td>"+machine_state.back.cont_true+"</td></tr>";
+ html += "</tbody></table>";
+ html += "<table class=\"ui celled table\">";
+ html += "<thead><tr><th>var</th>";
+ for (vi in machine_state.vars) {
+  html += "<th>"+vi+"</th>";
+ }
+ html += "</tr></thead><tbody><tr><th>value</th>";
+ for (vi in machine_state.vars) {
+  html += "<td>"+machine_state.vars[vi]+"</td>";
+ }
+ html += "</tr></tbody></table>";
+ html += "Next dim: " + machine_state.next_dim
+ return html;
+}
 state_machines_tab.append("pre")
- .text(d => (d.msg ? JSON.stringify(d.msg, null, " ") : ""));
-*/
+ .html(d => mk_state_table(d[1]));
 
 d3.selectAll(".index").data([]).exit().remove();
 d3.select("body").select("#step-counter").selectAll(".title")
  .data([states[t].index])
  .enter()
  .append("text")
- .text(d => d + (states[t]["passed"] ? "" : "✗"))
+ .text(d => (d + 1) + (states[t]["passed"] ? "" : "✗"))
  .attr("class","index")
 
 d3.selectAll(".title")

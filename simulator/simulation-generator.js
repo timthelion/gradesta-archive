@@ -106,10 +106,10 @@ function build_states() {
   bookmarks.push({"text":desc,"index":s})
  }
  function next_state() {
-  var stack = new Error().stack
-  state.stack = stack
+  var stack =
+  state.stack = new Error().stack;
   //save the old state
-  states[s] = state
+  states[s] = copy(state);
   // create new state as copy of old state
   s++;
   state = copy(state);
@@ -406,15 +406,16 @@ function build_states() {
 
  state.status = "The service then sends its metadata and the index pointer to the manager along with the defaults. Everything is sent back to the manager, even the defaults that the manager just sent, because the service is always the source of truth about it's state.";
 
+ respond("manager.gradesock",msg);
  update_actor_state("M",function(as){
   as["service_state"] = msg;
   as["service_state"]["cells"] = {};
   return as});
- respond("manager.gradesock",msg);
+ next_state();
  update_actor_state("M",as => as);
  next_state();
 
- state.status = "The manager now constructs the default index selection and state machine and requests the cells in the index stack from the service.";
+ state.status = "The manager now constructs the default index selection and requests the cells in the index stack from the service.";
  update_actor_state("M", function(as){
    as["client_state"]["selections"] = {};
    as["client_state"].selections["index"] =
@@ -446,11 +447,35 @@ function build_states() {
  next_state();
  update_actor_state("M",as => as);
  bookmark("Getting the cells seen by the default index selection")
- state.status = "The manager requests the center cell of the selection from the service.";
  request_cells(["abc"]);
+ update_actor_state("S", function(as){
+  as.in_view = {"abc":true};
+  return as;
+  });
+ next_state();
+ update_actor_state("S",as => as);
  send_requested_cells(["abc"]);
  next_state();
- update_actor_state("M",as => as);
+ state.status = "Update selection LOS to contain new state machines.";
+ update_actor_state("M", function(as){
+  as.client_state.selections.index.cursors[0].los.cells = {};
+  as.client_state.selections.index.cursors[0].los.cells["abc"] = [[
+     {"forth":
+      {"var":0
+      ,"cont_true":0
+      ,"cont_false":-1
+      }
+     ,"back":
+      {"var":1
+      ,"cont_true":-1
+      ,"cont_false":-1
+      }
+     ,"vars":[1000,0]
+     ,"next_dim":-1}
+  ]];
+  return as;
+  });
+ next_state();
  state.status = "The manager looks at the newly received cells, and requests neighbors from the service in acordance with the given cursor's LineOfSight state-machines.";
  request_cells(["fdg"]);
  next_state();
