@@ -5,21 +5,26 @@ bookmarks = []
 gcells =
  {"abc":
   {"cell":{"data":"Hello world!"
-  ,"dims":[{"forth":[{"cell_id":"fdg"}]}]}}
+  ,"dims":[{"forth":[{"cell_id":"fdg"}]}]}
+  ,"edit_count":1
+  ,"click_count":0}
  ,"fdg":
   {"cell":{"data":"foo"
           ,"dims":[{"back":[{"cell_id":"abc"}],"forth":[{"cell_id":"efd"}]}
-                  ,{"forth":[{"cell_id":"did"}]}]}}
+                  ,{"forth":[{"cell_id":"did"}]}]}
+  ,"edit_count":1
+  ,"click_count":0}
  ,"efd":
   {"cell":{"data":"bar"
-          ,"dims":[{"back":[{"cell_id":"fdg"}],"forth":[{"cell_id":"xyz"}]}]}}
+          ,"dims":[{"back":[{"cell_id":"fdg"}],"forth":[]}]}
+  ,"edit_count":1
+  ,"click_count":0}
  ,"did":
   {"cell":{"data":"blob"
           ,"dims":[{}
-                  ,{"back":[{"cell_id":"fdg"}]}]}}
- ,"xyz":
-  {"cell":{"data":"lala"
-          ,"dims":[{"back":[{"cell_id":"efd"}]}]}}
+                  ,{"back":[{"cell_id":"fdg"}]}]}
+  ,"edit_count":1
+  ,"click_count":0}
 }
 
 initial_service_state = {"cells":copy(gcells)}
@@ -407,6 +412,7 @@ function build_states() {
  state.status = "The service then sends its metadata and the index pointer to the manager along with the defaults. Everything is sent back to the manager, even the defaults that the manager just sent, because the service is always the source of truth about it's state.";
 
  respond("manager.gradesock",msg);
+ state.status = "The manager saves the service state to it's cache."
  update_actor_state("M",function(as){
   as["service_state"] = msg;
   as["service_state"]["cells"] = {};
@@ -476,19 +482,86 @@ function build_states() {
   return as;
   });
  next_state();
+ update_actor_state("M",as => as);
  state.status = "The manager looks at the newly received cells, and requests neighbors from the service in acordance with the given cursor's LineOfSight state-machines.";
  request_cells(["fdg"]);
+ update_actor_state("S", function(as){
+  as.in_view["fdg"] = true;
+  return as;
+  });
  next_state();
+ update_actor_state("S",as => as);
  send_requested_cells(["fdg"]);
- bookmark("The service and manager in their ready state");
  state.status = "The manager looks at the newly received cells, and requests neighbors from the service in acordance with the given cursor's LineOfSight state-machines.";
+ update_actor_state("M", function(as){
+  as.client_state.selections.index.cursors[0].los.cells["fdg"] = [[
+     {"forth":
+      {"var":0
+      ,"cont_true":0
+      ,"cont_false":-1
+      }
+     ,"back":
+      {"var":1
+      ,"cont_true":-1
+      ,"cont_false":-1
+      }
+     ,"vars":[999,0]
+     ,"next_dim":-1}
+  ]];
+  return as;
+  });
+ next_state();
+ update_actor_state("M",as => as);
  request_cells(["efd"]);
+ update_actor_state("S", function(as){
+  as.in_view["efd"] = true;
+  return as;
+  });
  next_state();
+ update_actor_state("S",as => as);
+
  send_requested_cells(["efd"]);
+ update_actor_state("M", function(as){
+  as.client_state.selections.index.cursors[0].los.cells["efd"] = [[
+     {"forth":
+      {"var":0
+      ,"cont_true":0
+      ,"cont_false":-1
+      }
+     ,"back":
+      {"var":1
+      ,"cont_true":-1
+      ,"cont_false":-1
+      }
+     ,"vars":[998,0]
+     ,"next_dim":-1}
+  ]];
+  return as;
+  });
  next_state();
+ bookmark("The service and manager in their ready state");
  state.status = "The manager and service are now ready and await connections from clients.";
+ update_actor_state("M",as => as);
  next_state();
- send("manager.gradesock");
+ state.status = "In the ready state, it is possible that the service will send updates to the manager.";
+ update_actor_state("S", function(as){
+  as.cells["efd"].cell.data = "Asdf!";
+  as.cells["efd"].edit_count++;
+  return as;
+  });
+ next_state();
+ update_actor_state("S",as => as);
+ state.status = "For example, here the efd cell's data feild has been changed to \"Asdf!\" and that change is passed on to the manager. (If an out of view cell had changed, the change would not be passed on). Note that there is no current_round feild. Rounds are only used when messages are being sent in the direction of the service, and there is the expectation that the round will be \"completed\" by the service's reply.";
+ send("manager.gradesock",{"cells":{"efd":{"cell":{"data":"Asdf!"},"edit_count":2}}});
+ update_actor_state("M", function(as){
+  as.service_state.cells["efd"].cell.data = "Asdf!";
+  as.service_state.cells["efd"].edit_count = 2;
+  return as;
+  });
+ next_state();
+ state.status = "The service/manager are again in their ready state.";
+ update_actor_state("M",as => as);
+ next_state();
  ////
  }
  {// Adding clients

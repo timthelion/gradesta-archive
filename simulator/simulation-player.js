@@ -268,8 +268,8 @@ sockets_tab.append("pre")
  .text(d => (d.msg ? JSON.stringify(d.msg, null, " ") : ""));
 
 state_machines = []
-for (selid in states[15].actors[1].state.client_state.selections) {
- sel = states[15].actors[1].state.client_state.selections[selid]
+for (selid in states[t].actors[1].state.client_state.selections) {
+ sel = states[t].actors[1].state.client_state.selections[selid]
  for (cursi in sel.cursors) {
   cursor = sel.cursors[cursi]
   for (cellid in cursor.los.cells) {
