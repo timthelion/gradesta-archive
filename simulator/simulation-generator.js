@@ -501,7 +501,7 @@ function build_states() {
  send_requested_cells(["efd"]);
  update_actor_state("M", function(as){
   as.client_state.selections.index.cursors[0].los.state_tree[1]["forth"][0][1]["forth"][0] =
-   ["did"
+   ["bar"
    ,{"forth": {}
     ,"back": {}
     ,"current_state":0
