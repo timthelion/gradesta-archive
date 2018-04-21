@@ -163,7 +163,7 @@ function build_states() {
   state.status = "The client-mananger sees, via a file system watcher, the new manager.gradesock socket and connects to that socket.";
   next_state();
   state.status = "The client-manager then sends a blank welcome message to the client via the notification-manager.";
-  send("manager/notifications.gradesock(1)");
+  send("manager/notifications.gradesock(1)",{"recipients":[client]});
   next_state();
   state.status = "The notification manager registers the new client and sends the blank wecome message on to the client.";
   send("clients/"+client+"/client.gradesock");
@@ -433,16 +433,10 @@ function build_states() {
       ,"los":
        {"states":[
           {"forth":
-           {"var":0
-           ,"cont_true":0
-           ,"cont_false":-1
-           }
-          ,"back":
-           {"var":1
-           ,"cont_true":-1
-           ,"cont_false":-1
-	   }
-          ,"next_dim":-1}]
+           {0:{"var":0
+              ,"cont_true":0
+              ,"cont_false":-1
+           }}}]
        ,"vars":[1000,0]
        }
       }]
@@ -464,21 +458,13 @@ function build_states() {
  next_state();
  state.status = "Update selection LOS to contain new state machines.";
  update_actor_state("M", function(as){
-  as.client_state.selections.index.cursors[0].los.cells = {};
-  as.client_state.selections.index.cursors[0].los.cells["abc"] = [[
-     {"forth":
-      {"var":0
-      ,"cont_true":0
-      ,"cont_false":-1
-      }
-     ,"back":
-      {"var":1
-      ,"cont_true":-1
-      ,"cont_false":-1
-      }
-     ,"vars":[1000,0]
-     ,"next_dim":-1}
-  ]];
+  as.client_state.selections.index.cursors[0].los.state_tree = {};
+  as.client_state.selections.index.cursors[0].los.state_tree =
+   ["abc"
+   ,{"forth": {}
+    ,"back": {}
+    ,"current_state":0
+    ,"vars":[1000,0]}];
   return as;
   });
  next_state();
@@ -494,20 +480,12 @@ function build_states() {
  send_requested_cells(["fdg"]);
  state.status = "The manager looks at the newly received cells, and requests neighbors from the service in acordance with the given cursor's LineOfSight state-machines.";
  update_actor_state("M", function(as){
-  as.client_state.selections.index.cursors[0].los.cells["fdg"] = [[
-     {"forth":
-      {"var":0
-      ,"cont_true":0
-      ,"cont_false":-1
-      }
-     ,"back":
-      {"var":1
-      ,"cont_true":-1
-      ,"cont_false":-1
-      }
-     ,"vars":[999,0]
-     ,"next_dim":-1}
-  ]];
+  as.client_state.selections.index.cursors[0].los.state_tree[1]["forth"][0] =
+   ["fdg"
+   ,{"forth": {}
+    ,"back": {}
+    ,"current_state":0
+    ,"vars":[999,0]}];
   return as;
   });
  next_state();
@@ -522,20 +500,12 @@ function build_states() {
 
  send_requested_cells(["efd"]);
  update_actor_state("M", function(as){
-  as.client_state.selections.index.cursors[0].los.cells["efd"] = [[
-     {"forth":
-      {"var":0
-      ,"cont_true":0
-      ,"cont_false":-1
-      }
-     ,"back":
-      {"var":1
-      ,"cont_true":-1
-      ,"cont_false":-1
-      }
-     ,"vars":[998,0]
-     ,"next_dim":-1}
-  ]];
+  as.client_state.selections.index.cursors[0].los.state_tree[1]["forth"][0][1]["forth"][0] =
+   ["did"
+   ,{"forth": {}
+    ,"back": {}
+    ,"current_state":0
+    ,"vars":[998,0]}];
   return as;
   });
  next_state();

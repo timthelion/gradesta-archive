@@ -26,6 +26,11 @@ tests = [["actors[0].name"],
 ["actors[0].state.cells.efd.cell.data == \"Asdf!\""],
 ["sockets[0].msg.cells.efd"],
 ["actors[1].state.service_state.cells.efd.cell.data == \"Asdf!\""],
+[],
+["actors[4]"],
+[],
+["sockets[4].msg.recipients[0] == \"C1\""],
+[]
 ]
 
 for (t in tests) {

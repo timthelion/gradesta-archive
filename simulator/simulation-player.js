@@ -45,6 +45,7 @@ function tchange(event){
 
 function update_t(time){
  t = time;
+ push_state();
  update();
 }
 
@@ -267,59 +268,89 @@ sockets_tab.append("div")
 sockets_tab.append("pre")
  .text(d => (d.msg ? JSON.stringify(d.msg, null, " ") : ""));
 
-state_machines = []
+cursors = []
 for (selid in states[t].actors[1].state.client_state.selections) {
  sel = states[t].actors[1].state.client_state.selections[selid]
  for (cursi in sel.cursors) {
   cursor = sel.cursors[cursi]
-  for (cellid in cursor.los.cells) {
-   for (dimi in cursor.los.cells[cellid]){
-    dim = cursor.los.cells[cellid][dimi]
-    for (sti in dim) {
-     state_machines.push(
-      [selid + "." + cursi + "." + cellid + "." + dimi + "." + sti,
-      copy(dim[sti])
-      ]);
-    }
-   }
-  }
+  cursors.push(
+  [sel.name + "." + cursi
+  ,cursor
+  ]);
  }
 }
 
-d3.selectAll(".state-machine-msg")
+d3.selectAll(".cursor-card")
  .data([]).exit().remove();
-state_machines_tab = d3.select("body").select("#state-machines-tab")
- .selectAll(".state-machine-msg")
- .data(state_machines)
+cursors_tab = d3.select("body").select("#cursors-tab")
+ .selectAll(".cursor-card")
+ .data(cursors)
  .enter()
  .append("div")
- .attr("class","state-machine-msg ui card");
+ .attr("class","cursor-card ui content");
 
-state_machines_tab.append("div")
+cursors_tab.append("div")
  .attr("class","header")
  .text(d => d[0]);
-function mk_state_table(machine_state) {
+function mk_state_tree(los) {
  html = "<table class=\"ui celled table\">";
  html += "<thead><tr><th></th><th>var</th><th>cont_true</th><th>cont_false</th></tr></thead>";
+
  html += "<tbody>";
- html += "<tr><td>forth</td><td>"+machine_state.forth.var+"</td><td>"+machine_state.forth.cont_true+"</td><td>"+machine_state.forth.cont_true+"</td></tr>";
- html += "<tr><td>back</td><td>"+machine_state.back.var+"</td><td>"+machine_state.back.cont_true+"</td><td>"+machine_state.back.cont_true+"</td></tr>";
+ for (state_id in los.states) {
+  state = los.states[state_id]
+  function add_direction(direction,dn) {
+   for (dim in direction) {
+    condition = direction[dim]
+    html += "<tr><td>"+state_id+"."+dn+"."+dim+"</td><td>"+condition.var+"</td><td>"+condition.cont_true+"</td><td>"+condition.cont_false+"</td></tr>";
+   }
+  }
+  add_direction(state.forth,"forth");
+  add_direction(state.back,"back");
+ }
  html += "</tbody></table>";
+
  html += "<table class=\"ui celled table\">";
  html += "<thead><tr><th>var</th>";
- for (vi in machine_state.vars) {
+ for (vi in los.vars) {
   html += "<th>"+vi+"</th>";
  }
  html += "</tr></thead><tbody><tr><th>value</th>";
- for (vi in machine_state.vars) {
-  html += "<td>"+machine_state.vars[vi]+"</td>";
+ for (vi in los.vars) {
+  html += "<td>"+los.vars[vi]+"</td>";
  }
  html += "</tr></tbody></table>";
- html += "Next dim: " + machine_state.next_dim
+ function add_branch(branch){
+  html += "<div class='ui list'>"
+   html+= "<div class='item'>"
+    html+= "<i class='arrows alternate'></i>"
+    html+= "<div class='content'>"
+     html+= "<div class='header'>"+branch[0]+" Current state:"+branch[1].current_state+" Vars:"+branch[1].vars+"</div>"
+    html+= "</div>"
+    function add_direction(dir,dn){
+     for(dimi in dir) {
+      html+= "<div class='item'>"
+      html+= "<i class='angle right'></i>"
+      html+= "<div>"+dn+"."+dimi+"</div>"
+      add_branch(dir[dimi])
+      html+= "</div>"
+     }
+    }
+    html += "<div class='ui list'>"
+     add_direction(branch[1].forth,"forth")
+     add_direction(branch[1].back,"back")
+    html += "</div>"
+   html += "</div>"
+  html += "</div>"
+ }
+ console.log(los)
+ if(los.state_tree){
+  add_branch(los.state_tree)
+ }
  return html;
 }
-state_machines_tab.append("pre")
- .html(d => mk_state_table(d[1]));
+cursors_tab.append("pre")
+ .html(d => mk_state_tree(d[1].los));
 
 d3.selectAll(".index").data([]).exit().remove();
 d3.select("body").select("#step-counter").selectAll(".title")
