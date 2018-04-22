@@ -325,7 +325,7 @@ function mk_state_tree(los) {
    html+= "<div class='item'>"
     html+= "<i class='arrows alternate'></i>"
     html+= "<div class='content'>"
-     html+= "<div class='header'>"+branch[0]+" Current state:"+branch[1].current_state+" Vars:"+branch[1].vars+"</div>"
+     html+= "<div class='header'>"+branch[0]+" → <tt>state:"+branch[1].current_state+" vars:"+branch[1].vars+"</tt></div>"
     html+= "</div>"
     function add_direction(dir,dn){
      for(dimi in dir) {
