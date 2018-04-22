@@ -30,7 +30,11 @@ tests = [["actors[0].name"],
 ["actors[4]"],
 [],
 ["sockets[4].msg.recipients[0] == \"C1\""],
-[]
+[],
+["sockets[6].sending"],
+[],
+["sockets[5].sending", "sockets[5].sending"],
+[],
 ]
 
 for (t in tests) {
