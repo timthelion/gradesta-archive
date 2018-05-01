@@ -1,0 +1,17 @@
+{
+ "description": "The textgraph ecosystem.",
+ "maintainer": "Timothy Hobbs <timothyhobbs@seznam.cz>",
+ "executable": "/bin/bash",
+ "basic-common-permissions": {
+  "stateful-home": true,
+  "inherit-locale": true,
+  "inherit-timezone": true
+ },
+ "gui": {
+  "clipboard": false,
+  "system-tray": false,
+  "cursors": false,
+  "border-color": "red"
+ },
+ "access-working-directory": true
+}
