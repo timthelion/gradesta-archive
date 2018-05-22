@@ -49,8 +49,38 @@ func recv_from_service() *pb.ServiceState {
 	return nss
 }
 
-func merge_cell_runtimes(nc pb.CellRuntime, oc *pb.CellRuntime) {
-        return
+func merge_modes32(nm map[uint32]pb.Mode, om map[uint32]pb.Mode) {
+	for k, v := range nm {
+		om[k] = v
+	}
+}
+
+func merge_modes64(nm map[uint64]pb.Mode, om map[uint64]pb.Mode) {
+	for k, v := range nm {
+		om[k] = v
+	}
+}
+
+func merge_cells(nc *pb.Cell, oc *pb.Cell) {
+        // here you are
+}
+
+func merge_cell_runtimes(ncr *pb.CellRuntime, ocr *pb.CellRuntime) {
+	merge_cells(ncr.Cell, ocr.Cell)
+	if ncr.EditCount != nil {
+		ocr.EditCount = ncr.EditCount
+	}
+	if ncr.ClickCount != nil {
+		ocr.ClickCount = ncr.ClickCount
+	}
+	if ncr.Deleted != nil {
+		ocr.Deleted = ncr.Deleted
+	}
+	merge_modes32(ncr.CellRuntimeModes, ocr.CellRuntimeModes)
+	merge_modes32(ncr.CellModes, ocr.CellModes)
+	merge_modes64(ncr.ForLinkModes, ocr.ForLinkModes)
+	merge_modes64(ncr.BackLinkModes, ocr.BackLinkModes)
+	ocr.SupportedEncodings = append(ocr.SupportedEncodings, ncr.SupportedEncodings...)
 }
 
 func merge_new_state_from_service(nss *pb.ServiceState, ss *pb.ServiceState) {
@@ -67,19 +97,18 @@ func merge_new_state_from_service(nss *pb.ServiceState, ss *pb.ServiceState) {
 		ss.Metadata = nss.Metadata
 	}
 	if nss.CellTemplate != nil {
-                if ss.CellTemplate != nil {
-                        merge_cell_runtimes(*nss.CellTemplate, ss.CellTemplate)
-                } else {
-		        ss.CellTemplate = nss.CellTemplate
-                }
+		if ss.CellTemplate != nil {
+			merge_cell_runtimes(nss.CellTemplate, ss.CellTemplate)
+		} else {
+			ss.CellTemplate = nss.CellTemplate
+		}
 	}
 	for field, mode := range nss.ServiceStateModes {
 		ss.ServiceStateModes[field] = mode
 	}
-	for cell_id, cell_runtime := range nss.Cells{
+	for cell_id, cell_runtime := range nss.Cells {
 		merge_cell_runtimes(cell_runtime, ss.Cells[cell_id])
 	}
-
 }
 
 func main() {
