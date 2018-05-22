@@ -371,9 +371,7 @@ function build_states() {
  next_state();
  ////
  state.status = "Once the manager has started it informs the service that manager is ready by sending protocol defaults to the service.";
- msg = {
-        "layers":["base"]
-       ,"on_disk_state":1
+ msg = {"on_disk_state":1
        ,"current_round":{"request":round}
        ,"cell_template":
          {

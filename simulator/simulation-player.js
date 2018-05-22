@@ -292,6 +292,17 @@ cursors_tab = d3.select("body").select("#cursors-tab")
 cursors_tab.append("div")
  .attr("class","header")
  .text(d => d[0]);
+
+/*
+function mk_status_list(los) {
+ "⚏"
+}
+
+cursors_tab.append("div")
+ .attr("class","header")
+ .text();
+*/
+
 function mk_state_tree(los) {
  html = "<table class=\"ui celled table\">";
  html += "<thead><tr><th></th><th>var</th><th>cont_true</th><th>cont_false</th></tr></thead>";
