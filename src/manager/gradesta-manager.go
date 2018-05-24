@@ -3,6 +3,7 @@ package main
 import (
 	//"fmt"
 	"log"
+	"math"
 	"os"
 	"os/exec"
 
@@ -61,8 +62,38 @@ func merge_modes64(nm map[uint64]pb.Mode, om map[uint64]pb.Mode) {
 	}
 }
 
+func merge_links(nl map[uint64]*pb.Links, ol map[uint64]*pb.Links) {
+	for k, v := range nl {
+		ol[k] = v
+	}
+}
+
 func merge_cells(nc *pb.Cell, oc *pb.Cell) {
-        // here you are
+	if nc.Data != nil {
+		oc.Data = nc.Data
+	}
+	if nc.Encoding != nil {
+		oc.Encoding = nc.Encoding
+	}
+	if nc.Mime != nil {
+		oc.Mime = nc.Mime
+	}
+	merge_links(nc.Forth, oc.Forth)
+	merge_links(nc.Back, oc.Back)
+	for k, v := range nc.Tags {
+		if v {
+			oc.Tags[k] = true
+		} else {
+			delete(oc.Tags, k)
+		}
+	}
+	for k, v := range nc.Coords {
+		if math.IsNaN(v) {
+			delete(oc.Coords, k)
+		} else {
+			oc.Coords[k] = v
+		}
+	}
 }
 
 func merge_cell_runtimes(ncr *pb.CellRuntime, ocr *pb.CellRuntime) {
