@@ -8,6 +8,7 @@ import (
 	"os/exec"
 
 	pb "./pb"
+	deque "github.com/gammazero/deque"
 	"github.com/golang/protobuf/proto"
 	zmq "github.com/pebbe/zmq4"
 )
@@ -142,6 +143,69 @@ func merge_new_state_from_service(nss *pb.ServiceState, ss *pb.ServiceState) {
 	}
 }
 
+var (
+	index = "index"
+	one   = 1
+)
+
+type placedNonTerminal struct {
+	cell_id string
+	uint32  symbol
+}
+
+func evaluate_loses(state *pb.ClientState) map[string]bool {
+	needed := map[string]bool{}
+	for _, selection := range state.Selections {
+		for _, cursor := range selection {
+			los := cursor.Los
+			if state[cursor.Cell] {
+				var ents deque.Deque // exposed non-terminals
+				ents.PushBack(placedNonTerminal{cursor.Cell, 0})
+				for ents.Len() > 0 {
+					nt := ents.PopFront()
+					cell_runtime := state.Cells[nt.cell_id]
+					for _, symbol_index := range los.ProductionRules[nt.symbol].Symbols {
+						symbol := los.Symbols[symbol_index]
+						var direction map[uint64]pb.Links
+						if symbol.Direction {
+							direction = cell_runtime.Cell.Forth
+						} else {
+							direction = cell_runtime.Cell.Back
+						}
+						links, ok := direction[symbol.Dimension]
+						if ok {
+							for _, link := range links {
+								if link.Mime == "." && link.Path == "." {
+									_, have_cell := state.Cells[link.CellId]
+									if have_cell {
+										ents.PushBack(placedNonTerminal{})
+									} else {
+										needed[link.CellId] = true
+									}
+								}
+							}
+						}
+					}
+				}
+			} else {
+				needed[cursor.cell] = true
+			}
+		}
+	}
+	return needed
+}
+
+func update_view(state *pb.ClientState) {
+	for {
+		newly_in_view := evaluate_loses(state)
+		if len(newly_in_view) == 0 {
+			return
+		}
+		new_view := state.ServiceState{in_view: newly_in_view}
+		send_to_service(new_view)
+	}
+}
+
 func main() {
 	// Initialize directories
 	for _, dir := range directories {
@@ -165,20 +229,57 @@ func main() {
 		process.Start()
 	}
 	// Send protocol defaults to service
-	ss := &pb.ServiceState{
-		OnDiskState: pb.ServiceState_READ_ONLY.Enum(),
-		ServiceStateModes: map[uint32]pb.Mode{
-			1: pb.Mode_READ_WRITE,
-			2: pb.Mode_READ_WRITE,
-			3: pb.Mode_READ_ONLY,
-			4: pb.Mode_READ_WRITE,
-			5: pb.Mode_READ_WRITE,
-			6: pb.Mode_READ_ONLY,
-			7: pb.Mode_READ_ONLY,
-			8: pb.Mode_READ_ONLY,
+	state := &pb.ClientState{
+		ServiceState: &pb.ServiceState{
+			OnDiskState: pb.ServiceState_READ_ONLY.Enum(),
+			ServiceStateModes: map[uint32]pb.Mode{
+				1: pb.Mode_READ_WRITE,
+				2: pb.Mode_READ_WRITE,
+				3: pb.Mode_READ_ONLY,
+				4: pb.Mode_READ_WRITE,
+				5: pb.Mode_READ_WRITE,
+				6: pb.Mode_READ_ONLY,
+				7: pb.Mode_READ_ONLY,
+				8: pb.Mode_READ_ONLY,
+			},
+			CurrentRound: &pb.Round{Request: &one},
 		},
-		CurrentRound: &pb.Round{Request: func(i uint64) *uint64 { return &i }(1)}, // thanks https://stackoverflow.com/questions/30716354/how-do-i-do-a-literal-int64-in-go . Sometimes go really sucks for the most basic things!
 	}
+	ss := state.ServiceState
 	send_to_service(ss)
 	merge_new_state_from_service(recv_from_service(), ss)
+	//////////////////////////////////////////////////////////
+	// Getting the cells seen by the default index selection//
+	//////////////////////////////////////////////////////////
+	{
+		// https://stackoverflow.com/questions/30716354/how-do-i-do-a-literal-int64-in-go#30716481
+		state.Selections["index"] = &pb.Selection{ // of course, struct literals can be addressed, because golang doesn't just suck, it's inconsistent as well.
+			Name:        &index, // golang sucks
+			UpdateCount: &one,   // golang sucks
+			Clients: map[string]pb.Selection_Status{
+				"manager": pb.Selection_PRIMARY,
+			},
+			Cursors: []pb.Cursor{&pb.Cursor{ // Golang also sucks, because arrays and struct literalls basically look the same. So confusing.
+				Name: &index, // golang sucks
+				Cell: ss.Index,
+				Los: &pb.LineOfSight{
+					Vars: []uint64{1000, 0},
+					States: []pb.LOSState{
+						&pb.LOSState{
+							Forth: map[uint64]*pb.Condition{
+								Requirements: []pb.Condition_Requirement{
+									pb.Condition_UNIQUE,
+								},
+								Var:       0,
+								ContTrue:  0,
+								ContFalse: -1,
+							},
+						},
+					},
+				},
+			},
+			},
+		}
+		update_view(state)
+	}
 }
