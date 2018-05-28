@@ -13,4 +13,5 @@ ENV GOPATH /usr/local/share/go
 RUN go get github.com/golang/protobuf/protoc-gen-go
 RUN apt-get install -y libczmq-dev libsodium-dev
 RUN go get github.com/pebbe/zmq4
+RUN go get github.com/gammazero/deque
 ENV PATH $PATH:$GOPATH/bin

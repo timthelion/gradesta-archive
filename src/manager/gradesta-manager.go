@@ -143,44 +143,68 @@ func merge_new_state_from_service(nss *pb.ServiceState, ss *pb.ServiceState) {
 	}
 }
 
+// https://stackoverflow.com/questions/30716354/how-do-i-do-a-literal-int64-in-go#30716481
 var (
-	index = "index"
-	one   = 1
+	index         = "index"
+	zero   uint64 = 0
+	zero32 uint32 = 0
+	one    uint64 = 1
+	falsev        = false
+	truev         = true
 )
 
 type placedNonTerminal struct {
 	cell_id string
-	uint32  symbol
+	symbol  uint32
+	vars    []uint64
 }
 
 func evaluate_loses(state *pb.ClientState) map[string]bool {
 	needed := map[string]bool{}
+	scanned := map[string]bool{}
 	for _, selection := range state.Selections {
-		for _, cursor := range selection {
+		for _, cursor := range selection.Cursors {
 			los := cursor.Los
-			if state[cursor.Cell] {
+			_, have_cell := state.ServiceState.Cells[*cursor.Cell]
+			if have_cell {
 				var ents deque.Deque // exposed non-terminals
-				ents.PushBack(placedNonTerminal{cursor.Cell, 0})
+				ents.PushBack(placedNonTerminal{*cursor.Cell, 0, los.Vars})
 				for ents.Len() > 0 {
-					nt := ents.PopFront()
-					cell_runtime := state.Cells[nt.cell_id]
+					nt := ents.PopFront().(placedNonTerminal)
+					cell_runtime := state.ServiceState.Cells[nt.cell_id]
 					for _, symbol_index := range los.ProductionRules[nt.symbol].Symbols {
-						symbol := los.Symbols[symbol_index]
-						var direction map[uint64]pb.Links
-						if symbol.Direction {
+						var symbol *pb.Symbol
+						symbol = los.Symbols[symbol_index]
+						vars := make([]uint64, len(nt.vars))
+						if symbol.Var != nil {
+							copy(vars, nt.vars)
+							vars[*symbol.Var] = vars[*symbol.Var] - 1
+							if vars[*symbol.Var] == 0 {
+								continue
+							}
+						}
+						var direction map[uint64]*pb.Links
+						if symbol.Direction != nil && *symbol.Direction {
 							direction = cell_runtime.Cell.Forth
 						} else {
 							direction = cell_runtime.Cell.Back
 						}
-						links, ok := direction[symbol.Dimension]
+						links, ok := direction[*symbol.Dimension]
 						if ok {
-							for _, link := range links {
-								if link.Mime == "." && link.Path == "." {
-									_, have_cell := state.Cells[link.CellId]
+							for _, link := range links.Links {
+								if (link.Mime == nil || *link.Mime == ".") && (link.Path == nil || *link.Path == ".") {
+									_, have_cell := state.ServiceState.Cells[*link.CellId]
+									if symbol.Relabel == nil || !*symbol.Relabel {
+										_, already := scanned[*link.CellId]
+										if already {
+											continue
+										}
+									}
+									scanned[*link.CellId] = true
 									if have_cell {
-										ents.PushBack(placedNonTerminal{})
+										ents.PushBack(placedNonTerminal{*link.CellId, symbol_index, vars})
 									} else {
-										needed[link.CellId] = true
+										needed[*link.CellId] = true
 									}
 								}
 							}
@@ -188,7 +212,7 @@ func evaluate_loses(state *pb.ClientState) map[string]bool {
 					}
 				}
 			} else {
-				needed[cursor.cell] = true
+				needed[*cursor.Cell] = true
 			}
 		}
 	}
@@ -201,7 +225,7 @@ func update_view(state *pb.ClientState) {
 		if len(newly_in_view) == 0 {
 			return
 		}
-		new_view := state.ServiceState{in_view: newly_in_view}
+		new_view := &pb.ServiceState{InView: newly_in_view}
 		send_to_service(new_view)
 	}
 }
@@ -252,30 +276,32 @@ func main() {
 	// Getting the cells seen by the default index selection//
 	//////////////////////////////////////////////////////////
 	{
-		// https://stackoverflow.com/questions/30716354/how-do-i-do-a-literal-int64-in-go#30716481
 		state.Selections["index"] = &pb.Selection{ // of course, struct literals can be addressed, because golang doesn't just suck, it's inconsistent as well.
 			Name:        &index, // golang sucks
 			UpdateCount: &one,   // golang sucks
 			Clients: map[string]pb.Selection_Status{
 				"manager": pb.Selection_PRIMARY,
 			},
-			Cursors: []pb.Cursor{&pb.Cursor{ // Golang also sucks, because arrays and struct literalls basically look the same. So confusing.
+			Cursors: []*pb.Cursor{&pb.Cursor{ // Golang also sucks, because arrays and struct literalls basically look the same. So confusing.
 				Name: &index, // golang sucks
 				Cell: ss.Index,
 				Los: &pb.LineOfSight{
-					Vars: []uint64{1000, 0},
-					States: []pb.LOSState{
-						&pb.LOSState{
-							Forth: map[uint64]*pb.Condition{
-								Requirements: []pb.Condition_Requirement{
-									pb.Condition_UNIQUE,
-								},
-								Var:       0,
-								ContTrue:  0,
-								ContFalse: -1,
-							},
+					Vars: []uint64{1000},
+					Symbols: []*pb.Symbol{
+						&pb.Symbol{
+							Direction: &falsev,
+							Dimension: &zero,
+							Var:       &zero32,
+							Relabel:   &falsev,
+						},
+						&pb.Symbol{
+							Direction: &truev,
+							Dimension: &zero,
+							Var:       &zero32,
+							Relabel:   &falsev,
 						},
 					},
+					ProductionRules: map[uint32]*pb.RHS{0: &pb.RHS{Symbols: []uint32{0}}, 1: &pb.RHS{Symbols: []uint32{1}}},
 				},
 			},
 			},

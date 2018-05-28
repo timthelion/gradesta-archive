@@ -107,6 +107,6 @@
 [195, "The Dims object", [["#", 183], ["#next", 6]]]
 [196, "The MessageFromClient object", [["#", 176], ["#next", 118]]]
 [198, "message Links {\n repeated Link links = 1;\n}", [["#", 5]]]
-[199, "message Symbol {\n optional bool   direction        = 1;\n optional uint63 dimension        = 2;\n optional uint32 var              = 3;\n optional bool   cross_boundaries = 4;\n optional bool   relabel          = 5;\n}", []]
+[199, "message Symbol {\n optional bool   direction        = 1;\n optional uint64 dimension        = 2;\n optional uint32 var              = 3;\n optional bool   relabel          = 4;\n}", []]
 [200, "message RHS {\n repeated uint32 symbols = 1;\n}", []]
 [201, "", [["", 199]]]
