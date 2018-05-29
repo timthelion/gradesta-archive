@@ -1,0 +1,44 @@
+#!/usr/bin/python3
+import zmq
+import gradesta_pb2
+import json
+import os
+
+context = zmq.Context()
+manager_socket = context.socket(zmq.PUSH)
+manager_socket.bind("ipc://manager.gradesock")
+service_socket = context.socket(zmq.PULL)
+service_socket.bind("ipc://service.gradesock")
+
+s = gradesta_pb2.ServiceState()
+s.ParseFromString(service_socket.recv())
+s.index = json.dumps({"dir":"/","t":"head"})
+manager_socket.send(s.SerializeToString())
+cache = {}
+while True:
+ m = gradesta_pb2.ServiceState()
+ m.ParseFromString(service_socket.recv())
+ print(m)
+ for cell_id, v in m.in_view.items():
+  cell_id = json.loads(cell_id)
+  if not cell_id["dir"] in cache:
+   cache[cell_id["dir"]] = os.listdir(cell_id["dir"])
+  if v:
+   cr = m.cells[json.dumps(cell_id)]
+   cr.CopyFrom(s.cell_template)
+   if cell_id["t"] == "head":
+    cr.cell.data = cell_id["dir"].encode("utf-8")
+    if cache[cell_id["dir"]]:
+     forth = cr.cell.forth[0]
+     l = gradesta_pb2.Link()
+     l.cell_id=json.dumps({"dir":cell_id["dir"],"t":"entry","i":0})
+     forth.links.extend([l])
+   if cell_id["t"] == "entry":
+    if cache[cell_id["dir"]]:
+     cr.cell.data = cache[cell_id["dir"]][cell_id["i"]].encode("utf-8")
+     if cell_id["i"]+1 < len(cache[cell_id["dir"]]):
+      forth = cr.cell.forth[0]
+      l = gradesta_pb2.Link()
+      l.cell_id=json.dumps({"dir":cell_id["dir"],"t":"entry","i":cell_id["i"]+1})
+      forth.links.extend([l])
+ manager_socket.send(m.SerializeToString())

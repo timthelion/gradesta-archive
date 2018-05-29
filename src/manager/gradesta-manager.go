@@ -1,156 +1,29 @@
 package main
 
 import (
-	//"fmt"
+	"fmt"
 	"log"
-	"math"
 	"os"
 	"os/exec"
 
-	pb "./pb"
 	deque "github.com/gammazero/deque"
-	"github.com/golang/protobuf/proto"
 	zmq "github.com/pebbe/zmq4"
+
+	pb "./pb"
 )
-
-var directories = []string{"manager", "clients"}
-
-var service_sock = "ipc://service.gradesock"
-var manager_sock = "ipc://manager.gradesock"
-var clients_sock = "ipc://manager/clients.gradesock"
-var notifications_sock = "ipc://manager/notifications.gradesock"
-
-var socket_types = map[string]zmq.Type{
-	service_sock:       zmq.PUSH,
-	manager_sock:       zmq.PULL,
-	clients_sock:       zmq.PULL,
-	notifications_sock: zmq.PUSH,
-}
-
-var sockets = map[string]*zmq.Socket{}
 
 var sub_managers = []string{"gradesta-notifications-manager", "gradesta-client-manager"}
 
-func send_to_service(ss *pb.ServiceState) {
-	frame, err := proto.Marshal(ss)
-	if err != nil {
-		log.Fatalf("Error marshaling service state", err)
-	}
-	sockets[service_sock].SendBytes(frame, 0)
-}
-
-func recv_from_service() *pb.ServiceState {
-	frame, err := sockets[manager_sock].RecvBytes(0)
-	if err != nil {
-		log.Fatalf("Error reading message from service", err)
-	}
-	nss := new(pb.ServiceState)
-	if err := proto.Unmarshal(frame, nss); err != nil {
-		log.Fatalf("Error unmarshaling message from service", err)
-	}
-	return nss
-}
-
-func merge_modes32(nm map[uint32]pb.Mode, om map[uint32]pb.Mode) {
-	for k, v := range nm {
-		om[k] = v
-	}
-}
-
-func merge_modes64(nm map[uint64]pb.Mode, om map[uint64]pb.Mode) {
-	for k, v := range nm {
-		om[k] = v
-	}
-}
-
-func merge_links(nl map[uint64]*pb.Links, ol map[uint64]*pb.Links) {
-	for k, v := range nl {
-		ol[k] = v
-	}
-}
-
-func merge_cells(nc *pb.Cell, oc *pb.Cell) {
-	if nc.Data != nil {
-		oc.Data = nc.Data
-	}
-	if nc.Encoding != nil {
-		oc.Encoding = nc.Encoding
-	}
-	if nc.Mime != nil {
-		oc.Mime = nc.Mime
-	}
-	merge_links(nc.Forth, oc.Forth)
-	merge_links(nc.Back, oc.Back)
-	for k, v := range nc.Tags {
-		if v {
-			oc.Tags[k] = true
-		} else {
-			delete(oc.Tags, k)
-		}
-	}
-	for k, v := range nc.Coords {
-		if math.IsNaN(v) {
-			delete(oc.Coords, k)
-		} else {
-			oc.Coords[k] = v
-		}
-	}
-}
-
-func merge_cell_runtimes(ncr *pb.CellRuntime, ocr *pb.CellRuntime) {
-	merge_cells(ncr.Cell, ocr.Cell)
-	if ncr.EditCount != nil {
-		ocr.EditCount = ncr.EditCount
-	}
-	if ncr.ClickCount != nil {
-		ocr.ClickCount = ncr.ClickCount
-	}
-	if ncr.Deleted != nil {
-		ocr.Deleted = ncr.Deleted
-	}
-	merge_modes32(ncr.CellRuntimeModes, ocr.CellRuntimeModes)
-	merge_modes32(ncr.CellModes, ocr.CellModes)
-	merge_modes64(ncr.ForLinkModes, ocr.ForLinkModes)
-	merge_modes64(ncr.BackLinkModes, ocr.BackLinkModes)
-	ocr.SupportedEncodings = append(ocr.SupportedEncodings, ncr.SupportedEncodings...)
-}
-
-func merge_new_state_from_service(nss *pb.ServiceState, ss *pb.ServiceState) {
-	if nss.Index != nil {
-		ss.Index = nss.Index
-	}
-	if nss.OnDiskState != nil {
-		ss.OnDiskState = nss.OnDiskState
-	}
-	for time, msg := range nss.Log {
-		ss.Log[time] = msg
-	}
-	if nss.Metadata != nil {
-		ss.Metadata = nss.Metadata
-	}
-	if nss.CellTemplate != nil {
-		if ss.CellTemplate != nil {
-			merge_cell_runtimes(nss.CellTemplate, ss.CellTemplate)
-		} else {
-			ss.CellTemplate = nss.CellTemplate
-		}
-	}
-	for field, mode := range nss.ServiceStateModes {
-		ss.ServiceStateModes[field] = mode
-	}
-	for cell_id, cell_runtime := range nss.Cells {
-		merge_cell_runtimes(cell_runtime, ss.Cells[cell_id])
-	}
-}
-
+// literals that can be used as &literal
 // https://stackoverflow.com/questions/30716354/how-do-i-do-a-literal-int64-in-go#30716481
 var (
-	index         = "index"
-	zero   uint64 = 0
-	zero32 uint32 = 0
-	one    uint64 = 1
-	falsev        = false
-	truev         = true
+	index             = "index"
+	text_plain        = "text/plain"
+	zero       uint64 = 0
+	zero32     uint32 = 0
+	one        uint64 = 1
+	falsev            = false
+	truev             = true
 )
 
 type placedNonTerminal struct {
@@ -189,6 +62,7 @@ func evaluate_loses(state *pb.ClientState) map[string]bool {
 						} else {
 							direction = cell_runtime.Cell.Back
 						}
+
 						links, ok := direction[*symbol.Dimension]
 						if ok {
 							for _, link := range links.Links {
@@ -216,17 +90,31 @@ func evaluate_loses(state *pb.ClientState) map[string]bool {
 			}
 		}
 	}
-	return needed
+	changes_to_view := map[string]bool{}
+	for k, _ := range state.ServiceState.InView {
+		_, e := needed[k]
+		if !e {
+			changes_to_view[k] = false
+		}
+	}
+	for k, _ := range needed {
+		_, e := state.ServiceState.InView[k]
+		if !e {
+			changes_to_view[k] = true
+		}
+	}
+	return changes_to_view
 }
 
 func update_view(state *pb.ClientState) {
 	for {
-		newly_in_view := evaluate_loses(state)
-		if len(newly_in_view) == 0 {
+		changes_to_view := evaluate_loses(state)
+		if len(changes_to_view) == 0 {
 			return
 		}
-		new_view := &pb.ServiceState{InView: newly_in_view}
+		new_view := &pb.ServiceState{InView: changes_to_view}
 		send_to_service(new_view)
+		merge_new_state_from_service(recv_from_service(), state.ServiceState)
 	}
 }
 
@@ -267,6 +155,47 @@ func main() {
 				8: pb.Mode_READ_ONLY,
 			},
 			CurrentRound: &pb.Round{Request: &one},
+
+			CellTemplate: &pb.CellRuntime{
+				Cell: &pb.Cell{
+					Encoding: pb.Encoding_UTF8.Enum(),
+					Mime:     &text_plain,
+				},
+				EditCount:  &one,
+				ClickCount: &one,
+				Deleted:    &falsev,
+
+				CellRuntimeModes: map[uint32]pb.Mode{
+					1:  pb.Mode_READ_WRITE,
+					2:  pb.Mode_READ_WRITE,
+					3:  pb.Mode_READ_ONLY,
+					4:  pb.Mode_READ_WRITE,
+					5:  pb.Mode_READ_ONLY,
+					6:  pb.Mode_READ_ONLY,
+					7:  pb.Mode_READ_ONLY,
+					8:  pb.Mode_READ_ONLY,
+					9:  pb.Mode_READ_ONLY,
+					10: pb.Mode_READ_ONLY,
+				},
+				CellModes: map[uint32]pb.Mode{
+					1:   pb.Mode_READ_WRITE,
+					2:   pb.Mode_READ_ONLY,
+					3:   pb.Mode_READ_ONLY,
+					4:   pb.Mode_READ_WRITE,
+					5:   pb.Mode_READ_WRITE,
+					6:   pb.Mode_READ_ONLY,
+					200: pb.Mode_READ_ONLY,
+				},
+				ForLinkModes: map[uint64]pb.Mode{
+					0: pb.Mode_READ_WRITE,
+					1: pb.Mode_READ_WRITE,
+				},
+				BackLinkModes: map[uint64]pb.Mode{
+					0: pb.Mode_READ_WRITE,
+					1: pb.Mode_READ_WRITE,
+				},
+				SupportedEncodings: []pb.Encoding{pb.Encoding_UTF8},
+			},
 		},
 	}
 	ss := state.ServiceState
@@ -276,6 +205,7 @@ func main() {
 	// Getting the cells seen by the default index selection//
 	//////////////////////////////////////////////////////////
 	{
+		state.Selections = map[string]*pb.Selection{}
 		state.Selections["index"] = &pb.Selection{ // of course, struct literals can be addressed, because golang doesn't just suck, it's inconsistent as well.
 			Name:        &index, // golang sucks
 			UpdateCount: &one,   // golang sucks
@@ -288,6 +218,7 @@ func main() {
 				Los: &pb.LineOfSight{
 					Vars: []uint64{1000},
 					Symbols: []*pb.Symbol{
+						&pb.Symbol{},
 						&pb.Symbol{
 							Direction: &falsev,
 							Dimension: &zero,
@@ -301,11 +232,18 @@ func main() {
 							Relabel:   &falsev,
 						},
 					},
-					ProductionRules: map[uint32]*pb.RHS{0: &pb.RHS{Symbols: []uint32{0}}, 1: &pb.RHS{Symbols: []uint32{1}}},
+					ProductionRules: map[uint32]*pb.RHS{
+						0: &pb.RHS{Symbols: []uint32{1, 2}},
+						1: &pb.RHS{Symbols: []uint32{1}},
+						2: &pb.RHS{Symbols: []uint32{2}},
+					},
 				},
-			},
-			},
+			}},
 		}
 		update_view(state)
+	}
+	for _, cr := range state.ServiceState.Cells {
+		//fmt.Println(cell_id)
+		fmt.Println(string(cr.Cell.Data))
 	}
 }
