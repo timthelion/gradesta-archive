@@ -1,7 +1,7 @@
 package main
 
 import (
-	pb "./pb"
+	pb "../pb"
 )
 
 var (
@@ -25,9 +25,9 @@ var (
 					Encoding: pb.Encoding_UTF8.Enum(),
 					Mime:     &text_plain,
 				},
-				UpdateCount:  &one,
-				ClickCount: &one,
-				Deleted:    &falsev,
+				UpdateCount: &one,
+				ClickCount:  &one,
+				Deleted:     &falsev,
 
 				CellRuntimeModes: map[uint32]pb.Mode{
 					1:  pb.Mode_READ_WRITE,

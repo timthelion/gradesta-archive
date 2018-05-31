@@ -7,7 +7,7 @@ import (
 	"github.com/golang/protobuf/proto"
 	zmq "github.com/pebbe/zmq4"
 
-	pb "./pb"
+	pb "../pb"
 )
 
 var service_sock = "ipc://service.gradesock"
@@ -25,6 +25,13 @@ var socket_types = map[string]zmq.Type{
 }
 
 var sockets = map[string]*zmq.Socket{}
+
+func send_pending_changes_to_service() {
+	if are_pending_changes_for_service() {
+		send_to_service(pending_changes_for_service)
+	}
+	pending_changes_for_service = &pb.ServiceState{}
+}
 
 func send_to_service(ss *pb.ServiceState) {
 	frame, err := proto.Marshal(ss)
@@ -48,6 +55,13 @@ func recv_from_service() *pb.ServiceState {
 	//fmt.Println("Recv")
 	//fmt.Println()
 	return nss
+}
+
+func send_pending_changes_to_clients() {
+	if are_pending_changes_for_clients() {
+		send_to_clients(pending_changes_for_clients)
+	}
+	pending_changes_for_clients = &pb.ClientState{}
 }
 
 func send_to_clients(cs *pb.ClientState) {

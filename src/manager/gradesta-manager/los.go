@@ -3,7 +3,7 @@ package main
 import (
 	deque "github.com/gammazero/deque"
 
-	pb "./pb"
+	pb "../pb"
 )
 
 type placedNonTerminal struct {
@@ -12,7 +12,7 @@ type placedNonTerminal struct {
 	vars    []uint64
 }
 
-func evaluate_loses(state *pb.ClientState) map[string]bool {
+func evaluate_loses() bool {
 	needed := map[string]bool{}
 	scanned := map[string]bool{}
 	for _, selection := range state.Selections {
@@ -83,17 +83,16 @@ func evaluate_loses(state *pb.ClientState) map[string]bool {
 			changes_to_view[k] = true
 		}
 	}
-	return changes_to_view
+	pending_changes_for_service.InView = changes_to_view
+	return len(changes_to_view) > 0
 }
 
-func update_view(state *pb.ClientState) {
+func update_view() {
 	for {
-		changes_to_view := evaluate_loses(state)
-		if len(changes_to_view) == 0 {
+		if !evaluate_loses() {
 			return
 		}
-		new_view := &pb.ServiceState{InView: changes_to_view}
-		send_to_service(new_view)
+		send_pending_changes_to_service()
 		merge_new_state_from_service(recv_from_service(), state.ServiceState)
 	}
 }

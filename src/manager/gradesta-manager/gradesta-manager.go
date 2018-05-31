@@ -8,7 +8,7 @@ import (
 
 	zmq "github.com/pebbe/zmq4"
 
-	pb "./pb"
+	pb "../pb"
 )
 
 var sub_managers = []string{"gradesta-notifications-manager", "gradesta-client-manager"}
@@ -55,7 +55,7 @@ func main() {
 	{
 		state.Selections = map[string]*pb.Selection{}
 		state.Selections["index"] = get_default_selection(ss.Index)
-		update_view(state)
+		update_view()
 	}
 	for _, cr := range state.ServiceState.Cells {
 		//fmt.Println(cell_id)
@@ -74,21 +74,31 @@ func main() {
 			sockets, _ := poller.Poll(-1)
 			for _, socket := range sockets {
 				switch s := socket.Socket; s {
-				case ms:
+				case ms: // from service
 					m := recv_from_service()
 					pending_changes_for_clients = &pb.ClientState{
 						ServiceState: m,
 					}
 					merge_new_state_from_service(m, state.ServiceState)
-				case cs:
+					update_view()
+					send_pending_changes_to_clients()
+				case cs: // from clients
 					m := recv_from_clients()
 					conflicts := check_for_conflicts(m)
-                    if conflicts != nil {
-                        send_to_clients(conflicts)
-                    } else {
-					pending_changes_for_service = m.ServiceState
-					merge_from_clients(m, state)
-                    }
+					if conflicts != nil {
+						send_to_clients(conflicts)
+					} else {
+                        if m.ServiceState != nil {
+						    pending_changes_for_service = m.ServiceState
+                        }
+						merge_from_clients(m, state)
+						update_view()
+						if are_pending_changes_for_service() {
+							send_pending_changes_to_service()
+						} else if are_pending_changes_for_clients() {
+							send_pending_changes_to_clients()
+						}
+					}
 				}
 			}
 		}

@@ -4,7 +4,7 @@ import (
 	"math"
 	//"fmt"
 
-	pb "./pb"
+	pb "../pb"
 )
 
 func merge_modes32(nm map[uint32]pb.Mode, om map[uint32]pb.Mode) {

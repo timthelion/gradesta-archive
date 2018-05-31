@@ -4,4 +4,3 @@ module-explorer
 mge
 gradesta_pb2.py
 gradesta.proto
-gradesta-manager
