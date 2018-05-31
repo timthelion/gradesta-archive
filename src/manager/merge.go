@@ -55,8 +55,8 @@ func merge_cells(nc *pb.Cell, oc *pb.Cell) {
 
 func merge_cell_runtimes(ncr *pb.CellRuntime, ocr *pb.CellRuntime) {
 	merge_cells(ncr.Cell, ocr.Cell)
-	if ncr.EditCount != nil {
-		ocr.EditCount = ncr.EditCount
+	if ncr.UpdateCount != nil {
+		ocr.UpdateCount = ncr.UpdateCount
 	}
 	if ncr.ClickCount != nil {
 		ocr.ClickCount = ncr.ClickCount
@@ -103,6 +103,27 @@ func merge_new_state_from_service(nss *pb.ServiceState, ss *pb.ServiceState) {
 				ss.Cells = map[string]*pb.CellRuntime{}
 			}
 			ss.Cells[cell_id] = cell_runtime
+		}
+	}
+}
+
+func merge_from_clients(ncs *pb.ClientState, ocs *pb.ClientState) {
+	for client_id, client := range ncs.Clients {
+		ocs.Clients[client_id] = client
+	}
+	for selection_id, selection := range ncs.Selections {
+		old_selection, exists := ocs.Selections[selection_id]
+		if exists {
+			if selection.Name != nil {
+				old_selection.Name = selection.Name
+			}
+			old_selection.UpdateCount = selection.UpdateCount
+			for client_id, status := range selection.Clients {
+				old_selection.Clients[client_id] = status
+			}
+			old_selection.Cursors = selection.Cursors
+		} else {
+			ocs.Selections[selection_id] = selection
 		}
 	}
 }

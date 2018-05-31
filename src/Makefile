@@ -67,7 +67,7 @@ code-visualizations/gradesta.proto.png:code-visualizatons/gradest.proto.dot
 	dot -Tpng code-visualizations/gradesta.proto.dot > code-visualizations/gradesta.proto.png
 
 code-visualizatons/gradest.proto.dot:gradesta.proto.tg
-	cat gradesta.proto.tg | tg2dot --center 172 --no-street-numbers --no-street-names --no-center-highlight --downstream > code-visualizations/gradesta.proto.dot
+	cat gradesta.proto.tg | tg2dot --center 42 --no-street-numbers --no-street-names --no-center-highlight --downstream > code-visualizations/gradesta.proto.dot
 
 manager/gradesta-manager:manager/pb/gradesta.pb.go
 	cd manager; gofmt -w gradesta-manager.go ; go build gradesta-manager.go

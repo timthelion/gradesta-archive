@@ -25,7 +25,7 @@ var (
 					Encoding: pb.Encoding_UTF8.Enum(),
 					Mime:     &text_plain,
 				},
-				EditCount:  &one,
+				UpdateCount:  &one,
 				ClickCount: &one,
 				Deleted:    &falsev,
 
@@ -67,7 +67,7 @@ var (
 func get_default_selection(index *string) *pb.Selection {
 	return &pb.Selection{ // of course, struct literals can be addressed, because golang doesn't just suck, it's inconsistent as well.
 		Name:        &indexv, // golang sucks
-		UpdateCount: &one,   // golang sucks
+		UpdateCount: &one,    // golang sucks
 		Clients: map[string]pb.Selection_Status{
 			"manager": pb.Selection_PRIMARY,
 		},

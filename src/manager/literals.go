@@ -1,3 +1,5 @@
+package main
+
 // literals that can be used as &literal
 // https://stackoverflow.com/questions/30716354/how-do-i-do-a-literal-int64-in-go#30716481
 var (

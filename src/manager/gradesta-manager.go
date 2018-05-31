@@ -14,10 +14,9 @@ import (
 var sub_managers = []string{"gradesta-notifications-manager", "gradesta-client-manager"}
 
 var (
-	pending_service_state_changes pb.ServiceState
-	pending_clients_changes       map[string]*pb.Client
-	pending_manager_changes       pb.Manager
-	pending_selections_changes    map[string]*pb.Selection
+	pending_changes_for_service *pb.ServiceState
+	pending_changes_for_clients *pb.ClientState
+	state                       *pb.ClientState
 )
 
 func main() {
@@ -40,7 +39,10 @@ func main() {
 	// Launch submanagers
 	for _, sub_manager := range sub_managers {
 		process := exec.Command(sub_manager)
-		process.Start()
+		e := process.Start()
+		if e != nil {
+			log.Fatalf("Error initializing %s\n\n%s", sub_manager, e)
+		}
 	}
 	// Send protocol defaults to service
 	state := &default_state
@@ -74,9 +76,19 @@ func main() {
 				switch s := socket.Socket; s {
 				case ms:
 					m := recv_from_service()
-
+					pending_changes_for_clients = &pb.ClientState{
+						ServiceState: m,
+					}
+					merge_new_state_from_service(m, state.ServiceState)
 				case cs:
-					m, _ := s.Recv(0)
+					m := recv_from_clients()
+					conflicts := check_for_conflicts(m)
+                    if conflicts != nil {
+                        send_to_clients(conflicts)
+                    } else {
+					pending_changes_for_service = m.ServiceState
+					merge_from_clients(m, state)
+                    }
 				}
 			}
 		}
