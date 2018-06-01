@@ -26,16 +26,7 @@ func main() {
 			log.Fatal(err)
 		}
 	}
-	// Initialize sockets
-	for socket_path, socket_type := range socket_types {
-		socket, _ := zmq.NewSocket(socket_type)
-		err := socket.Connect(socket_path)
-		if err != nil {
-			log.Fatalf("Error initializing socket %s\n%s", socket_path, err)
-		}
-		defer socket.Close()
-		sockets[socket_path] = socket
-	}
+	initialize_sockets()
 	// Launch submanagers
 	for _, sub_manager := range sub_managers {
 		process := exec.Command(sub_manager)
@@ -88,9 +79,9 @@ func main() {
 					if conflicts != nil {
 						send_to_clients(conflicts)
 					} else {
-                        if m.ServiceState != nil {
-						    pending_changes_for_service = m.ServiceState
-                        }
+						if m.ServiceState != nil {
+							pending_changes_for_service = m.ServiceState
+						}
 						merge_from_clients(m, state)
 						update_view()
 						if are_pending_changes_for_service() {

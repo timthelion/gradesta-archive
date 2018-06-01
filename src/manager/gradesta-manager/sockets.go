@@ -26,6 +26,18 @@ var socket_types = map[string]zmq.Type{
 
 var sockets = map[string]*zmq.Socket{}
 
+func initialize_sockets() {
+	for socket_path, socket_type := range socket_types {
+		socket, _ := zmq.NewSocket(socket_type)
+		err := socket.Connect(socket_path)
+		if err != nil {
+			log.Fatalf("Error initializing socket %s\n%s", socket_path, err)
+		}
+		defer socket.Close()
+		sockets[socket_path] = socket
+	}
+}
+
 func send_pending_changes_to_service() {
 	if are_pending_changes_for_service() {
 		send_to_service(pending_changes_for_service)
