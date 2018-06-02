@@ -7,7 +7,10 @@ import (
 	"time"
 
 	"github.com/fsnotify/fsnotify"
+	"github.com/golang/protobuf/proto"
 	zmq "github.com/pebbe/zmq4"
+
+	pb "../pb"
 )
 
 var clients_sock_path = "ipc://manager/clients.gradesock"
@@ -41,11 +44,20 @@ func main() {
 								client_socket, _ := zmq.NewSocket(zmq.PULL)
 								client_socket.Connect(ev.Name)
 								defer client_socket.Close()
-								notifications_socket.SendBytes([]byte{}, 0)
+								intro_msg := pb.ClientState{
+									Clients: map[string]*pb.Client{
+										path_components[1]: &pb.Client{
+											Status: pb.Client_INITIALIZING.Enum(),
+										},
+									},
+								}
+								frame, _ := proto.Marshal(&intro_msg)
+								notifications_socket.SendBytes(frame, 0)
 								for {
 									frame, err := client_socket.RecvBytes(0)
 									if err != nil {
-										log.Fatalf("Error reading frame from client ", ev.Name, err)
+										log.Println("Error reading frame from client ", ev.Name, err)
+                                        return
 									}
 									clients_socket.SendBytes(frame, 0)
 								}

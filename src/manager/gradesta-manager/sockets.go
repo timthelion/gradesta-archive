@@ -17,24 +17,56 @@ var notifications_sock = "ipc://manager/notifications.gradesock"
 
 var directories = []string{"manager", "clients"}
 
-var socket_types = map[string]zmq.Type{
-	service_sock:       zmq.PUSH,
-	manager_sock:       zmq.PULL,
-	clients_sock:       zmq.PULL,
-	notifications_sock: zmq.PUSH,
+const (
+	BIND    = iota
+	CONNECT = iota
+)
+
+type SocketParams struct {
+	stype zmq.Type
+	role  uint32
+	addr  string
+}
+
+var socket_params = []*SocketParams{
+	&SocketParams{
+		addr:  service_sock,
+		stype: zmq.PUSH,
+		role:  CONNECT,
+	},
+	&SocketParams{
+		addr:  manager_sock,
+		stype: zmq.PULL,
+		role:  BIND,
+	},
+	&SocketParams{
+		addr:  clients_sock,
+		stype: zmq.PULL,
+		role:  BIND,
+	},
+	&SocketParams{
+		addr:  notifications_sock,
+		stype: zmq.PUSH,
+		role:  BIND,
+	},
 }
 
 var sockets = map[string]*zmq.Socket{}
 
 func initialize_sockets() {
-	for socket_path, socket_type := range socket_types {
-		socket, _ := zmq.NewSocket(socket_type)
-		err := socket.Connect(socket_path)
+	for _, socket_param := range socket_params {
+		socket, _ := zmq.NewSocket(socket_param.stype)
+        var err error
+		if socket_param.role == CONNECT {
+			err = socket.Connect(socket_param.addr)
+		} else {
+			err = socket.Bind(socket_param.addr)
+		}
 		if err != nil {
-			log.Fatalf("Error initializing socket %s\n%s", socket_path, err)
+			log.Fatalf("Error initializing socket %s\n%s", socket_param.addr, err)
 		}
 		defer socket.Close()
-		sockets[socket_path] = socket
+		sockets[socket_param.addr] = socket
 	}
 }
 
