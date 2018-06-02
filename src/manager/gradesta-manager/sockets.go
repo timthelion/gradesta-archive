@@ -37,7 +37,7 @@ var socket_params = []*SocketParams{
 	&SocketParams{
 		addr:  manager_sock,
 		stype: zmq.PULL,
-		role:  BIND,
+		role:  CONNECT,
 	},
 	&SocketParams{
 		addr:  clients_sock,
@@ -65,7 +65,6 @@ func initialize_sockets() {
 		if err != nil {
 			log.Fatalf("Error initializing socket %s\n%s", socket_param.addr, err)
 		}
-		defer socket.Close()
 		sockets[socket_param.addr] = socket
 	}
 }
@@ -80,7 +79,7 @@ func send_pending_changes_to_service() {
 func send_to_service(ss *pb.ServiceState) {
 	frame, err := proto.Marshal(ss)
 	if err != nil {
-		log.Fatalf("Error marshaling service state", err)
+		log.Fatalf("Error marshaling service state %s", err)
 	}
 	sockets[service_sock].SendBytes(frame, 0)
 	//fmt.Println("Sending")
@@ -94,7 +93,7 @@ func recv_from_service() *pb.ServiceState {
 	}
 	nss := new(pb.ServiceState)
 	if err := proto.Unmarshal(frame, nss); err != nil {
-		log.Fatalf("Error unmarshaling message from service", err)
+		log.Fatalf("Error unmarshaling message from service %s", err)
 	}
 	//fmt.Println("Recv")
 	//fmt.Println()
@@ -111,7 +110,7 @@ func send_pending_changes_to_clients() {
 func send_to_clients(cs *pb.ClientState) {
 	frame, err := proto.Marshal(cs)
 	if err != nil {
-		log.Fatalf("Error marshaling notification", err)
+		log.Fatalf("Error marshaling notification %s", err)
 	}
 	sockets[notifications_sock].SendBytes(frame, 0)
 	//fmt.Println("Sending")
@@ -121,11 +120,11 @@ func send_to_clients(cs *pb.ClientState) {
 func recv_from_clients() *pb.ClientState {
 	frame, err := sockets[clients_sock].RecvBytes(0)
 	if err != nil {
-		log.Fatalf("Error reading message from clients", err)
+		log.Fatalf("Error reading message from clients %s", err)
 	}
 	ncs := new(pb.ClientState)
 	if err := proto.Unmarshal(frame, ncs); err != nil {
-		log.Fatalf("Error unmarshaling message from service", err)
+		log.Fatalf("Error unmarshaling message from service %s", err)
 	}
 	//fmt.Println("Recv")
 	//fmt.Println()

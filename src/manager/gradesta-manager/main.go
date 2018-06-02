@@ -1,7 +1,6 @@
 package main
 
 import (
-	"fmt"
 	"log"
 	"os"
 	"os/exec"
@@ -14,8 +13,8 @@ import (
 var sub_managers = []string{"gradesta-notifications-manager", "gradesta-client-manager"}
 
 var (
-	pending_changes_for_service *pb.ServiceState
-	pending_changes_for_clients *pb.ClientState
+	pending_changes_for_service = &pb.ServiceState{}
+	pending_changes_for_clients = &pb.ClientState{}
 	state                       *pb.ClientState
 )
 
@@ -36,7 +35,7 @@ func main() {
 		}
 	}
 	// Send protocol defaults to service
-	state := &default_state
+	state = &default_state
 	ss := state.ServiceState
 	send_to_service(ss)
 	merge_new_state_from_service(recv_from_service(), ss)
@@ -47,10 +46,6 @@ func main() {
 		state.Selections = map[string]*pb.Selection{}
 		state.Selections["index"] = get_default_selection(ss.Index)
 		update_view()
-	}
-	for _, cr := range state.ServiceState.Cells {
-		//fmt.Println(cell_id)
-		fmt.Println(string(cr.Cell.Data))
 	}
 	//////////////////////////////////////////////////////////
 	// Listen loop                                          //
