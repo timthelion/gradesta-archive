@@ -56,7 +56,7 @@ var sockets = map[string]*zmq.Socket{}
 func initialize_sockets() {
 	for _, socket_param := range socket_params {
 		socket, _ := zmq.NewSocket(socket_param.stype)
-        var err error
+		var err error
 		if socket_param.role == CONNECT {
 			err = socket.Connect(socket_param.addr)
 		} else {
@@ -82,8 +82,6 @@ func send_to_service(ss *pb.ServiceState) {
 		log.Fatalf("Error marshaling service state %s", err)
 	}
 	sockets[service_sock].SendBytes(frame, 0)
-	//fmt.Println("Sending")
-	//fmt.Println(ss)
 }
 
 func recv_from_service() *pb.ServiceState {
@@ -102,6 +100,7 @@ func recv_from_service() *pb.ServiceState {
 
 func send_pending_changes_to_clients() {
 	if are_pending_changes_for_clients() {
+		log.Println("Sending pending changes to clients")
 		send_to_clients(pending_changes_for_clients)
 	}
 	pending_changes_for_clients = &pb.ClientState{}
@@ -112,9 +111,12 @@ func send_to_clients(cs *pb.ClientState) {
 	if err != nil {
 		log.Fatalf("Error marshaling notification %s", err)
 	}
-	sockets[notifications_sock].SendBytes(frame, 0)
-	//fmt.Println("Sending")
-	//fmt.Println(ss)
+	log.Println("Starting sendbytes to clients")
+	bytes, err := sockets[notifications_sock].SendBytes(frame, 0)
+	if err != nil {
+		log.Println("Error sending frame to notification manager.", err)
+	}
+	log.Println("Ending sendbytes to clients", bytes, len(frame))
 }
 
 func recv_from_clients() *pb.ClientState {

@@ -71,7 +71,15 @@ func merge_cell_runtimes(ncr *pb.CellRuntime, ocr *pb.CellRuntime) {
 	ocr.SupportedEncodings = append(ocr.SupportedEncodings, ncr.SupportedEncodings...)
 }
 
-func merge_new_state_from_service(nss *pb.ServiceState, ss *pb.ServiceState) {
+func merge_new_state_from_service(nss *pb.ServiceState) {
+	merge_service_state_changes(nss, state.ServiceState)
+	if pending_changes_for_clients.ServiceState == nil {
+		pending_changes_for_clients.ServiceState = &pb.ServiceState{}
+	}
+	merge_service_state_changes(nss, pending_changes_for_clients.ServiceState)
+}
+
+func merge_service_state_changes(nss *pb.ServiceState, ss *pb.ServiceState) {
 	if nss.Index != nil {
 		ss.Index = nss.Index
 	}
@@ -91,6 +99,9 @@ func merge_new_state_from_service(nss *pb.ServiceState, ss *pb.ServiceState) {
 			ss.CellTemplate = nss.CellTemplate
 		}
 	}
+	if ss.ServiceStateModes == nil {
+		ss.ServiceStateModes = map[uint32]pb.Mode{}
+	}
 	for field, mode := range nss.ServiceStateModes {
 		ss.ServiceStateModes[field] = mode
 	}
@@ -109,6 +120,9 @@ func merge_new_state_from_service(nss *pb.ServiceState, ss *pb.ServiceState) {
 
 func merge_from_clients(ncs *pb.ClientState, ocs *pb.ClientState) {
 	for client_id, client := range ncs.Clients {
+		if ocs.Clients == nil {
+			ocs.Clients = map[string]*pb.Client{}
+		}
 		ocs.Clients[client_id] = client
 	}
 	for selection_id, selection := range ncs.Selections {
@@ -123,6 +137,9 @@ func merge_from_clients(ncs *pb.ClientState, ocs *pb.ClientState) {
 			}
 			old_selection.Cursors = selection.Cursors
 		} else {
+			if ocs.Selections == nil {
+				ocs.Selections = map[string]*pb.Selection{}
+			}
 			ocs.Selections[selection_id] = selection
 		}
 	}

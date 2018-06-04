@@ -1,0 +1,164 @@
+#!/usr/bin/python3
+import os
+import zmq
+import gradesta_pb2
+import uuid
+import sys
+
+request = 1
+
+context = zmq.Context()
+client_socket = context.socket(zmq.PULL)
+client_socket.bind("ipc://client.gradesock")
+manager_socket = context.socket(zmq.PUSH)
+manager_socket.bind("ipc://manager.gradesock")
+
+def recv():
+ m = gradesta_pb2.ClientState()
+ m.ParseFromString(client_socket.recv())
+ return m
+
+def send(m):
+ manager_socket.send(m.SerializeToString())
+
+client_id = os.path.split(os.getcwd())[-1]
+m = recv()
+client = m.clients[client_id]
+metadata = gradesta_pb2.ActorMetadata()
+metadata.name="gred"
+client.metadata.CopyFrom(metadata)
+m.service_state.round.client_of_origin = "client_id"
+m.service_state.round.request = request
+m.service_state.round.full_sync=True
+request+=1
+send(m)
+
+m = recv()
+selection_id = str(uuid.uuid4())
+s = m.selections[selection_id]
+s.name = "Cli Present Working Cell (PWC)"
+sel_update_count = 1
+s.update_count = sel_update_count
+cursor = gradesta_pb2.Cursor()
+start = m.service_state.index
+cursor.cell = start
+los = gradesta_pb2.LineOfSight()
+los.vars.extend([5])
+symbol = gradesta_pb2.Symbol()
+symbol.direction=True
+symbol.dimension=0
+symbol.var=0
+symbol.relabel=False
+los.symbols.extend([symbol])
+rhs = los.production_rules[0]
+rhs.symbols.extend([0])
+cursor.los.CopyFrom(los)
+s.cursors.extend([cursor])
+s.clients[client_id] = gradesta_pb2.Selection.PRIMARY
+send(m)
+m = recv()
+cells = {}
+for cell_id, cell in m.service_state.cells.items():
+ cells[cell_id] = cell
+
+def set_cursor(cell_id):
+ print("Setting cursor")
+ print(cell_id)
+ global start
+ start = cell_id
+ global m
+ m = gradesta_pb2.ClientState()
+ cursor = gradesta_pb2.Cursor()
+ cursor.cell = cell_id
+ global los
+ global sel_update_count
+ cursor.los.CopyFrom(los)
+ m.selections[selection_id].cursors.extend([cursor])
+ m.selections[selection_id].update_count = sel_update_count
+ sel_update_count += 1
+ m.service_state.round.client_of_origin=client_id
+ global request
+ m.service_state.round.request = request
+ request += 1
+ send(m)
+ print(m)
+ m = recv()
+ global cells
+ for cell_id, cell in m.service_state.cells.items():
+  cells[cell_id] = cell
+
+#http://code.activestate.com/recipes/134892/
+class _Getch:
+    """Gets a single character from standard input.  Does not echo to the
+screen."""
+    def __init__(self):
+        try:
+            self.impl = _GetchWindows()
+        except ImportError:
+            self.impl = _GetchUnix()
+
+    def __call__(self): return self.impl()
+
+
+class _GetchUnix:
+    def __init__(self):
+        import tty, sys
+
+    def __call__(self):
+        import sys, tty, termios
+        fd = sys.stdin.fileno()
+        old_settings = termios.tcgetattr(fd)
+        try:
+            tty.setraw(sys.stdin.fileno())
+            ch = sys.stdin.read(1)
+        finally:
+            termios.tcsetattr(fd, termios.TCSADRAIN, old_settings)
+        return ch
+
+
+class _GetchWindows:
+    def __init__(self):
+        import msvcrt
+
+    def __call__(self):
+        import msvcrt
+        return msvcrt.getch()
+
+
+getch = _Getch()
+
+while True:
+ i = start
+ while i in cells:
+  cell = cells[i]
+  left = ""
+  right = ""
+  if 1 in cell.cell.forth:
+   right = "→"
+  if 1 in cell.cell.back:
+   left = "←"
+  print(left, cell.cell.data.decode("utf-8"), right)
+  if 0 in cell.cell.forth and cell.cell.forth[0].links:
+   i = cell.cell.forth[0].links[0].cell_id
+  else:
+   break
+ if 0 in cell.cell.forth:
+  print("↓")
+ center_cell = cells[start]
+ char = getch()
+ if char == 'k': # up
+  print("↑")
+  links = center_cell.cell.back[0].links
+  if links:
+   set_cursor(links[0].cell_id)
+ if char == 'j': # down
+  print("↓")
+  links = center_cell.cell.forth[0].links
+  if links:
+   set_cursor(links[0].cell_id)
+ if char == 'h': # left
+  pass
+ if char == 'l': # right
+  pass
+ if char == 'q':
+  sys.exit()

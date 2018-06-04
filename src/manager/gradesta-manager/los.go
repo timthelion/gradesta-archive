@@ -1,6 +1,8 @@
 package main
 
 import (
+	"log"
+
 	deque "github.com/gammazero/deque"
 
 	pb "../pb"
@@ -15,16 +17,28 @@ type placedNonTerminal struct {
 func evaluate_loses() bool {
 	needed := map[string]bool{}
 	scanned := map[string]bool{}
-	for _, selection := range state.Selections {
+	if pending_changes_for_clients.Selections == nil {
+		pending_changes_for_clients.Selections = map[string]*pb.Selection{}
+	}
+	for selection_id, selection := range state.Selections {
+		if pending_changes_for_clients.Selections[selection_id] == nil {
+			pending_changes_for_clients.Selections[selection_id] = &pb.Selection{}
+		}
 		for _, cursor := range selection.Cursors {
+			pending_cursor := &pb.Cursor{}
+			pending_cursor.Los = &pb.LineOfSight{}
 			los := cursor.Los
 			_, have_cell := state.ServiceState.Cells[*cursor.Cell]
 			if have_cell {
+				log.Println(cursor)
 				var ents deque.Deque // exposed non-terminals
 				ents.PushBack(placedNonTerminal{*cursor.Cell, 0, los.Vars})
 				for ents.Len() > 0 {
 					nt := ents.PopFront().(placedNonTerminal)
 					cell_runtime := state.ServiceState.Cells[nt.cell_id]
+					if los.ProductionRules == nil {
+						log.Fatalf("No production rules set in los %s.", los)
+					}
 					for _, symbol_index := range los.ProductionRules[nt.symbol].Symbols {
 						var symbol *pb.Symbol
 						symbol = los.Symbols[symbol_index]
@@ -56,9 +70,15 @@ func evaluate_loses() bool {
 									}
 									scanned[*link.CellId] = true
 									if have_cell {
-										ents.PushBack(placedNonTerminal{*link.CellId, symbol_index, vars})
+										pnt := placedNonTerminal{*link.CellId, symbol_index, vars}
+										log.Println("Placed non-terminal:", pnt)
+										ents.PushBack(pnt)
 									} else {
 										needed[*link.CellId] = true
+										if pending_cursor.Los.InView == nil {
+											pending_cursor.Los.InView = map[string]bool{}
+										}
+										pending_cursor.Los.InView[*link.CellId] = true
 									}
 								}
 							}
@@ -90,9 +110,11 @@ func evaluate_loses() bool {
 func update_view() {
 	for {
 		if !evaluate_loses() {
+			log.Println("Done updating view.")
 			return
 		}
+		log.Println("Sending pending changes in view to service.", pending_changes_for_service)
 		send_pending_changes_to_service()
-		merge_new_state_from_service(recv_from_service(), state.ServiceState)
+		merge_new_state_from_service(recv_from_service())
 	}
 }

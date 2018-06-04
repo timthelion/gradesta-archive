@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"log"
 	"os"
 	"strings"
@@ -14,15 +15,17 @@ import (
 )
 
 var clients_sock_path = "ipc://manager/clients.gradesock"
-var notifications_sock_path = "ipc://manager/notifications.gradesock"
+var notifications_sock_path = "ipc://manager/new_clients.gradesock"
 
 func main() {
+	log.SetPrefix("gradetsa-client-manager ")
+	log.Println("Launching client manager.")
 	clients_socket, _ := zmq.NewSocket(zmq.PUSH)
 	clients_socket.Connect(clients_sock_path)
 	defer clients_socket.Close()
 
 	notifications_socket, _ := zmq.NewSocket(zmq.PUSH)
-	notifications_socket.Connect(notifications_sock_path)
+	notifications_socket.Bind(notifications_sock_path)
 	defer notifications_socket.Close()
 
 	watcher, err := fsnotify.NewWatcher()
@@ -39,10 +42,12 @@ func main() {
 					if len(path_components) == 2 {
 						watcher.Add(ev.Name)
 					} else if len(path_components) == 3 {
+						log.Println("Seems like we have a new client.")
 						if path_components[2] == "manager.gradesock" {
 							go func() {
+								log.Println("Connecting to ", ev.Name)
 								client_socket, _ := zmq.NewSocket(zmq.PULL)
-								client_socket.Connect(ev.Name)
+								client_socket.Connect(fmt.Sprintf("ipc://%s", ev.Name))
 								defer client_socket.Close()
 								intro_msg := pb.ClientState{
 									Clients: map[string]*pb.Client{
@@ -53,13 +58,16 @@ func main() {
 								}
 								frame, _ := proto.Marshal(&intro_msg)
 								notifications_socket.SendBytes(frame, 0)
+								log.Println("Intro frame sent.")
 								for {
 									frame, err := client_socket.RecvBytes(0)
 									if err != nil {
 										log.Println("Error reading frame from client ", ev.Name, err)
-                                        return
+										return
 									}
+									log.Println("Forwarding message from client.")
 									clients_socket.SendBytes(frame, 0)
+									log.Println("Message sent.")
 								}
 							}()
 						}
