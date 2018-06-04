@@ -31,22 +31,22 @@ type SocketParams struct {
 var socket_params = []*SocketParams{
 	&SocketParams{
 		addr:  service_sock,
-		stype: zmq.PUSH,
+		stype: zmq.PAIR,
 		role:  CONNECT,
 	},
 	&SocketParams{
 		addr:  manager_sock,
-		stype: zmq.PULL,
+		stype: zmq.PAIR,
 		role:  CONNECT,
 	},
 	&SocketParams{
 		addr:  clients_sock,
-		stype: zmq.PULL,
+		stype: zmq.PAIR,
 		role:  BIND,
 	},
 	&SocketParams{
 		addr:  notifications_sock,
-		stype: zmq.PUSH,
+		stype: zmq.PAIR,
 		role:  BIND,
 	},
 }

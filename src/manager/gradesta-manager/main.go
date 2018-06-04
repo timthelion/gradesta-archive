@@ -4,7 +4,7 @@ import (
 	"log"
 	"os"
 	"os/exec"
-	"time"
+	//	"time"
 
 	zmq "github.com/pebbe/zmq4"
 
@@ -60,10 +60,9 @@ func main() {
 		poller.Add(ms, zmq.POLLIN)
 		poller.Add(cs, zmq.POLLIN)
 		for {
-			sockets, _ := poller.Poll(2000 * time.Millisecond)
+			sockets, _ := poller.Poll(-1)
 			if len(sockets) == 0 {
 				log.Println("Polling.")
-				send_to_clients(state)
 			}
 			for _, socket := range sockets {
 				switch s := socket.Socket; s {

@@ -20,11 +20,11 @@ var notifications_sock_path = "ipc://manager/new_clients.gradesock"
 func main() {
 	log.SetPrefix("gradetsa-client-manager ")
 	log.Println("Launching client manager.")
-	clients_socket, _ := zmq.NewSocket(zmq.PUSH)
+	clients_socket, _ := zmq.NewSocket(zmq.PAIR)
 	clients_socket.Connect(clients_sock_path)
 	defer clients_socket.Close()
 
-	notifications_socket, _ := zmq.NewSocket(zmq.PUSH)
+	notifications_socket, _ := zmq.NewSocket(zmq.PAIR)
 	notifications_socket.Bind(notifications_sock_path)
 	defer notifications_socket.Close()
 
@@ -46,7 +46,7 @@ func main() {
 						if path_components[2] == "manager.gradesock" {
 							go func() {
 								log.Println("Connecting to ", ev.Name)
-								client_socket, _ := zmq.NewSocket(zmq.PULL)
+								client_socket, _ := zmq.NewSocket(zmq.PAIR)
 								client_socket.Connect(fmt.Sprintf("ipc://%s", ev.Name))
 								defer client_socket.Close()
 								intro_msg := pb.ClientState{

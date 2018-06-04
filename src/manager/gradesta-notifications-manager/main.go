@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"log"
 	"os"
-	"time"
+	//	"time"
 
 	"github.com/golang/protobuf/proto"
 	zmq "github.com/pebbe/zmq4"
@@ -22,12 +22,12 @@ func main() {
 	log.SetPrefix("gradesta-notifications-manager ")
 	log.Println("Launching notification manager.")
 	defer log.Println("Goodbye!")
-	notifications_sock, _ := zmq.NewSocket(zmq.PULL)
+	notifications_sock, _ := zmq.NewSocket(zmq.PAIR)
 	if err := notifications_sock.Connect(notifications_sock_path); err != nil {
 		log.Fatalf("Error connecting to %s. %s", notifications_sock_path, err)
 	}
 	defer notifications_sock.Close()
-	new_clients_sock, _ := zmq.NewSocket(zmq.PULL)
+	new_clients_sock, _ := zmq.NewSocket(zmq.PAIR)
 	new_clients_sock.Connect(new_clients_sock_path)
 	defer new_clients_sock.Close()
 	poller := zmq.NewPoller()
@@ -39,7 +39,7 @@ func main() {
 			err   error
 		)
 		log.Println("Polling for new notifications.")
-		sockets, err := poller.Poll(3000 * time.Millisecond)
+		sockets, err := poller.Poll(-1)
 		if err != nil {
 			log.Println("Polling error: ", err)
 			continue
@@ -65,7 +65,7 @@ func main() {
 				for client_id, client := range notification.Clients {
 					client_sock, exists := client_socks[client_id]
 					if !exists && *client.Status == pb.Client_INITIALIZING {
-						client_sock, _ = zmq.NewSocket(zmq.PUSH)
+						client_sock, _ = zmq.NewSocket(zmq.PAIR)
 						client_socks[client_id] = client_sock
 						socket_path := fmt.Sprintf("ipc://clients%c%s%cclient.gradesock", os.PathSeparator, client_id, os.PathSeparator)
 						log.Printf("Connecting to new client %s on socket %s.\n", client_id, socket_path)

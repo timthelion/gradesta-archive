@@ -24,14 +24,21 @@ func evaluate_loses() bool {
 		if pending_changes_for_clients.Selections[selection_id] == nil {
 			pending_changes_for_clients.Selections[selection_id] = &pb.Selection{}
 		}
+		pending_changes_for_clients.Selections[selection_id].Cursors = []*pb.Cursor{}
 		for _, cursor := range selection.Cursors {
 			pending_cursor := &pb.Cursor{}
 			pending_cursor.Los = &pb.LineOfSight{}
+			pending_changes_for_clients.Selections[selection_id].Cursors = append(pending_changes_for_clients.Selections[selection_id].Cursors, pending_cursor)
 			los := cursor.Los
 			_, have_cell := state.ServiceState.Cells[*cursor.Cell]
 			if have_cell {
 				log.Println(cursor)
 				var ents deque.Deque // exposed non-terminals
+
+				if pending_cursor.Los.InView == nil {
+					pending_cursor.Los.InView = map[string]bool{}
+				}
+				pending_cursor.Los.InView[*cursor.Cell] = true
 				ents.PushBack(placedNonTerminal{*cursor.Cell, 0, los.Vars})
 				for ents.Len() > 0 {
 					nt := ents.PopFront().(placedNonTerminal)
@@ -69,16 +76,13 @@ func evaluate_loses() bool {
 										}
 									}
 									scanned[*link.CellId] = true
+									pending_cursor.Los.InView[*link.CellId] = true
 									if have_cell {
 										pnt := placedNonTerminal{*link.CellId, symbol_index, vars}
 										log.Println("Placed non-terminal:", pnt)
 										ents.PushBack(pnt)
 									} else {
 										needed[*link.CellId] = true
-										if pending_cursor.Los.InView == nil {
-											pending_cursor.Los.InView = map[string]bool{}
-										}
-										pending_cursor.Los.InView[*link.CellId] = true
 									}
 								}
 							}

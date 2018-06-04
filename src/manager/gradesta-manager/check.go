@@ -33,7 +33,7 @@ func check_for_conflicts(changes *pb.ClientState) *pb.ClientState {
 			log.Println("Invalid message! Selection has no update count!")
 			return nil
 		}
-		if exists && *selection.UpdateCount == *selection_state.UpdateCount+1 {
+		if exists && *selection.UpdateCount != *selection_state.UpdateCount+1 {
 			if changes.ServiceState.Round == nil {
 				log.Println("Invalid message! No round received from client!")
 				return nil
