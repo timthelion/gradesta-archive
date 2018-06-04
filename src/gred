@@ -64,7 +64,6 @@ for cell_id, cell in m.service_state.cells.items():
 in_view = set()
 for cell_id, _ in m.selections[selection_id].cursors[0].los.in_view.items():
  in_view.add(cell_id)
- print(cell_id)
 
 def set_cursor(cell_id):
  global start
@@ -83,7 +82,6 @@ def set_cursor(cell_id):
  global request
  m.service_state.round.request = request
  request += 1
- print(m)
  send(m)
  m = recv()
  if m.service_state.round.errors:
@@ -160,13 +158,19 @@ while True:
   links = center_cell.cell.back[0].links
   if links:
    set_cursor(links[0].cell_id)
- if char == 'j': # down
+ elif char == 'j': # down
   links = center_cell.cell.forth[0].links
   if links:
    set_cursor(links[0].cell_id)
- if char == 'h': # left
-  pass
- if char == 'l': # right
-  pass
- if char == 'q':
+ elif char == 'h': # left
+  links = center_cell.cell.back[1].links
+  if links:
+   set_cursor(links[0].cell_id)
+ elif char == 'l': # right
+  links = center_cell.cell.forth[1].links
+  if links:
+   set_cursor(links[0].cell_id)
+ elif char == 'q':
   sys.exit()
+ else:
+  print(char)

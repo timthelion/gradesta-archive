@@ -33,9 +33,21 @@ while True:
      l = gradesta_pb2.Link()
      l.cell_id=json.dumps({"dir":cell_id["dir"],"t":"entry","i":0})
      forth.links.extend([l])
+    if os.path.split(cell_id["dir"])[1]:
+     back = cr.cell.back[1]
+     l = gradesta_pb2.Link()
+     l.cell_id=json.dumps({"dir":os.path.split(cell_id["dir"])[0],"t":"head"})
+     back.links.extend([l])
    if cell_id["t"] == "entry":
-    if cache[cell_id["dir"]]:
-     cr.cell.data = cache[cell_id["dir"]][cell_id["i"]].encode("utf-8")
+    if cache[cell_id["dir"]]: # ignore empty directories
+     entry = cache[cell_id["dir"]][cell_id["i"]]
+     cr.cell.data = entry.encode("utf-8")
+     full_path = os.path.join(cell_id["dir"], entry)
+     if os.path.isdir(full_path):
+      forth = cr.cell.forth[1]
+      l = gradesta_pb2.Link()
+      l.cell_id=json.dumps({"dir":full_path,"t":"head"})
+      forth.links.extend([l])
      if cell_id["i"]+1 < len(cache[cell_id["dir"]]):
       forth = cr.cell.forth[0]
       l = gradesta_pb2.Link()
