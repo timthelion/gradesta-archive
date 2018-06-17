@@ -1,7 +1,7 @@
 package main
 
 import (
-//pb "../pb"
+//pb "./pb"
 )
 
 func are_pending_changes_for_service() bool {

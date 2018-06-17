@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"log"
 
-	pb "../pb"
+	pb "./pb"
 )
 
 func make_error(round *pb.Round, error string) *pb.ClientState {

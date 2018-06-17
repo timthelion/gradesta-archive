@@ -3,15 +3,11 @@ package main
 import (
 	"log"
 	"os"
-	"os/exec"
-	//	"time"
 
 	zmq "github.com/pebbe/zmq4"
 
-	pb "../pb"
+	pb "./pb"
 )
-
-var sub_managers = []string{"gradesta-notifications-manager", "gradesta-client-manager"}
 
 var (
 	pending_changes_for_service = &pb.ServiceState{}
@@ -30,19 +26,6 @@ func main() {
 	}
 	log.Println("Initializing sockets.")
 	initialize_sockets()
-	// Launch submanagers
-	log.Println("Launching sububmanagers.")
-	for _, sub_manager := range sub_managers {
-		process := exec.Command(sub_manager)
-		process.Stdout = os.Stdout
-		process.Stderr = os.Stderr
-		e := process.Start()
-		if e != nil {
-			log.Fatalf("Error initializing %s\n\n%s", sub_manager, e)
-		}
-		log.Println(sub_manager, "launched.")
-		defer process.Process.Kill()
-	}
 	// Send protocol defaults to service
 	log.Println("Sending protocol defaults")
 	state = &default_state
@@ -55,8 +38,8 @@ func main() {
 	//////////////////////////////////////////////////////////
 	{
 		poller := zmq.NewPoller()
-		ms := sockets[manager_sock]
-		cs := sockets[clients_sock]
+		ms := service_sock
+		cs := clients_sock
 		poller.Add(ms, zmq.POLLIN)
 		poller.Add(cs, zmq.POLLIN)
 		for {

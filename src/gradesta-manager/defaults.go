@@ -1,7 +1,7 @@
 package main
 
 import (
-	pb "../pb"
+	pb "./pb"
 )
 
 var (

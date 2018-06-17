@@ -5,13 +5,18 @@ import (
 
 	deque "github.com/gammazero/deque"
 
-	pb "../pb"
+	pb "./pb"
+)
+
+var (
+	global_max_length uint64 = 10000000
 )
 
 type placedNonTerminal struct {
-	cell_id string
-	symbol  uint32
-	vars    []uint64
+	cell_id    string
+	symbol     int32
+	vars       map[uint32]uint64
+	generation uint64
 }
 
 func evaluate_loses() bool {
@@ -24,34 +29,37 @@ func evaluate_loses() bool {
 		if pending_changes_for_clients.Selections[selection_id] == nil {
 			pending_changes_for_clients.Selections[selection_id] = &pb.Selection{}
 		}
-		pending_changes_for_clients.Selections[selection_id].Cursors = []*pb.Cursor{}
-		for _, cursor := range selection.Cursors {
-			pending_cursor := &pb.Cursor{}
-			pending_cursor.Los = &pb.LineOfSight{}
-			pending_changes_for_clients.Selections[selection_id].Cursors = append(pending_changes_for_clients.Selections[selection_id].Cursors, pending_cursor)
-			los := cursor.Los
-			_, have_cell := state.ServiceState.Cells[*cursor.Cell]
+		pending_selection := pending_changes_for_clients.Selections[selection_id]
+		if selection.MaxLength == nil {
+			selection.MaxLength = &global_max_length
+		}
+		for center_id, cursor := range selection.Cursors {
+			_, have_cell := state.ServiceState.Cells[center_id]
 			if have_cell {
-				log.Println(cursor)
 				var ents deque.Deque // exposed non-terminals
-
-				if pending_cursor.Los.InView == nil {
-					pending_cursor.Los.InView = map[string]bool{}
+				if pending_selection.Cursors[center_id] == nil {
+					pending_selection.Cursors[center_id] = &pb.Cursor{}
 				}
-				pending_cursor.Los.InView[*cursor.Cell] = true
-				ents.PushBack(placedNonTerminal{*cursor.Cell, 0, los.Vars})
+				pending_cursor := pending_selection.Cursors[center_id]
+				if pending_cursor.InView == nil {
+					pending_cursor.InView = map[string]bool{}
+				}
+				pending_cursor.InView[center_id] = true
+				ents.PushBack(placedNonTerminal{center_id, *cursor.StartSymbol, selection.Vars, 0})
 				for ents.Len() > 0 {
 					nt := ents.PopFront().(placedNonTerminal)
 					cell_runtime := state.ServiceState.Cells[nt.cell_id]
-					if los.ProductionRules == nil {
-						log.Fatalf("No production rules set in los %s.", los)
+					if selection.ProductionRules == nil {
+						log.Fatalf("No production rules set in selection %s.", selection)
 					}
-					for _, symbol_index := range los.ProductionRules[nt.symbol].Symbols {
+					for _, symbol_index := range selection.ProductionRules[nt.symbol].Symbols {
 						var symbol *pb.Symbol
-						symbol = los.Symbols[symbol_index]
-						vars := make([]uint64, len(nt.vars))
+						symbol = selection.Symbols[symbol_index]
+						vars := map[uint32]uint64{}
 						if symbol.Var != nil {
-							copy(vars, nt.vars)
+							for k, v := range nt.vars {
+								vars[k] = v
+							}
 							if vars[*symbol.Var] == 0 {
 								continue
 							}
@@ -76,9 +84,9 @@ func evaluate_loses() bool {
 										}
 									}
 									scanned[*link.CellId] = true
-									pending_cursor.Los.InView[*link.CellId] = true
+									pending_cursor.InView[*link.CellId] = true
 									if have_cell {
-										pnt := placedNonTerminal{*link.CellId, symbol_index, vars}
+										pnt := placedNonTerminal{*link.CellId, symbol_index, vars, nt.generation + 1}
 										log.Println("Placed non-terminal:", pnt)
 										ents.PushBack(pnt)
 									} else {
@@ -90,7 +98,7 @@ func evaluate_loses() bool {
 					}
 				}
 			} else {
-				needed[*cursor.Cell] = true
+				needed[center_id] = true
 			}
 		}
 	}

@@ -11,22 +11,17 @@ import (
 	"github.com/golang/protobuf/proto"
 	zmq "github.com/pebbe/zmq4"
 
-	pb "../pb"
+	pb "./pb"
 )
 
-var clients_sock_path = "ipc://manager/clients.gradesock"
-var notifications_sock_path = "ipc://manager/new_clients.gradesock"
-
-func main() {
-	log.SetPrefix("gradetsa-client-manager ")
-	log.Println("Launching client manager.")
-	clients_socket, _ := zmq.NewSocket(zmq.PAIR)
-	clients_socket.Connect(clients_sock_path)
-	defer clients_socket.Close()
-
-	notifications_socket, _ := zmq.NewSocket(zmq.PAIR)
-	notifications_socket.Bind(notifications_sock_path)
-	defer notifications_socket.Close()
+func listen_for_clients() {
+	clients_socket, err := zmq.NewSocket(zmq.PAIR)
+	if err != nil {
+		log.Fatal(err)
+	}
+	if err = clients_socket.Connect("inproc://clients.gradesock"); err != nil {
+		log.Fatal(err)
+	}
 
 	watcher, err := fsnotify.NewWatcher()
 	if err != nil {
@@ -57,7 +52,7 @@ func main() {
 									},
 								}
 								frame, _ := proto.Marshal(&intro_msg)
-								notifications_socket.SendBytes(frame, 0)
+								client_socket.SendBytes(frame, 0)
 								log.Println("Intro frame sent.")
 								for {
 									frame, err := client_socket.RecvBytes(0)
@@ -65,6 +60,8 @@ func main() {
 										log.Println("Error reading frame from client ", ev.Name, err)
 										return
 									}
+									ncs := new(pb.ClientState)
+									err = proto.Unmarshal(frame, ncs)
 									log.Println("Forwarding message from client.")
 									clients_socket.SendBytes(frame, 0)
 									log.Println("Message sent.")

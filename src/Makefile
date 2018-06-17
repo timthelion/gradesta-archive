@@ -69,15 +69,9 @@ code-visualizations/gradesta.proto.png:code-visualizatons/gradest.proto.dot
 code-visualizatons/gradest.proto.dot:gradesta.proto.tg
 	cat gradesta.proto.tg | tg2dot --center 42 --no-street-numbers --no-street-names --no-center-highlight --downstream > code-visualizations/gradesta.proto.dot
 
-manager/gradesta-manager/gradesta-manager:manager/pb/gradesta.pb.go manager/gradesta-client-manager/gradesta-client-manager manager/gradesta-notifications-manager/gradesta-notifications-manager manager/gradesta-manager/*.go
-	cd manager/gradesta-manager; gofmt -w *.go ; go build
+gradesta-manager/gradesta-manager:gradesta-manager/pb/gradesta.pb.go gradesta-manager/*.go
+	cd gradesta-manager; gofmt -w *.go ; go build
 
-manager/pb/gradesta.pb.go:gradesta.proto
-	protoc --go_out=manager/pb/ gradesta.proto
-
-manager/gradesta-client-manager/gradesta-client-manager:manager/pb/gradesta.pb.go manager/gradesta-client-manager/*.go
-	cd manager/gradesta-client-manager; gofmt -w *.go ; go build
-
-manager/gradesta-notifications-manager/gradesta-notifications-manager:manager/pb/gradesta.pb.go manager/gradesta-notifications-manager/*.go
-	cd manager/gradesta-notifications-manager; gofmt -w *.go ; go build
+gradesta-manager/pb/gradesta.pb.go:gradesta.proto
+	protoc --go_out=gradesta-manager/pb/ gradesta.proto
 
