@@ -8,6 +8,7 @@ import (
 )
 
 func make_error(round *pb.Round, error string) *pb.ClientState {
+	log.Println("Warning: error merging states.", error)
 	rval := &pb.ClientState{
 		ServiceState: &pb.ServiceState{
 			Round: round,

@@ -72,15 +72,16 @@ func send_pending_changes_to_clients() {
 }
 
 func send_to_clients(cs *pb.ClientState) {
-	frame, err := proto.Marshal(cs)
-	if err != nil {
-		log.Fatalf("Error marshaling notification %s", err)
-	}
-	log.Println("Starting sendbytes to clients")
 	for client_id, client_sock := range client_socks {
-		// customized_notification TODO
-		log.Println("Sending notification to client.", client_id)
-		client_sock.SendBytes(frame, 0)
+		cs1, changed := customize_for_client(client_id, cs)
+		if changed {
+			frame, err := proto.Marshal(cs1)
+			if err != nil {
+				log.Fatalf("Error marshaling notification %s", err)
+			}
+			log.Println("Sending notification to client.", client_id)
+			client_sock.SendBytes(frame, 0)
+		}
 	}
 }
 
@@ -93,5 +94,6 @@ func recv_from_clients() *pb.ClientState {
 	if err := proto.Unmarshal(frame, ncs); err != nil {
 		log.Fatalf("Error unmarshaling message from service %s", err)
 	}
+	log.Println(ncs)
 	return ncs
 }

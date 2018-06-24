@@ -5,15 +5,13 @@ import json
 import os
 
 context = zmq.Context()
-manager_socket = context.socket(zmq.PAIR)
-manager_socket.bind("ipc://manager.gradesock")
 service_socket = context.socket(zmq.PAIR)
 service_socket.bind("ipc://service.gradesock")
 
 s = gradesta_pb2.ServiceState()
 s.ParseFromString(service_socket.recv())
 s.index = json.dumps({"dir":"/","t":"head"})
-manager_socket.send(s.SerializeToString())
+service_socket.send(s.SerializeToString())
 cache = {}
 while True:
  m = gradesta_pb2.ServiceState()
@@ -64,4 +62,4 @@ while True:
       l.cell_id=json.dumps({"dir":cell_id["dir"],"t":"head"})
       back.links.extend([l])
 
- manager_socket.send(m.SerializeToString())
+ service_socket.send(m.SerializeToString())

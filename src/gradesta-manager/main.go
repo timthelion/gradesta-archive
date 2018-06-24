@@ -33,6 +33,7 @@ func main() {
 	send_to_service(ss)
 	merge_service_state_changes(recv_from_service(), ss)
 	log.Println("Revceived protocol defaults")
+	listen_for_clients()
 	//////////////////////////////////////////////////////////
 	// Listen loop                                          //
 	//////////////////////////////////////////////////////////

@@ -10,8 +10,6 @@ request = 1
 context = zmq.Context()
 client_socket = context.socket(zmq.PAIR)
 client_socket.bind("ipc://client.gradesock")
-manager_socket = context.socket(zmq.PAIR)
-manager_socket.bind("ipc://manager.gradesock")
 
 def recv():
  m = gradesta_pb2.ClientState()
@@ -19,42 +17,33 @@ def recv():
  return m
 
 def send(m):
- manager_socket.send(m.SerializeToString())
+ client_socket.send(m.SerializeToString())
 
 client_id = os.path.split(os.getcwd())[-1]
-m = recv()
+
+fs = recv()
+m = gradesta_pb2.ClientState()
 client = m.clients[client_id]
 metadata = gradesta_pb2.ActorMetadata()
 metadata.name="gred"
 client.metadata.CopyFrom(metadata)
-m.service_state.round.client_of_origin = "client_id"
-m.service_state.round.request = request
-m.service_state.round.full_sync=True
-request+=1
-send(m)
-
-m = recv()
 selection_id = str(uuid.uuid4())
 s = m.selections[selection_id]
 s.name = "Cli Present Working Cell (PWC)"
 sel_update_count = 1
 s.update_count = sel_update_count
 sel_update_count += 1
-cursor = gradesta_pb2.Cursor()
-start = m.service_state.index
-cursor.cell = start
-los = gradesta_pb2.LineOfSight()
-los.vars.extend([5])
-symbol = gradesta_pb2.Symbol()
+s.vars[0] = 5
+symbol = s.symbols[0]
 symbol.direction=True
 symbol.dimension=0
 symbol.var=0
 symbol.relabel=False
-los.symbols.extend([symbol])
-rhs = los.production_rules[0]
+rhs = s.production_rules[0]
 rhs.symbols.extend([0])
-cursor.los.CopyFrom(los)
-s.cursors.extend([cursor])
+start = fs.service_state.index
+cursor = s.cursors[start]
+cursor.start_symbol = 0
 s.clients[client_id] = gradesta_pb2.Selection.PRIMARY
 send(m)
 m = recv()
@@ -62,20 +51,19 @@ cells = {}
 for cell_id, cell in m.service_state.cells.items():
  cells[cell_id] = cell
 in_view = set()
-for cell_id, _ in m.selections[selection_id].cursors[0].los.in_view.items():
+for cell_id, _ in m.selections[selection_id].cursors[fs.service_state.index].in_view.items():
  in_view.add(cell_id)
 
 def set_cursor(cell_id):
  global start
+ old_start = start
  start = cell_id
- global m
  m = gradesta_pb2.ClientState()
- cursor = gradesta_pb2.Cursor()
- cursor.cell = cell_id
- global los
+ old_cursor = m.selections[selection_id].cursors[old_start]
+ old_cursor.deleted = True
+ cursor = m.selections[selection_id].cursors[start]
+ cursor.start_symbol = 0
  global sel_update_count
- cursor.los.CopyFrom(los)
- m.selections[selection_id].cursors.extend([cursor])
  m.selections[selection_id].update_count = sel_update_count
  sel_update_count += 1
  m.service_state.round.client_of_origin=client_id
@@ -84,6 +72,7 @@ def set_cursor(cell_id):
  request += 1
  send(m)
  m = recv()
+ print(m)
  if m.service_state.round.errors:
   sys.exit(m.service_state.round.errors)
  global cells
@@ -91,8 +80,9 @@ def set_cursor(cell_id):
   cells[cell_id] = cell
  global in_view
  in_view = set()
- for cell_id, _ in m.selections[selection_id].cursors[0].los.in_view.items():
+ for cell_id, _ in m.selections[selection_id].cursors[start].in_view.items():
   in_view.add(cell_id)
+ print(in_view)
 
 #http://code.activestate.com/recipes/134892/
 class _Getch:

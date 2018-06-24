@@ -21,7 +21,6 @@ type placedNonTerminal struct {
 
 func evaluate_loses() bool {
 	needed := map[string]bool{}
-	scanned := map[string]bool{}
 	if pending_changes_for_clients.Selections == nil {
 		pending_changes_for_clients.Selections = map[string]*pb.Selection{}
 	}
@@ -33,7 +32,11 @@ func evaluate_loses() bool {
 		if selection.MaxLength == nil {
 			selection.MaxLength = &global_max_length
 		}
+		if pending_selection.Cursors == nil {
+			pending_selection.Cursors = map[string]*pb.Cursor{}
+		}
 		for center_id, cursor := range selection.Cursors {
+			scanned := map[string]bool{}
 			_, have_cell := state.ServiceState.Cells[center_id]
 			if have_cell {
 				var ents deque.Deque // exposed non-terminals
@@ -45,10 +48,15 @@ func evaluate_loses() bool {
 					pending_cursor.InView = map[string]bool{}
 				}
 				pending_cursor.InView[center_id] = true
+				if cursor.StartSymbol == nil {
+					log.Println("Warning, no start symbol set for cursor.")
+					continue
+				}
 				ents.PushBack(placedNonTerminal{center_id, *cursor.StartSymbol, selection.Vars, 0})
 				for ents.Len() > 0 {
 					nt := ents.PopFront().(placedNonTerminal)
 					cell_runtime := state.ServiceState.Cells[nt.cell_id]
+					log.Println(cell_runtime, "ůůů", selection_id, ";;;;;")
 					if selection.ProductionRules == nil {
 						log.Fatalf("No production rules set in selection %s.", selection)
 					}
@@ -57,6 +65,7 @@ func evaluate_loses() bool {
 						symbol = selection.Symbols[symbol_index]
 						vars := map[uint32]uint64{}
 						if symbol.Var != nil {
+							log.Println(vars)
 							for k, v := range nt.vars {
 								vars[k] = v
 							}
@@ -64,6 +73,9 @@ func evaluate_loses() bool {
 								continue
 							}
 							vars[*symbol.Var] = vars[*symbol.Var] - 1
+						} else {
+							log.Println("Warning, production rule variable not set.")
+							continue
 						}
 						var direction map[uint64]*pb.Links
 						if symbol.Direction != nil && *symbol.Direction {
@@ -97,6 +109,7 @@ func evaluate_loses() bool {
 						}
 					}
 				}
+				state.Selections[selection_id].Cursors[center_id].InView = pending_cursor.InView
 			} else {
 				needed[center_id] = true
 			}

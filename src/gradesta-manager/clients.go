@@ -5,7 +5,6 @@ import (
 	"log"
 	"os"
 	"strings"
-	"time"
 
 	"github.com/fsnotify/fsnotify"
 	"github.com/golang/protobuf/proto"
@@ -15,6 +14,7 @@ import (
 )
 
 func listen_for_clients() {
+	log.Println("Listening for client connections.")
 	clients_socket, err := zmq.NewSocket(zmq.PAIR)
 	if err != nil {
 		log.Fatal(err)
@@ -23,26 +23,35 @@ func listen_for_clients() {
 		log.Fatal(err)
 	}
 
+	clients_socket_chan := make(chan []byte)
+	go func() {
+		for {
+			frame := <-clients_socket_chan
+			clients_socket.SendBytes(frame, 0)
+		}
+	}()
+
 	watcher, err := fsnotify.NewWatcher()
 	if err != nil {
 		log.Fatal(err)
 	}
-
 	go func() {
 		for {
 			select {
 			case ev := <-watcher.Events:
 				if ev.Op == fsnotify.Create {
 					path_components := strings.Split(ev.Name, string(os.PathSeparator))
+					log.Println(ev.Name)
 					if len(path_components) == 2 {
 						watcher.Add(ev.Name)
 					} else if len(path_components) == 3 {
 						log.Println("Seems like we have a new client.")
-						if path_components[2] == "manager.gradesock" {
+						if path_components[2] == "client.gradesock" {
 							go func() {
 								log.Println("Connecting to ", ev.Name)
 								client_socket, _ := zmq.NewSocket(zmq.PAIR)
 								client_socket.Connect(fmt.Sprintf("ipc://%s", ev.Name))
+								client_socks[path_components[1]] = client_socket
 								defer client_socket.Close()
 								intro_msg := pb.ClientState{
 									Clients: map[string]*pb.Client{
@@ -50,9 +59,14 @@ func listen_for_clients() {
 											Status: pb.Client_INITIALIZING.Enum(),
 										},
 									},
+									ServiceState: &pb.ServiceState{
+										Round: &pb.Round{
+											FullSync: &truev,
+										},
+									},
 								}
 								frame, _ := proto.Marshal(&intro_msg)
-								client_socket.SendBytes(frame, 0)
+								clients_socket_chan <- frame
 								log.Println("Intro frame sent.")
 								for {
 									frame, err := client_socket.RecvBytes(0)
@@ -60,10 +74,8 @@ func listen_for_clients() {
 										log.Println("Error reading frame from client ", ev.Name, err)
 										return
 									}
-									ncs := new(pb.ClientState)
-									err = proto.Unmarshal(frame, ncs)
 									log.Println("Forwarding message from client.")
-									clients_socket.SendBytes(frame, 0)
+									clients_socket_chan <- frame
 									log.Println("Message sent.")
 								}
 							}()
@@ -76,10 +88,8 @@ func listen_for_clients() {
 			}
 		}
 	}()
-
 	err = watcher.Add("clients")
 	if err != nil {
 		log.Fatal(err)
 	}
-	time.Sleep(100 * time.Second)
 }

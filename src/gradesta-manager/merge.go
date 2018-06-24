@@ -1,8 +1,8 @@
 package main
 
 import (
+	"log"
 	"math"
-	//"fmt"
 
 	pb "./pb"
 )
@@ -143,4 +143,5 @@ func merge_from_clients(ncs *pb.ClientState, ocs *pb.ClientState) {
 			ocs.Selections[selection_id] = selection
 		}
 	}
+	log.Println(ocs)
 }
