@@ -39,7 +39,6 @@ while True:
     except IsADirectoryError:
      pass
    if cr.click_count % 2 == 1:
-    print("Closing ",path)
     if path in open_files:
      del open_files[path]
    m.in_view[s_cell_id] = True
@@ -74,7 +73,7 @@ while True:
      cr.cell.data = open_files[full_path]
      back = cr.cell.back[1]
      l = gradesta_pb2.Link()
-     l.cell_id=json.dumps({"dir":cell_id["dir"],"t":"head"})
+     l.cell_id=json.dumps({"dir":cell_id["dir"],"t":"entry","i": cache[cell_id["dir"]].index(cell_id["name"])})
      back.links.extend([l])
    if cell_id["t"] == "entry":
     if cache[cell_id["dir"]]: # ignore empty directories
@@ -82,6 +81,7 @@ while True:
      cr.cell.data = entry.encode("utf-8")
      full_path = os.path.join(cell_id["dir"], entry)
      if os.path.isdir(full_path):
+      cr.cell.data += "/".encode("utf-8")
       forth = cr.cell.forth[1]
       l = gradesta_pb2.Link()
       l.cell_id=json.dumps({"dir":full_path,"t":"head"})
@@ -106,5 +106,4 @@ while True:
       l = gradesta_pb2.Link()
       l.cell_id=json.dumps({"dir":cell_id["dir"],"t":"head"})
       back.links.extend([l])
- print("sending",m)
  service_socket.send(m.SerializeToString())

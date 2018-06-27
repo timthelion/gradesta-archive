@@ -77,7 +77,6 @@ def update_view():
  while True:
   global start
   m = recv()
-  print(str(m).replace("\n","\r\n"))
   for center in m.selections[selection_id].cursors.keys():
    start = center
   if m.service_state.round.errors:

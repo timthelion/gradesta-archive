@@ -74,7 +74,6 @@ func main() {
 						merge_from_clients(m, state)
 						log.Println("Updating view")
 						update_view()
-						log.Println("Pending changes for clients are: ", pending_changes_for_clients)
 						if are_pending_changes_for_service() {
 							send_pending_changes_to_service()
 						} else if are_pending_changes_for_clients() {
