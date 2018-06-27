@@ -13,17 +13,50 @@ s.ParseFromString(service_socket.recv())
 s.index = json.dumps({"dir":"/","t":"head"})
 service_socket.send(s.SerializeToString())
 cache = {}
+open_files = {}
+update_counts = {}
+click_counts = {}
 while True:
  m = gradesta_pb2.ServiceState()
  m.ParseFromString(service_socket.recv())
- print(m)
+ try:
+  for cell_id, cr in m.cells.items():
+   s_cell_id = cell_id
+   cell_id = json.loads(cell_id)
+   update_counts[s_cell_id] = cr.update_count
+   click_counts[s_cell_id] = cr.click_count
+   path = os.path.join(cell_id["dir"], cache[cell_id["dir"]][cell_id["i"]])
+   if (cr.click_count > 0) and (cr.click_count % 2 == 0):
+    try:
+     with open(path, "rb") as fd:
+      open_files[path] = fd.read()
+    except PermissionError as e:
+     r = gradesta_pb2.ServiceState()
+     r.round.CopyFrom(m.round)
+     r.round.errors = str(e)
+     service_socket.send(r.SerializeToString())
+     raise e
+    except IsADirectoryError:
+     pass
+   if cr.click_count % 2 == 1:
+    print("Closing ",path)
+    if path in open_files:
+     del open_files[path]
+   m.in_view[s_cell_id] = True
+ except PermissionError:
+  continue
  for cell_id, v in m.in_view.items():
+  s_cell_id = cell_id
   cell_id = json.loads(cell_id)
   if not cell_id["dir"] in cache:
    cache[cell_id["dir"]] = os.listdir(cell_id["dir"])
   if v:
    cr = m.cells[json.dumps(cell_id)]
    cr.CopyFrom(s.cell_template)
+   if s_cell_id in update_counts:
+    cr.update_count = update_counts[s_cell_id]
+   if s_cell_id in click_counts:
+    cr.click_count = click_counts[s_cell_id]
    if cell_id["t"] == "head":
     cr.cell.data = cell_id["dir"].encode("utf-8")
     if cache[cell_id["dir"]]:
@@ -36,6 +69,13 @@ while True:
      l = gradesta_pb2.Link()
      l.cell_id=json.dumps({"dir":os.path.split(cell_id["dir"])[0],"t":"head"})
      back.links.extend([l])
+   if cell_id["t"] == "file":
+     full_path = os.path.join(cell_id["dir"], cell_id["name"])
+     cr.cell.data = open_files[full_path]
+     back = cr.cell.back[1]
+     l = gradesta_pb2.Link()
+     l.cell_id=json.dumps({"dir":cell_id["dir"],"t":"head"})
+     back.links.extend([l])
    if cell_id["t"] == "entry":
     if cache[cell_id["dir"]]: # ignore empty directories
      entry = cache[cell_id["dir"]][cell_id["i"]]
@@ -45,6 +85,11 @@ while True:
       forth = cr.cell.forth[1]
       l = gradesta_pb2.Link()
       l.cell_id=json.dumps({"dir":full_path,"t":"head"})
+      forth.links.extend([l])
+     elif full_path in open_files:
+      forth = cr.cell.forth[1]
+      l = gradesta_pb2.Link()
+      l.cell_id=json.dumps({"dir":cell_id["dir"],"t":"file", "name": entry})
       forth.links.extend([l])
      if cell_id["i"]+1 < len(cache[cell_id["dir"]]):
       forth = cr.cell.forth[0]
@@ -61,5 +106,5 @@ while True:
       l = gradesta_pb2.Link()
       l.cell_id=json.dumps({"dir":cell_id["dir"],"t":"head"})
       back.links.extend([l])
-
+ print("sending",m)
  service_socket.send(m.SerializeToString())

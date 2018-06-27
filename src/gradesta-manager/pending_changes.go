@@ -1,7 +1,7 @@
 package main
 
 import (
-	"log"
+	//	"log"
 
 	pb "./pb"
 )
@@ -42,7 +42,7 @@ func customize_for_client(client_id string, pending *pb.ClientState) (*pb.Client
 	if pss != nil &&
 		(pss.Index != nil ||
 			pss.OnDiskState != nil ||
-			(pss.Round != nil && *pss.Round.ClientOfOrigin == client_id) ||
+			(pss.Round != nil && pss.Round.ClientOfOrigin != nil && *pss.Round.ClientOfOrigin == client_id) ||
 			len(pss.Log) > 0 ||
 			pss.Metadata != nil ||
 			pss.CellTemplate != nil ||
@@ -52,10 +52,9 @@ func customize_for_client(client_id string, pending *pb.ClientState) (*pb.Client
 	}
 	in_view := map[string]bool{}
 	pending_selections := map[string]*pb.Selection{}
-	for selection_id, selection := range pending.Selections {
-		status, ex := state.Selections[selection_id].Clients[client_id]
+	for selection_id, selection := range state.Selections {
+		status, ex := selection.Clients[client_id]
 		if ex && status != pb.Selection_NONE {
-			log.Println(ex, client_id, status, state.Selections[selection_id].Clients, "šščščšškjfldslkfjdskfjdslkjfdslkjfdskljf;;;;;")
 			for _, cursor := range selection.Cursors {
 				for cell_id, visible := range cursor.InView {
 					if visible {
@@ -72,15 +71,15 @@ func customize_for_client(client_id string, pending *pb.ClientState) (*pb.Client
 			}
 		}
 	}
-	log.Println(pending_selections, "íé")
 	pending_cells := map[string]*pb.CellRuntime{}
 	for cell_id, _ := range in_view {
 		pending_cells[cell_id] = state.ServiceState.Cells[cell_id]
+		changed = true
 	}
 	var pending_round *pb.Round = nil
 	if pss != nil {
 		pending_round = pss.Round
-		if pss.Round == nil || *pss.Round.ClientOfOrigin != client_id {
+		if pss.Round == nil || pss.Round.ClientOfOrigin == nil || *pss.Round.ClientOfOrigin != client_id {
 			pending_round = nil
 		}
 	}
@@ -103,6 +102,5 @@ func customize_for_client(client_id string, pending *pb.ClientState) (*pb.Client
 		fc.ServiceState.ServiceStateModes = pss.ServiceStateModes
 		fc.ServiceState.UserIndexes = pss.UserIndexes
 	}
-
 	return fc, changed
 }

@@ -1,8 +1,8 @@
 package main
 
 import (
-	"log"
-	"math"
+	//	"log"
+	//	"math"
 
 	pb "./pb"
 )
@@ -19,6 +19,7 @@ func merge_modes64(nm map[uint64]pb.Mode, om map[uint64]pb.Mode) {
 	}
 }
 
+/*
 func merge_links(nl map[uint64]*pb.Links, ol map[uint64]*pb.Links) {
 	for k, v := range nl {
 		ol[k] = v
@@ -52,9 +53,11 @@ func merge_cells(nc *pb.Cell, oc *pb.Cell) {
 		}
 	}
 }
-
+*/
 func merge_cell_runtimes(ncr *pb.CellRuntime, ocr *pb.CellRuntime) {
-	merge_cells(ncr.Cell, ocr.Cell)
+	if ncr.Cell != nil {
+		ocr.Cell = ncr.Cell
+	}
 	if ncr.UpdateCount != nil {
 		ocr.UpdateCount = ncr.UpdateCount
 	}
@@ -82,6 +85,9 @@ func merge_new_state_from_service(nss *pb.ServiceState) {
 func merge_service_state_changes(nss *pb.ServiceState, ss *pb.ServiceState) {
 	if nss.Index != nil {
 		ss.Index = nss.Index
+	}
+	if nss.Round != nil {
+		ss.Round = nss.Round
 	}
 	if nss.OnDiskState != nil {
 		ss.OnDiskState = nss.OnDiskState
@@ -149,5 +155,4 @@ func merge_from_clients(ncs *pb.ClientState, ocs *pb.ClientState) {
 			ocs.Selections[selection_id] = selection
 		}
 	}
-	log.Println(ocs)
 }

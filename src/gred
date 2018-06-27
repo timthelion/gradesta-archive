@@ -34,7 +34,7 @@ s.name = "Cli Present Working Cell (PWC)"
 sel_update_count = 1
 s.update_count = sel_update_count
 sel_update_count += 1
-s.vars[0] = 5
+s.vars[0] = 15
 symbol = s.symbols[0]
 symbol.direction=True
 symbol.dimension=0
@@ -48,12 +48,22 @@ cursor.start_symbol = 0
 s.clients[client_id] = gradesta_pb2.Selection.PRIMARY
 send(m)
 cells = {}
+in_view = set()
+
+def mk_req():
+ m = gradesta_pb2.ClientState()
+ m.service_state.round.client_of_origin=client_id
+ global request
+ m.service_state.round.request = request
+ request += 1
+ return m
+
 
 def set_cursor(cell_id):
  global start
  old_start = start
  start = cell_id
- m = gradesta_pb2.ClientState()
+ m=mk_req()
  old_cursor = m.selections[selection_id].cursors[old_start]
  old_cursor.deleted = True
  cursor = m.selections[selection_id].cursors[start]
@@ -61,27 +71,25 @@ def set_cursor(cell_id):
  global sel_update_count
  m.selections[selection_id].update_count = sel_update_count
  sel_update_count += 1
- m.service_state.round.client_of_origin=client_id
- global request
- m.service_state.round.request = request
- request += 1
  send(m)
 
 def update_view():
  while True:
   global start
   m = recv()
+  print(str(m).replace("\n","\r\n"))
   for center in m.selections[selection_id].cursors.keys():
    start = center
   if m.service_state.round.errors:
-   sys.exit(m.service_state.round.errors)
+   print(m.service_state.round.errors, '\n')
   global cells
   for cell_id, cell in m.service_state.cells.items():
    cells[cell_id] = cell
   global in_view
-  in_view = set()
-  for cell_id, _ in m.selections[selection_id].cursors[start].in_view.items():
-   in_view.add(cell_id)
+  if m.selections[selection_id].cursors:
+   in_view = set()
+   for cell_id, _ in m.selections[selection_id].cursors[start].in_view.items():
+    in_view.add(cell_id)
   print("-------------------------------------------\r")
   i = start
   while i in in_view:
@@ -92,7 +100,7 @@ def update_view():
     right = "→"
    if 1 in cell.cell.back:
     left = "←"
-   print(left, cell.cell.data.decode("utf-8"), right, '\r')
+   print(left, cell.cell.data.decode("utf-8").replace("\n","\r\n"), right, '\r')
    if 0 in cell.cell.forth and cell.cell.forth[0].links:
     i = cell.cell.forth[0].links[0].cell_id
    else:
@@ -146,7 +154,12 @@ getch = _Getch()
 while True:
  char = getch()
  center_cell = cells[start]
- if char == 'k': # up
+ if ord(char) == 13:
+  m = mk_req()
+  m.service_state.cells[start].click_count = center_cell.click_count + 1
+  m.service_state.cells[start].update_count = center_cell.update_count + 1
+  send(m)
+ elif char == 'k': # up
   links = center_cell.cell.back[0].links
   if links:
    set_cursor(links[0].cell_id)

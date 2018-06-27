@@ -60,6 +60,7 @@ func recv_from_service() *pb.ServiceState {
 	if err := proto.Unmarshal(frame, nss); err != nil {
 		log.Fatalf("Error unmarshaling message from service %s", err)
 	}
+	log.Println("Recieved from service: ", nss)
 	return nss
 }
 
@@ -94,6 +95,6 @@ func recv_from_clients() *pb.ClientState {
 	if err := proto.Unmarshal(frame, ncs); err != nil {
 		log.Fatalf("Error unmarshaling message from service %s", err)
 	}
-	log.Println(ncs)
+	log.Println("Recieved from client: ", ncs)
 	return ncs
 }

@@ -61,7 +61,6 @@ func evaluate_loses() bool {
 				for ents.Len() > 0 {
 					nt := ents.PopFront().(placedNonTerminal)
 					cell_runtime := state.ServiceState.Cells[nt.cell_id]
-					log.Println(cell_runtime, "ůůů", selection_id, ";;;;;")
 					if selection.ProductionRules == nil {
 						log.Fatalf("No production rules set in selection %s.", selection)
 					}
@@ -70,7 +69,6 @@ func evaluate_loses() bool {
 						symbol = selection.Symbols[symbol_index]
 						vars := map[uint32]uint64{}
 						if symbol.Var != nil {
-							log.Println(vars)
 							for k, v := range nt.vars {
 								vars[k] = v
 							}
@@ -146,7 +144,6 @@ func update_view() {
 			log.Println("Done updating view.")
 			return
 		}
-		log.Println("Sending pending changes in view to service.", pending_changes_for_service)
 		send_pending_changes_to_service()
 		merge_new_state_from_service(recv_from_service())
 	}
