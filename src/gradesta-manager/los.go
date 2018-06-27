@@ -9,7 +9,8 @@ import (
 )
 
 var (
-	global_max_length uint64 = 10000000
+	global_max_length    uint64 = 10000000
+	evaluated_selections        = map[string]uint64{}
 )
 
 type placedNonTerminal struct {
@@ -25,6 +26,10 @@ func evaluate_loses() bool {
 		pending_changes_for_clients.Selections = map[string]*pb.Selection{}
 	}
 	for selection_id, selection := range state.Selections {
+		prev_update_count, ex := evaluated_selections[selection_id]
+		if ex && prev_update_count == *selection.UpdateCount {
+			continue
+		}
 		if pending_changes_for_clients.Selections[selection_id] == nil {
 			pending_changes_for_clients.Selections[selection_id] = &pb.Selection{}
 		}
@@ -135,6 +140,9 @@ func evaluate_loses() bool {
 func update_view() {
 	for {
 		if !evaluate_loses() {
+			for selection_id, selection := range state.Selections {
+				evaluated_selections[selection_id] = *selection.UpdateCount
+			}
 			log.Println("Done updating view.")
 			return
 		}

@@ -55,6 +55,7 @@ func customize_for_client(client_id string, pending *pb.ClientState) (*pb.Client
 	for selection_id, selection := range pending.Selections {
 		status, ex := state.Selections[selection_id].Clients[client_id]
 		if ex && status != pb.Selection_NONE {
+			log.Println(ex, client_id, status, state.Selections[selection_id].Clients, "šščščšškjfldslkfjdskfjdslkjfdslkjfdskljf;;;;;")
 			for _, cursor := range selection.Cursors {
 				for cell_id, visible := range cursor.InView {
 					if visible {
