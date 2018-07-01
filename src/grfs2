@@ -1,0 +1,82 @@
+#!/usr/bin/python3
+import gradesta
+import os
+
+class Dir(gradesta.Obj):
+ def load(self):
+  self.files = os.listdir(self.id)
+  self.open_files = {}
+
+class Head(gradesta.Cell):
+ obj_type = Dir
+
+ def data(self):
+  return self.obj.id.encode("utf-8")
+
+ def down(self):
+  return Entry.id(
+   obj=self.obj,
+   attrs={"i": 0,},
+  )
+
+class Entry(gradesta.Cell):
+ obj_type = Dir
+
+ def data(self):
+  return self.entry().encode("utf-8")
+
+ def entry(self):
+  return self.obj.files[self.id["i"]]
+
+ def full_path(self):
+  return os.path.join(self.obj.id, self.entry())
+
+ def up(self):
+  if self.id["i"] == 0:
+   return Head.id(obj=self.obj)
+  else:
+   return Entry.id(
+    obj=self.obj,
+    attrs={"i": self.id["i"] - 1},
+   )
+
+ def down(self):
+  if self.id["i"] + 1 < len(self.obj.files):
+   return Entry.id(
+    obj=self.obj,
+    attrs={"i": self.id["i"] + 1},
+   )
+
+ def right(self):
+  if self.full_path() in self.obj.open_files:
+   return File.id(
+    obj=self.obj,
+    full_path=self.full_path(),
+    i=self.id["i"],
+   )
+  elif os.path.isdir(self.full_path()):
+   return Head.id(
+    obj_id=self.full_path(),
+   )
+
+ def click(self):
+  if self.click_count > 0 and self.click_count % 2 == 0:
+    try:
+     with open(path, "rb") as fd:
+      self.obj.open_files[self.full_path()] = fd.read()
+      self.obj.mark()
+    except IsADirectoryError:
+     pass
+  elif self.full_path() in self.obj.open_files:
+   del self.obj.open_files[self.full_path()]
+   self.obj.mark()
+
+gradesta.Server(
+ name="grfs",
+ source_url="http://git.hobbs.cz/?p=tg;a=summary",
+ index=Head.id(obj_id="/"),
+ cell_types=(
+  Head,
+  Entry,
+ )
+).serve()
