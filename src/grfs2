@@ -14,37 +14,46 @@ class Head(gradesta.Cell):
   return self.obj.id.encode("utf-8")
 
  def down(self):
-  return Entry.id(
-   obj=self.obj,
-   attrs={"i": 0,},
-  )
+  if self.obj.files:
+   return Entry.id(
+    obj=self.obj,
+    attrs={"e": self.obj.files[0],},
+   )
+
+ def left(self):
+  parent, me = os.path.split(self.obj.id)
+  if me:
+   return Entry.id(
+    obj_id=parent,
+    attrs={"e": me}
+   )
 
 class Entry(gradesta.Cell):
  obj_type = Dir
 
- def data(self):
-  return self.entry().encode("utf-8")
+ def load(self):
+  self.i = self.obj.files.index(self.id["e"])
 
- def entry(self):
-  return self.obj.files[self.id["i"]]
+ def data(self):
+  return self.id["e"].encode("utf-8")
 
  def full_path(self):
-  return os.path.join(self.obj.id, self.entry())
+  return os.path.join(self.obj.id, self.id["e"])
 
  def up(self):
-  if self.id["i"] == 0:
+  if self.id["e"] == self.obj.files[0]:
    return Head.id(obj=self.obj)
   else:
    return Entry.id(
     obj=self.obj,
-    attrs={"i": self.id["i"] - 1},
+    attrs={"e": self.obj.files[self.i - 1]},
    )
 
  def down(self):
-  if self.id["i"] + 1 < len(self.obj.files):
+  if self.i + 1 < len(self.obj.files):
    return Entry.id(
     obj=self.obj,
-    attrs={"i": self.id["i"] + 1},
+    attrs={"e":  self.obj.files[self.i + 1]},
    )
 
  def right(self):
@@ -52,7 +61,7 @@ class Entry(gradesta.Cell):
    return File.id(
     obj=self.obj,
     full_path=self.full_path(),
-    i=self.id["i"],
+    attrs={"e":self.id["e"]},
    )
   elif os.path.isdir(self.full_path()):
    return Head.id(

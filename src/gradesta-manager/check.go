@@ -22,6 +22,10 @@ func check_for_conflicts(changes *pb.ClientState) *pb.ClientState {
 	if changes.ServiceState != nil && changes.ServiceState.Cells != nil {
 		for cell_id, cell_runtime := range changes.ServiceState.Cells {
 			current_cell_state, exists := state.ServiceState.Cells[cell_id]
+			if current_cell_state.UpdateCount == nil {
+				var i uint64 = 0
+				current_cell_state.UpdateCount = &i
+			}
 			if exists && (cell_runtime.UpdateCount == nil || *cell_runtime.UpdateCount != *current_cell_state.UpdateCount+1) {
 				return make_error(changes.ServiceState.Round, fmt.Sprintf("Edit conflict on cell '%s' someone else edited that cell before you.", cell_id))
 			}

@@ -25,6 +25,10 @@ class Cell():
   else:
    self.obj = self.obj_type(server, self.id["obj"])
    server.objs[self.id["obj"]] = self.obj
+  self.load()
+
+ def load(self):
+  pass
 
  @classmethod
  def id(cls, obj=None, obj_id=None, attrs=None):
