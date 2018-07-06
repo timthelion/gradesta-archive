@@ -93,13 +93,13 @@ def update_view():
   i = start
   while i in in_view:
    cell = cells[i]
-   left = ""
-   right = ""
+   left = "▫"
+   right = "▫"
    if 1 in cell.cell.forth:
-    right = "→"
+    right = "▹"
    if 1 in cell.cell.back:
-    left = "←"
-   print(left, cell.cell.data.decode("utf-8").replace("\n","\r\n"), right, '\r')
+    left = "◃"
+   print(left, cell.cell.data.decode("utf-8").replace("\n","\r\n").ljust(10), right, '\r')
    if 0 in cell.cell.forth and cell.cell.forth[0].links:
     i = cell.cell.forth[0].links[0].cell_id
    else:

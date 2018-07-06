@@ -14,17 +14,23 @@ class Obj():
   for cell in self.cells:
    self.server.in_view[cell].marked = True
 
+ def load(self):
+  pass
 
 class Cell():
  def __init__(self, server, id):
+  self._r = gradesta_pb2.CellRuntime()
+  self._r.update_count = 0
+  self._r.click_count = 0
+  self.click_count = None
   self.marked = False
   self.server = server
-  self.id = id
-  if self.id["obj"] in server.objs:
-   self.obj = server.objs[self.id["obj"]]
+  self.a = id
+  if self.a["obj"] in server.objs:
+   self.obj = server.objs[self.a["obj"]]
   else:
-   self.obj = self.obj_type(server, self.id["obj"])
-   server.objs[self.id["obj"]] = self.obj
+   self.obj = self.obj_type(server, self.a["obj"])
+   server.objs[self.a["obj"]] = self.obj
   self.load()
 
  def load(self):
@@ -32,18 +38,21 @@ class Cell():
 
  @classmethod
  def id(cls, obj=None, obj_id=None, attrs=None):
-  id = {}
+  a = {}
   if obj is not None:
-   id["obj"] = obj.id
+   a["obj"] = obj.id
   if obj_id is not None:
-   id["obj"] = obj_id
+   a["obj"] = obj_id
   if attrs is not None:
-   id.update(attrs)
-  id["type"] = cls.__name__
-  return json.dumps(id)
+   a.update(attrs)
+  a["type"] = cls.__name__
+  return json.dumps(a)
 
  def fill_in_protobuf(self, cell_runtime):
   cell_runtime.cell.data = self.data()
+  if self.click_count is not None:
+   cell_runtime.click_count = self.click_count
+   self.click_count = None
 
   def fill_dim(dir, dim, method):
    link = gradesta_pb2.Link()
@@ -103,7 +112,13 @@ class Server():
       del self.objs[out_of_view_cell.obj.id]
      del self.in_view[s_cell_id]
    for s_cell_id, cell_runtime in m.cells.items():
-    pass # TODO
+    cell = self.in_view[s_cell_id]
+    old_runtime = cell._r
+    cell._r = cell_runtime
+    if cell._r.click_count > old_runtime.click_count:
+     cell.click()
+     cell.click_count = cell._r.click_count
+     cell.marked = True
    for id, cell in self.in_view.items():
     if cell.marked:
      cell.fill_in_protobuf(r.cells[id])
