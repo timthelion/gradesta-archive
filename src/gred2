@@ -2,6 +2,7 @@
 import gradesta_pb2
 import gradesta_client
 import sys
+import time
 
 class GredClient(gradesta_client.Client):
  def print_cursor(self, cursor):
@@ -37,6 +38,44 @@ class GredClient(gradesta_client.Client):
    print(selection.id, '\r')
    for cursor in selection.cursors:
     self.print_cursor(cursor)
+
+ def control(self, m):
+  char = m.decode("utf8")
+  cursor = selection.active_cursor
+  try:
+   center_cell = client.truth.service_state.cells[cursor.center]
+  except:
+   import pudb;pudb.set_trace()
+  if ord(char) == 13:
+   client.staged.service_state.cells[cursor.center].click_count = center_cell.click_count + 1
+   client.staged.service_state.cells[cursor.center].update_count = center_cell.update_count + 1
+   client.commit()
+  elif char == 'd':
+   import pudb; pudb.set_trace()
+  elif char == 'k': # up
+   links = center_cell.cell.back[1].links
+   if links:
+    cursor.move(links[0].cell_id)
+    client.commit()
+  elif char == 'j': # down
+   links = center_cell.cell.forth[1].links
+   if links:
+    cursor.move(links[0].cell_id)
+    client.commit()
+  elif char == 'h': # left
+   links = center_cell.cell.back[0].links
+   if links:
+    cursor.move(links[0].cell_id)
+    client.commit()
+  elif char == 'l': # right
+   links = center_cell.cell.forth[0].links
+   if links:
+    cursor.move(links[0].cell_id)
+    client.commit()
+  elif char == 'q':
+   sys.exit()
+  else:
+   print(char)
 
 client = GredClient()
 selection = client.new_selection(gradesta_pb2.Selection.PRIMARY)
@@ -87,39 +126,9 @@ class _GetchWindows:
 getch = _Getch()
 
 while True:
- char = getch()
- cursor = selection.active_cursor
- try:
-  center_cell = client.truth.service_state.cells[cursor.center]
- except:
-  import pudb;pudb.set_trace()
- if ord(char) == 13:
-  client.staged.service_state.cells[cursor.center].click_count = center_cell.click_count + 1
-  client.staged.service_state.cells[cursor.center].update_count = center_cell.update_count + 1
-  client.commit()
- elif char == 'd':
-  import pudb; pudb.set_trace()
- elif char == 'k': # up
-  links = center_cell.cell.back[1].links
-  if links:
-   cursor.move(links[0].cell_id)
-   client.commit()
- elif char == 'j': # down
-  links = center_cell.cell.forth[1].links
-  if links:
-   cursor.move(links[0].cell_id)
-   client.commit()
- elif char == 'h': # left
-  links = center_cell.cell.back[0].links
-  if links:
-   cursor.move(links[0].cell_id)
-   client.commit()
- elif char == 'l': # right
-  links = center_cell.cell.forth[0].links
-  if links:
-   cursor.move(links[0].cell_id)
-   client.commit()
- elif char == 'q':
-  sys.exit()
- else:
-  print(char)
+ in_ = getch()
+ for char in in_:
+  time.sleep(0.05)
+  client.run_command(char.encode("utf8"))
+  if char == "q":
+   sys.exit()
