@@ -65,7 +65,7 @@ func recv_from_service() *pb.ServiceState {
 
 func send_pending_changes_to_clients() {
 	if are_pending_changes_for_clients() {
-		log.Println("Sending pending changes to clients")
+		log.Println("Sending pending changes to clients %s", pending_changes_for_clients)
 		send_to_clients(pending_changes_for_clients)
 	}
 	pending_changes_for_clients = &pb.ClientState{}
@@ -74,12 +74,14 @@ func send_pending_changes_to_clients() {
 func send_to_clients(cs *pb.ClientState) {
 	for client_id, client_sock := range client_socks {
 		cs1, changed := customize_for_client(client_id, cs)
+		log.Println(cs1)
+		log.Println("↓↓↓")
 		if changed {
 			frame, err := proto.Marshal(cs1)
 			if err != nil {
 				log.Fatalf("Error marshaling notification %s", err)
 			}
-			log.Println("Sending notification to client.", client_id)
+			log.Println("€€€€", client_id)
 			client_sock.SendBytes(frame, 0)
 		}
 	}

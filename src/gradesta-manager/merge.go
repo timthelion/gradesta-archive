@@ -142,11 +142,7 @@ func merge_from_clients(ncs *pb.ClientState, ocs *pb.ClientState) {
 				old_selection.Clients[client_id] = status
 			}
 			for center, cursor := range selection.Cursors {
-				if cursor.Deleted != nil && *cursor.Deleted {
-					delete(old_selection.Cursors, center)
-				} else {
-					old_selection.Cursors[center] = cursor
-				}
+				old_selection.Cursors[center] = cursor
 			}
 		} else {
 			if ocs.Selections == nil {

@@ -61,10 +61,10 @@ class Cell():
     link.cell_id = link_id
     dir[dim].links.extend([link])
 
-  fill_dim(cell_runtime.cell.back,  0, self.up)
-  fill_dim(cell_runtime.cell.forth, 0, self.down)
-  fill_dim(cell_runtime.cell.back,  1, self.left)
-  fill_dim(cell_runtime.cell.forth, 1, self.right)
+  fill_dim(cell_runtime.cell.back,  0, self.left)
+  fill_dim(cell_runtime.cell.forth, 0, self.right)
+  fill_dim(cell_runtime.cell.back,  1, self.up)
+  fill_dim(cell_runtime.cell.forth, 1, self.down)
 
  def up(self):
   return None
@@ -112,11 +112,17 @@ class Server():
       del self.objs[out_of_view_cell.obj.id]
      del self.in_view[s_cell_id]
    for s_cell_id, cell_runtime in m.cells.items():
-    cell = self.in_view[s_cell_id]
+    try:
+     cell = self.in_view[s_cell_id]
+    except KeyError as e:
+     raise KeyError(str(e) + str(self.in_view.keys()))
     old_runtime = cell._r
     cell._r = cell_runtime
     if cell._r.click_count > old_runtime.click_count:
-     cell.click()
+     try:
+      cell.click()
+     except AttributeError:
+      pass
      cell.click_count = cell._r.click_count
      cell.marked = True
    for id, cell in self.in_view.items():

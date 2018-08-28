@@ -1,0 +1,125 @@
+#!/usr/bin/python3
+import gradesta_pb2
+import gradesta_client
+import sys
+
+class GredClient(gradesta_client.Client):
+ def print_cursor(self, cursor):
+   print("--------------%s---------------------------\n\r" % cursor.center)
+   i = cursor.center
+   cell = self.truth.service_state.cells[i]
+   if 1 in cell.cell.back and cell.cell.back[1].links:
+    print("↑", "\r")
+   while i in cursor.truth.in_view:
+    if i not in self.truth.service_state.cells:
+     print("Cell '%s' in view but not in state.\n" % i)
+     #sys.exit(1)
+    cell = self.truth.service_state.cells[i]
+    left = "▫"
+    right = "▫"
+    if 0 in cell.cell.forth:
+     right = "▹"
+    if 0 in cell.cell.back:
+     left = "◃"
+    print(left, cell.cell.data.decode("utf-8").replace("\n","\r\n").ljust(10), right, '\r')
+    if 1 in cell.cell.forth and cell.cell.forth[1].links:
+     i = cell.cell.forth[1].links[0].cell_id
+    else:
+     break
+   if 1 in cell.cell.forth and cell.cell.forth[1].links:
+    print("↓")
+
+ def update(self, m):
+  if m.service_state.round.errors:
+   print(m.service_state.round.errors, '\n')
+  for selection in self.selections:
+   print("===============================\r")
+   print(selection.id, '\r')
+   for cursor in selection.cursors:
+    self.print_cursor(cursor)
+
+client = GredClient()
+selection = client.new_selection(gradesta_pb2.Selection.PRIMARY)
+var = selection.add_var(15)
+sym_down = selection.add_symbol(direction=True, dimension=1, var=var, relabel=False)
+selection.add_production_rule(sym_down, [sym_down])
+selection.add_cursor(client.truth.service_state.index, sym_down)
+client.commit()
+
+#http://code.activestate.com/recipes/134892/
+class _Getch:
+    """Gets a single character from standard input.  Does not echo to the
+screen."""
+    def __init__(self):
+        try:
+            self.impl = _GetchWindows()
+        except ImportError:
+            self.impl = _GetchUnix()
+
+    def __call__(self): return self.impl()
+
+
+class _GetchUnix:
+    def __init__(self):
+        import tty, sys
+
+    def __call__(self):
+        import sys, tty, termios
+        fd = sys.stdin.fileno()
+        old_settings = termios.tcgetattr(fd)
+        try:
+            tty.setraw(sys.stdin.fileno())
+            ch = sys.stdin.read(1)
+        finally:
+            termios.tcsetattr(fd, termios.TCSADRAIN, old_settings)
+        return ch
+
+
+class _GetchWindows:
+    def __init__(self):
+        import msvcrt
+
+    def __call__(self):
+        import msvcrt
+        return msvcrt.getch()
+
+
+getch = _Getch()
+
+while True:
+ char = getch()
+ cursor = selection.active_cursor
+ try:
+  center_cell = client.truth.service_state.cells[cursor.center]
+ except:
+  import pudb;pudb.set_trace()
+ if ord(char) == 13:
+  client.staged.service_state.cells[cursor.center].click_count = center_cell.click_count + 1
+  client.staged.service_state.cells[cursor.center].update_count = center_cell.update_count + 1
+  client.commit()
+ elif char == 'd':
+  import pudb; pudb.set_trace()
+ elif char == 'k': # up
+  links = center_cell.cell.back[1].links
+  if links:
+   cursor.move(links[0].cell_id)
+   client.commit()
+ elif char == 'j': # down
+  links = center_cell.cell.forth[1].links
+  if links:
+   cursor.move(links[0].cell_id)
+   client.commit()
+ elif char == 'h': # left
+  links = center_cell.cell.back[0].links
+  if links:
+   cursor.move(links[0].cell_id)
+   client.commit()
+ elif char == 'l': # right
+  links = center_cell.cell.forth[0].links
+  if links:
+   cursor.move(links[0].cell_id)
+   client.commit()
+ elif char == 'q':
+  sys.exit()
+ else:
+  print(char)

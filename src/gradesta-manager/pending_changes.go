@@ -1,7 +1,7 @@
 package main
 
 import (
-	//	"log"
+	//"log"
 
 	pb "./pb"
 )
@@ -36,6 +36,10 @@ func stage_full_sync() {
 	}
 }
 
+var (
+	in_view_previously = map[string]map[string]bool{}
+)
+
 func customize_for_client(client_id string, pending *pb.ClientState) (*pb.ClientState, bool) {
 	changed := false
 	pss := pending.ServiceState
@@ -52,8 +56,8 @@ func customize_for_client(client_id string, pending *pb.ClientState) (*pb.Client
 	}
 	in_view := map[string]bool{}
 	pending_selections := map[string]*pb.Selection{}
-	for selection_id, selection := range state.Selections {
-		status, ex := selection.Clients[client_id]
+	for selection_id, selection := range pending.Selections {
+		status, ex := state.Selections[selection_id].Clients[client_id]
 		if ex && status != pb.Selection_NONE {
 			for _, cursor := range selection.Cursors {
 				for cell_id, visible := range cursor.InView {
@@ -71,10 +75,24 @@ func customize_for_client(client_id string, pending *pb.ClientState) (*pb.Client
 			}
 		}
 	}
+	clients_previous_view, exists := in_view_previously[client_id]
+	if !exists {
+		clients_previous_view = map[string]bool{}
+		in_view_previously[client_id] = clients_previous_view
+	}
 	pending_cells := map[string]*pb.CellRuntime{}
 	for cell_id, _ := range in_view {
-		pending_cells[cell_id] = state.ServiceState.Cells[cell_id]
-		changed = true
+		previously_in_view, ex := clients_previous_view[cell_id]
+		if ex && previously_in_view {
+			cell, ex1 := pending.ServiceState.Cells[cell_id]
+			if ex1 {
+				pending_cells[cell_id] = cell
+				changed = true
+			}
+		} else {
+			pending_cells[cell_id] = state.ServiceState.Cells[cell_id]
+			changed = true
+		}
 	}
 	var pending_round *pb.Round = nil
 	if pss != nil {

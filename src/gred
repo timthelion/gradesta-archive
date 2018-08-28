@@ -13,11 +13,13 @@ client_socket = context.socket(zmq.PAIR)
 client_socket.bind("ipc://client.gradesock")
 
 def recv():
+ print("recving")
  m = gradesta_pb2.ClientState()
  m.ParseFromString(client_socket.recv())
  return m
 
 def send(m):
+ print("sending", m)
  client_socket.send(m.SerializeToString())
 
 client_id = os.path.split(os.getcwd())[-1]
@@ -37,7 +39,7 @@ sel_update_count += 1
 s.vars[0] = 15
 symbol = s.symbols[0]
 symbol.direction=True
-symbol.dimension=0
+symbol.dimension=1
 symbol.var=0
 symbol.relabel=False
 rhs = s.production_rules[0]
@@ -95,16 +97,16 @@ def update_view():
    cell = cells[i]
    left = "▫"
    right = "▫"
-   if 1 in cell.cell.forth:
+   if 0 in cell.cell.forth:
     right = "▹"
-   if 1 in cell.cell.back:
+   if 0 in cell.cell.back:
     left = "◃"
    print(left, cell.cell.data.decode("utf-8").replace("\n","\r\n").ljust(10), right, '\r')
-   if 0 in cell.cell.forth and cell.cell.forth[0].links:
-    i = cell.cell.forth[0].links[0].cell_id
+   if 1 in cell.cell.forth and cell.cell.forth[1].links:
+    i = cell.cell.forth[1].links[0].cell_id
    else:
     break
-  if 0 in cell.cell.forth and cell.cell.forth[0].links:
+  if 1 in cell.cell.forth and cell.cell.forth[1].links:
    print("↓")
 
 t = threading.Thread(name='child procs', target=update_view, daemon=True)
@@ -159,19 +161,19 @@ while True:
   m.service_state.cells[start].update_count = center_cell.update_count + 1
   send(m)
  elif char == 'k': # up
-  links = center_cell.cell.back[0].links
-  if links:
-   set_cursor(links[0].cell_id)
- elif char == 'j': # down
-  links = center_cell.cell.forth[0].links
-  if links:
-   set_cursor(links[0].cell_id)
- elif char == 'h': # left
   links = center_cell.cell.back[1].links
   if links:
    set_cursor(links[0].cell_id)
- elif char == 'l': # right
+ elif char == 'j': # down
   links = center_cell.cell.forth[1].links
+  if links:
+   set_cursor(links[0].cell_id)
+ elif char == 'h': # left
+  links = center_cell.cell.back[0].links
+  if links:
+   set_cursor(links[0].cell_id)
+ elif char == 'l': # right
+  links = center_cell.cell.forth[0].links
   if links:
    set_cursor(links[0].cell_id)
  elif char == 'q':

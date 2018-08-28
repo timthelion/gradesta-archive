@@ -16,3 +16,5 @@ RUN go get github.com/pebbe/zmq4
 RUN go get github.com/gammazero/deque
 RUN go get github.com/fsnotify/fsnotify
 ENV PATH $PATH:$GOPATH/bin
+RUN pip3 install pudb
+RUN apt-get install -yq gdb

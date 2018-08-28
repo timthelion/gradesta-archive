@@ -41,6 +41,9 @@ func evaluate_loses() bool {
 			pending_selection.Cursors = map[string]*pb.Cursor{}
 		}
 		for center_id, cursor := range selection.Cursors {
+			if cursor.Deleted != nil && *cursor.Deleted {
+				continue
+			}
 			scanned := map[string]bool{}
 			_, have_cell := state.ServiceState.Cells[center_id]
 			if have_cell {
@@ -102,7 +105,7 @@ func evaluate_loses() bool {
 									pending_cursor.InView[*link.CellId] = true
 									if have_cell {
 										pnt := placedNonTerminal{*link.CellId, symbol_index, vars, nt.generation + 1}
-										log.Println("Placed non-terminal:", pnt)
+										// log.Println("Placed non-terminal:", pnt)
 										ents.PushBack(pnt)
 									} else {
 										needed[*link.CellId] = true
