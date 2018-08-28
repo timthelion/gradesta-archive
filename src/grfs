@@ -4,7 +4,10 @@ import os
 
 class Dir(gradesta.Obj):
  def load(self):
-  self.files = os.listdir(self.id)
+  try:
+   self.files = os.listdir(self.id)
+  except PermissionError as e:
+   self.files = [str(e)]
   self.open_files = {}
 
 class Head(gradesta.Cell):
@@ -74,11 +77,15 @@ class Entry(gradesta.Cell):
   print(self._r.click_count)
   if self._r.click_count > 0 and self._r.click_count % 2 == 1:
     try:
-     with open(self.full_path(), "rb") as fd:
-      self.obj.open_files[self.full_path()] = fd.read()
-      self.obj.mark()
-    except IsADirectoryError:
-     pass
+     try:
+      with open(self.full_path(), "rb") as fd:
+       self.obj.open_files[self.full_path()] = fd.read()
+       self.obj.mark()
+     except IsADirectoryError:
+      pass
+    except PermissionError as e:
+     self.obj.open_files[self.full_path()] = str(e).encode("utf8")
+     self.obj.mark()
   elif self.full_path() in self.obj.open_files:
    del self.obj.open_files[self.full_path()]
    self.obj.mark()

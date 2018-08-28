@@ -128,7 +128,6 @@ getch = _Getch()
 while True:
  in_ = getch()
  for char in in_:
-  time.sleep(0.05)
   client.run_command(char.encode("utf8"))
   if char == "q":
    sys.exit()
