@@ -7,60 +7,63 @@ import sys
 import threading
 import time
 
-FIELD=0   # Optional field
-RFIELD= 1 # Repeated field
-UDICT=2   # Update dict
-ODICT=3   # Overwrite entries
+FIELD  = 0  # Optional field
+RFIELD = 1  # Repeated field
+UDICT  = 2  # Update dict
+ODICT  = 3  # Overwrite entries
 
 cell_runtime_merge_policy = {
- "cell": FIELD,
- "update_count": FIELD,
- "click_count": FIELD,
- "creation_id": FIELD,
- "cell_runtime_modes": ODICT,
- "cell_modes": ODICT,
- "link_modes": ODICT,
- "for_link_modes": ODICT,
- "back_link_modes": ODICT,
+ "cell":                FIELD,
+ "update_count":        FIELD,
+ "click_count":         FIELD,
+ "creation_id":         FIELD,
+ "cell_runtime_modes":  ODICT,
+ "cell_modes":          ODICT,
+ "link_modes":          ODICT,
+ "for_link_modes":      ODICT,
+ "back_link_modes":     ODICT,
  "supported_encodings": RFIELD,
- "role_permissions": ODICT,
+ "role_permissions":    ODICT,
 }
 
 metadata_merge_policy = {
- "name": FIELD,
- "source_url": FIELD,
+ "name":           FIELD,
+ "source_url":     FIELD,
  "privacy_policy": FIELD,
 }
 
 client_state_merge_policy = {
  "service_state": (FIELD, {
-  "cells": (UDICT, cell_runtime_merge_policy),
-  "index": FIELD,
-  "on_disk_state": FIELD,
-  "log": ODICT,
-  "metadata": (FIELD, metadata_merge_policy),
-  "cell_template": (FIELD, cell_runtime_merge_policy),
+  "cells":               (UDICT, cell_runtime_merge_policy),
+  "index":               FIELD,
+  "on_disk_state":       FIELD,
+  "log":                 ODICT,
+  "metadata":            (FIELD, metadata_merge_policy),
+  "cell_template":       (FIELD, cell_runtime_merge_policy),
   "service_state_modes": ODICT,
  }),
  "clients": (UDICT, {
-  "status": FIELD,
-  "metadata": (FIELD, metadata_merge_policy),
+  "status":    FIELD,
+  "metadata":  (FIELD, metadata_merge_policy),
  }),
  "manager": (FIELD, {
   "metadata": (FIELD, metadata_merge_policy),
  }),
  "selections": (UDICT, {
-  "name": FIELD,
-  "update_count": FIELD,
-  "clients": ODICT,
-  "cursors": (UDICT, {
+  "name":              FIELD,
+  "update_count":      FIELD,
+  "clients":           ODICT,
+  "cursors":           (UDICT, {
+   # TODO
   }),
-  "symbols": (UDICT, {
+  "symbols":           (UDICT, {
+   # TODO
   }),
-  "production_rules": (UDICT, {
+  "production_rules":  (UDICT, {
+   # TODO
   }),
-  "vars": ODICT,
-  "max_length": FIELD,
+  "vars":              ODICT,
+  "max_length":        FIELD,
  }),
 }
 

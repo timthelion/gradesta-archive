@@ -1,6 +1,8 @@
+import sys
 import gradesta_pb2
 import zmq
 import json
+import subprocess
 
 
 class Obj():
@@ -78,8 +80,40 @@ class Cell():
  def right(self):
   return None
 
+class ListObj(Obj):
+ def __init__(self, server, id):
+  super().__init__(server, id)
+  for (t, ident) in self.list:
+   ident['obj'] = self.id
+   ident['type'] = t.__name__
+
+ def get_next(self, list_cell):
+  return self.__get_next__(list_cell, self.list)
+
+ def get_prev(self, list_cell):
+  return self.__get_next__(list_cell, reversed(self.list))
+
+ def __get_next__(self, list_cell, list):
+  next = False
+  for (t, attrs) in list:
+   if next:
+    return t.id(obj=self, attrs=attrs)
+   if attrs == list_cell.a:
+    next = True
+  return None
+
+
+class ListCell(Cell):
+ def up(self):
+  return self.obj.get_prev(self)
+
+ def down(self):
+  return self.obj.get_next(self)
+
+
 class Server():
  def __init__(self, name, source_url, index, cell_types):
+  self.manager_proc = subprocess.Popen("gradesta-manager")
   self.objs = {}
   self.in_view = {}
   self.cell_types = {}
@@ -94,6 +128,14 @@ class Server():
    self.cell_types[cell_type.__name__] = cell_type
 
  def serve(self):
+  try:
+   self.__serve__()
+  except KeyboardInterrupt:
+   self.manager_proc.terminate()
+   sys.exit()
+
+
+ def __serve__(self):
   while True:
    m = gradesta_pb2.ServiceState()
    m.ParseFromString(self.service_socket.recv())
