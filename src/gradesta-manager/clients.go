@@ -101,7 +101,7 @@ func listen_for_clients() {
 												log.Println("Error reading internally sent frame for client ", ev.Name, err)
 												return
 											}
-											log.Println("ůSending notification to client", client_id)
+											log.Println("Sending notification to client", client_id)
 											client_socket.SendBytes(frame, 0)
 										}
 									}

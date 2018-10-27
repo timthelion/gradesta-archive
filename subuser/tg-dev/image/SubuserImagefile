@@ -18,3 +18,4 @@ RUN go get github.com/fsnotify/fsnotify
 ENV PATH $PATH:$GOPATH/bin
 RUN pip3 install pudb
 RUN apt-get install -yq
+RUN pip3 install xdg
