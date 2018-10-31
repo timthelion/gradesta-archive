@@ -64,7 +64,8 @@ test/gradesta/clients/minimum-interacitve-cli:gradesta_pb2.py old-gradesta-manag
 	chmod +x ./test/gradesta/clients/minimum-interactive-cli
 
 code-visualizations/gradesta.proto.png:code-visualizatons/gradest.proto.dot
-	dot -Tpng code-visualizations/gradesta.proto.dot > code-visualizations/gradesta.proto.png
+	dot -Tpng code-visualizations/gradesta.proto.dot > code-visualizations/gradesta.proto.white.png
+	convert -negate code-visualizations/gradesta.proto.white.png code-visualizations/gradesta.proto.png
 
 code-visualizatons/gradest.proto.dot:gradesta.proto.tg
 	cat gradesta.proto.tg | tg2dot --center 42 --no-street-numbers --no-street-names --no-center-highlight --downstream > code-visualizations/gradesta.proto.dot

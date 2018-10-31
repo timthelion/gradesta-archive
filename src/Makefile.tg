@@ -28,7 +28,7 @@
 [31, "test/gradesta/services/echo-service.tg", [["", 30]]]
 [32, "test/gradesta/clients/minimum-interacitve-cli\ntgtemplate test/gradesta/clients/minimum-interactive-cli.tg --comment-prefix=\\ \\# --dont-comment-square-zero > test/gradesta/clients/minimum-interactive-cli\nchmod +x ./test/gradesta/clients/minimum-interactive-cli", [["", 27]]]
 [33, "test/gradesta/clients/minimum-interactive-cli.tg", [["", 32]]]
-[34, "code-visualizations/gradesta.proto.png\ndot -Tpng code-visualizations/gradesta.proto.dot > code-visualizations/gradesta.proto.png", []]
+[34, "code-visualizations/gradesta.proto.png\ndot -Tpng code-visualizations/gradesta.proto.dot > code-visualizations/gradesta.proto.white.png\nconvert -negate code-visualizations/gradesta.proto.white.png code-visualizations/gradesta.proto.png", []]
 [35, "code-visualizatons/gradest.proto.dot\ncat gradesta.proto.tg | tg2dot --center 42 --no-street-numbers --no-street-names --no-center-highlight --downstream > code-visualizations/gradesta.proto.dot", [["", 34]]]
 [36, "gradesta.proto.tg", [["", 35]]]
 [37, "gradesta-manager/gradesta-manager\ncd gradesta-manager; gofmt -w *.go ; go build", []]

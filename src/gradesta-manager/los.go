@@ -13,14 +13,102 @@ var (
 	evaluated_selections        = map[string]uint64{}
 )
 
-type placedNonTerminal struct {
-	cell_id    string
-	symbol     int32
-	vars       map[uint32]uint64
-	generation uint64
+type Walker func(needed map[string]bool)
+
+type TreeWalker struct {
+	walk Walker
 }
 
-func evaluate_loses() bool {
+type PlacedNonTerminal struct {
+	string
+	*pb.PlacedSymbol
+}
+
+func walk(center_id string, cursor pb.Cursor, pending_selection pb.Selection, needed map[string]bool) {
+	scanned := map[string]bool{}
+	_, have_cell := state.ServiceState.Cells[center_id]
+	if have_cell {
+		var ents deque.Deque // exposed non-terminals
+		if pending_selection.Cursors[center_id] == nil {
+			pending_selection.Cursors[center_id] = &pb.Cursor{}
+		}
+		pending_cursor := pending_selection.Cursors[center_id]
+		if pending_cursor.PlacedSymbols == nil {
+			pending_cursor.PlacedSymbols = map[string]*pb.PlacedSymbols{}
+		}
+        walk_tree := state.WalkTrees[*cursor.Los]
+		newly_placed_symbol := &pb.PlacedSymbol{
+			SymbolId: &zero32,
+			Vars:     walk_tree.Vars,
+		}
+		if pending_cursor.PlacedSymbols[center_id] == nil {
+			pending_cursor.PlacedSymbols[center_id] = &pb.PlacedSymbols{}
+		}
+		pending_cursor.PlacedSymbols[center_id].InView = &truev
+		pending_cursor.PlacedSymbols[center_id].PlacedSymbols = append(pending_cursor.PlacedSymbols[center_id].PlacedSymbols, newly_placed_symbol)
+		ents.PushBack(PlacedNonTerminal{center_id, newly_placed_symbol})
+		for ents.Len() > 0 {
+			cell_id, placed_symbol := ents.PopFront().(PlacedNonTerminal)
+			cell_runtime := state.ServiceState.Cells[cell_id]
+			for child_index := range walk_tree.Symbols[placed_symbol.SymbolId].Children {
+            place_child(child_index, cell_id, placed_symbol, cell_runtime)
+						}
+		}
+		state.Selections[selection_id].Cursors[center_id].InView = pending_cursor.InView
+	} else {
+		needed[center_id] = true
+	}
+}
+
+func place_child() {
+	child_symbol = walk_tree.Symbols[symbol_index]
+				child_vars := make([]uint64, len(walk_tree.Vars))
+				for _, op := child_symbol.Ops{
+					for k, v := range nt.vars {
+						vars[k] = v
+					}
+					if vars[*symbol.Var] == 0 {
+						continue
+					}
+					vars[*symbol.Var] = vars[*symbol.Var] - 1
+				} else {
+					log.Println("Warning, production rule variable not set.")
+					continue
+				}
+				var direction map[uint64]*pb.Links
+				if symbol.Direction != nil && *symbol.Direction {
+					direction = cell_runtime.Cell.Forth
+				} else {
+					direction = cell_runtime.Cell.Back
+				}
+
+				links, ok := direction[*symbol.Dimension]
+				if ok {
+					for _, link := range links.Links {
+						if (link.Mime == nil || *link.Mime == ".") && (link.Path == nil || *link.Path == ".") {
+							_, have_cell := state.ServiceState.Cells[*link.CellId]
+							if symbol.Relabel == nil || !*symbol.Relabel {
+								_, already := scanned[*link.CellId]
+								if already {
+									continue
+								}
+							}
+							scanned[*link.CellId] = true
+							pending_cursor.InView[*link.CellId] = true
+							if have_cell {
+								pnt := placedNonTerminal{*link.CellId, symbol_index, vars, nt.generation + 1}
+								// log.Println("Placed non-terminal:", pnt)
+								ents.PushBack(pnt)
+							} else {
+								needed[*link.CellId] = true
+							}
+						}
+					}
+				}
+
+}
+
+func (t *TreeWalker) evaluate_loses() bool {
 	needed := map[string]bool{}
 	if pending_changes_for_clients.Selections == nil {
 		pending_changes_for_clients.Selections = map[string]*pb.Selection{}
@@ -34,9 +122,6 @@ func evaluate_loses() bool {
 			pending_changes_for_clients.Selections[selection_id] = &pb.Selection{}
 		}
 		pending_selection := pending_changes_for_clients.Selections[selection_id]
-		if selection.MaxLength == nil {
-			selection.MaxLength = &global_max_length
-		}
 		if pending_selection.Cursors == nil {
 			pending_selection.Cursors = map[string]*pb.Cursor{}
 		}
@@ -44,81 +129,7 @@ func evaluate_loses() bool {
 			if cursor.Deleted != nil && *cursor.Deleted {
 				continue
 			}
-			scanned := map[string]bool{}
-			_, have_cell := state.ServiceState.Cells[center_id]
-			if have_cell {
-				var ents deque.Deque // exposed non-terminals
-				if pending_selection.Cursors[center_id] == nil {
-					pending_selection.Cursors[center_id] = &pb.Cursor{}
-				}
-				pending_cursor := pending_selection.Cursors[center_id]
-				if pending_cursor.InView == nil {
-					pending_cursor.InView = map[string]bool{}
-				}
-				pending_cursor.InView[center_id] = true
-				if cursor.StartSymbol == nil {
-					log.Println("Warning, no start symbol set for cursor.")
-					continue
-				}
-				ents.PushBack(placedNonTerminal{center_id, *cursor.StartSymbol, selection.Vars, 0})
-				for ents.Len() > 0 {
-					nt := ents.PopFront().(placedNonTerminal)
-					cell_runtime := state.ServiceState.Cells[nt.cell_id]
-					if selection.ProductionRules == nil {
-						log.Fatalf("No production rules set in selection %s.", selection)
-					}
-					for _, symbol_index := range selection.ProductionRules[nt.symbol].Symbols {
-						var symbol *pb.Symbol
-						symbol = selection.Symbols[symbol_index]
-						vars := map[uint32]uint64{}
-						if symbol.Var != nil {
-							for k, v := range nt.vars {
-								vars[k] = v
-							}
-							if vars[*symbol.Var] == 0 {
-								continue
-							}
-							vars[*symbol.Var] = vars[*symbol.Var] - 1
-						} else {
-							log.Println("Warning, production rule variable not set.")
-							continue
-						}
-						var direction map[uint64]*pb.Links
-						if symbol.Direction != nil && *symbol.Direction {
-							direction = cell_runtime.Cell.Forth
-						} else {
-							direction = cell_runtime.Cell.Back
-						}
-
-						links, ok := direction[*symbol.Dimension]
-						if ok {
-							for _, link := range links.Links {
-								if (link.Mime == nil || *link.Mime == ".") && (link.Path == nil || *link.Path == ".") {
-									_, have_cell := state.ServiceState.Cells[*link.CellId]
-									if symbol.Relabel == nil || !*symbol.Relabel {
-										_, already := scanned[*link.CellId]
-										if already {
-											continue
-										}
-									}
-									scanned[*link.CellId] = true
-									pending_cursor.InView[*link.CellId] = true
-									if have_cell {
-										pnt := placedNonTerminal{*link.CellId, symbol_index, vars, nt.generation + 1}
-										// log.Println("Placed non-terminal:", pnt)
-										ents.PushBack(pnt)
-									} else {
-										needed[*link.CellId] = true
-									}
-								}
-							}
-						}
-					}
-				}
-				state.Selections[selection_id].Cursors[center_id].InView = pending_cursor.InView
-			} else {
-				needed[center_id] = true
-			}
+			t.walk(center_id, cursor, pending_selection, needed)
 		}
 	}
 	changes_to_view := map[string]bool{}
