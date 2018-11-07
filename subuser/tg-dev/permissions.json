@@ -4,5 +4,6 @@
  "executable": "/bin/bash",
  "maintainer": "Timothy Hobbs <timothyhobbs@seznam.cz>",
  "x11": true,
- "basic-common-permissions": true
+ "basic-common-permissions": true,
+ "allow-network-access": true
 }
