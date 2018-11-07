@@ -1,0 +1,182 @@
+#!/usr/bin/python3
+import os
+import zmq
+import gradesta_pb2
+import uuid
+import sys
+import threading
+
+request = 1
+
+context = zmq.Context()
+client_socket = context.socket(zmq.PAIR)
+client_socket.bind("ipc://client.gradesock")
+
+def recv():
+ print("recving")
+ m = gradesta_pb2.ClientState()
+ m.ParseFromString(client_socket.recv())
+ return m
+
+def send(m):
+ print("sending", m)
+ client_socket.send(m.SerializeToString())
+
+client_id = os.path.split(os.getcwd())[-1]
+
+fs = recv()
+m = gradesta_pb2.ClientState()
+client = m.clients[client_id]
+metadata = gradesta_pb2.ActorMetadata()
+metadata.name="gred"
+client.metadata.CopyFrom(metadata)
+selection_id = str(uuid.uuid4())
+s = m.selections[selection_id]
+s.name = "Cli Present Working Cell (PWC)"
+sel_update_count = 1
+s.update_count = sel_update_count
+sel_update_count += 1
+s.vars[0] = 15
+symbol = s.symbols[0]
+symbol.direction=True
+symbol.dimension=1
+symbol.var=0
+symbol.relabel=False
+rhs = s.production_rules[0]
+rhs.symbols.extend([0])
+start = fs.service_state.index
+cursor = s.cursors[start]
+cursor.start_symbol = 0
+s.clients[client_id] = gradesta_pb2.Selection.PRIMARY
+send(m)
+cells = {}
+in_view = set()
+
+def mk_req():
+ m = gradesta_pb2.ClientState()
+ m.service_state.round.client_of_origin=client_id
+ global request
+ m.service_state.round.request = request
+ request += 1
+ return m
+
+
+def set_cursor(cell_id):
+ global start
+ old_start = start
+ start = cell_id
+ m=mk_req()
+ old_cursor = m.selections[selection_id].cursors[old_start]
+ old_cursor.deleted = True
+ cursor = m.selections[selection_id].cursors[start]
+ cursor.start_symbol = 0
+ global sel_update_count
+ m.selections[selection_id].update_count = sel_update_count
+ sel_update_count += 1
+ send(m)
+
+def update_view():
+ while True:
+  global start
+  m = recv()
+  for center in m.selections[selection_id].cursors.keys():
+   start = center
+  if m.service_state.round.errors:
+   print(m.service_state.round.errors, '\n')
+  global cells
+  for cell_id, cell in m.service_state.cells.items():
+   cells[cell_id] = cell
+  global in_view
+  if m.selections[selection_id].cursors:
+   in_view = set()
+   for cell_id, _ in m.selections[selection_id].cursors[start].in_view.items():
+    in_view.add(cell_id)
+  print("-------------------------------------------\r")
+  i = start
+  while i in in_view:
+   cell = cells[i]
+   left = "▫"
+   right = "▫"
+   if 0 in cell.cell.forth:
+    right = "▹"
+   if 0 in cell.cell.back:
+    left = "◃"
+   print(left, cell.cell.data.decode("utf-8").replace("\n","\r\n").ljust(10), right, '\r')
+   if 1 in cell.cell.forth and cell.cell.forth[1].links:
+    i = cell.cell.forth[1].links[0].cell_id
+   else:
+    break
+  if 1 in cell.cell.forth and cell.cell.forth[1].links:
+   print("↓")
+
+t = threading.Thread(name='child procs', target=update_view, daemon=True)
+t.start()
+
+#http://code.activestate.com/recipes/134892/
+class _Getch:
+    """Gets a single character from standard input.  Does not echo to the
+screen."""
+    def __init__(self):
+        try:
+            self.impl = _GetchWindows()
+        except ImportError:
+            self.impl = _GetchUnix()
+
+    def __call__(self): return self.impl()
+
+
+class _GetchUnix:
+    def __init__(self):
+        import tty, sys
+
+    def __call__(self):
+        import sys, tty, termios
+        fd = sys.stdin.fileno()
+        old_settings = termios.tcgetattr(fd)
+        try:
+            tty.setraw(sys.stdin.fileno())
+            ch = sys.stdin.read(1)
+        finally:
+            termios.tcsetattr(fd, termios.TCSADRAIN, old_settings)
+        return ch
+
+
+class _GetchWindows:
+    def __init__(self):
+        import msvcrt
+
+    def __call__(self):
+        import msvcrt
+        return msvcrt.getch()
+
+
+getch = _Getch()
+
+while True:
+ char = getch()
+ center_cell = cells[start]
+ if ord(char) == 13:
+  m = mk_req()
+  m.service_state.cells[start].click_count = center_cell.click_count + 1
+  m.service_state.cells[start].update_count = center_cell.update_count + 1
+  send(m)
+ elif char == 'k': # up
+  links = center_cell.cell.back[1].links
+  if links:
+   set_cursor(links[0].cell_id)
+ elif char == 'j': # down
+  links = center_cell.cell.forth[1].links
+  if links:
+   set_cursor(links[0].cell_id)
+ elif char == 'h': # left
+  links = center_cell.cell.back[0].links
+  if links:
+   set_cursor(links[0].cell_id)
+ elif char == 'l': # right
+  links = center_cell.cell.forth[0].links
+  if links:
+   set_cursor(links[0].cell_id)
+ elif char == 'q':
+  sys.exit()
+ else:
+  print(char)

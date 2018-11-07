@@ -1,0 +1,117 @@
+#!/usr/bin/python3
+import gradesta
+import textgraph
+import os
+import sys
+
+class Square(gradesta.Obj):
+ def get_square(self):
+  return tg[self.id]
+
+class Intersection(gradesta.Cell):
+ obj_type = Square
+
+ def data(self):
+  return self.obj.get_square().text.encode("utf-8")
+
+ def down(self):
+  if self.obj.get_square().streets:
+   return Street.id(
+    obj=self.obj,
+    attrs={"i": 0},
+   )
+
+ def up(self):
+  if self.obj.get_square().incommingStreets:
+   return IncommingStreet.id(
+    obj=self.obj,
+    attrs={"i": 0},
+   )
+
+class Street(gradesta.Cell):
+ obj_type = Square
+
+ def get_street(self):
+  return self.obj.get_square().streets[self.a["i"]]
+
+ def data(self):
+  return self.get_street().name.encode("utf-8")
+
+ def down(self):
+  if self.a["i"] + 1 < len(self.obj.get_square().streets):
+   return Street.id(
+    obj=self.obj,
+    attrs={"i": self.a["i"] + 1,},
+   )
+
+ def up(self):
+  if self.a["i"] - 1 > 0:
+   return Street.id(
+    obj=self.obj,
+    attrs={"i": self.a["i"] - 1,},
+   )
+  else:
+   return Intersection.id(
+    obj=self.obj,
+   )
+
+ def right(self):
+  i = 0
+  for incomming in tg[self.get_street().destination].incommingStreets:
+   if incomming.origin == self.obj.id:
+    break
+   i += 1
+  return IncommingStreet.id(
+   obj_id=self.get_street().destination,
+   attrs={"i": i},
+  )
+
+class IncommingStreet(gradesta.Cell):
+ obj_type = Square
+
+ def get_street(self):
+  return self.obj.get_square().incommingStreets[self.a["i"]]
+
+ def data(self):
+  return self.get_street().name.encode("utf-8")
+
+ def up(self):
+  if self.a["i"] + 1 < len(self.obj.get_square().incommingStreets):
+   return IncommingStreet.id(
+    obj=self.obj,
+    attrs={"i": self.a["i"] + 1,},
+   )
+
+ def down(self):
+  if self.a["i"] - 1 > 0:
+   return IncommingStreet.id(
+    obj=self.obj,
+    attrs={"i": self.a["i"] - 1,},
+   )
+  else:
+   return Intersection.id(
+    obj=self.obj,
+   )
+
+ def left(self):
+  i = 0
+  for street in tg[self.get_street().origin].streets:
+   if street.destination == self.obj.id:
+    break
+   i += 1
+  return Street.id(
+   obj_id=self.get_street().origin,
+   attrs={"i": i},
+  )
+
+tg = textgraph.TextGraphFile(filename=sys.argv[1])
+gradesta.Server(
+ name="grtg",
+ source_url="http://git.hobbs.cz/?p=tg;a=summary",
+ index=Intersection.id(obj_id=0),
+ cell_types=(
+  Intersection,
+  Street,
+  IncommingStreet,
+ )
+).serve()

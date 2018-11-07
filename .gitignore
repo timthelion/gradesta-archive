@@ -7,3 +7,4 @@
 .#*
 *.xcf
 *.svg
+node_modules

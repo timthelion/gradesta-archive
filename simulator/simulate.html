@@ -1,0 +1,71 @@
+<html>
+<head>
+<link href="data:image/x-icon;base64,AAABAAEAEBAQAAEABAAoAQAAFgAAACgAAAAQAAAAIAAAAAEABAAAAAAAgAAAAAAAAAAAAAAAEAAAAAAAAAAAAAAA////AERpOgA5cCcA7vDtAF6jSABllFcAuuCvAK2trQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAFjMzMzMzNxARYzMzMzVBEEERYzMzNhERZxRGMzZxQEA2FER3cRSAgTNxgEEREIQBMzFIARERFEEzNhERARFAATMzYREBEAhBMzMzEYEBFEEzMzNhEQQRQDMzMzcRgEAAMzMzNhERgIEzMzMyERgEQDMzMzMRAEgEMzMzMxERAEEAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA" rel="icon" type="image/x-icon" />
+
+<meta charset="utf-8">
+<title> Simulation of gradesta protocol message passing patterns </title>
+<script type="text/javascript" src="../js/d3.v5.js"></script>
+<script type="text/javascript" src="../js/jquery-3.3.1.js"></script>
+<script type="text/javascript" src="../js/semantic.js"></script>
+<script type="text/javascript" src="../js/modified/utils.js"></script>
+<link rel="stylesheet" type="text/css" class="ui" href="../js/semantic.css">
+</head>
+<body>
+<h1><div  style="float:right;"> Gradesta Protocol Simulator</div>
+<a href="../dev-docs/docs.html" class="ui button">← Back to docs</a>
+ </h1>
+<h2 class="ui header">
+<div id="step-title"/>
+<div class="ui floated right label black" style="float:right;"  id="step-counter"></div>
+</h2>
+<div id="step">
+<svg width="720" height="180">
+</svg>
+</div>
+<div class="ui top attached tabular menu">
+  <a class="item" data-tab="contents">Contents</a>
+  <a class="item" data-tab="actors">Actor states</a>
+  <a class="item" data-tab="graph-views">Graph views</a>
+  <a class="item" data-tab="sockets" id="sockets-tab-btn">Socket messages</a>
+  <a class="item" data-tab="cursors">Cursors</a>
+  <a class="item" data-tab="protobuf-spec">Protobuf spec</a>
+  <a class="item" data-tab="docs">Docs</a>
+</div>
+<div class="ui bottom attached tab segment active" data-tab="contents">
+ <div class="ui ordered divided list" id="contents-tab">
+ </div>
+</div>
+<div class="ui bottom attached tab segment" data-tab="actors">
+ <div class="ui cards" id="actors-tab" >
+ </div>
+</div>
+
+<div class="ui bottom attached tab segment" data-tab="graph-views">
+ <div id="graph-views-tab" class="ui divided items">
+ </div>
+</div>
+
+<div class="ui bottom attached tab segment" data-tab="sockets">
+ <div class="ui cards" id="sockets-tab" >
+ </div>
+</div>
+
+<div class="ui bottom attached tab segment" data-tab="cursors">
+ <div class="ui cards" id="cursors-tab" >
+ </div>
+</div>
+
+<div class="ui bottom attached tab segment" data-tab="protobuf-spec">
+ <a class="ui floated right button black" style="float:right;" href="../dev-docs/spec.html"  target="_blank">Open in new Tab</a>
+ <iframe src="../dev-docs/spec.html" width = "100%" height="100%" scrolling="no"  frameBorder="0"></iframe>
+</div>
+<div class="ui bottom attached tab segment" data-tab="docs">
+ <a class="ui floated right button black" style="float:right;" href="../dev-docs/tgweb.html?tg=../src/gradesta.proto.tg#0"  target="_blank">Open in new Tab</a>
+ <iframe src="../dev-docs/tgweb.html?tg=../src/gradesta.proto.tg#0" width = "100%" height="100%" frameBorder="0"></iframe>
+</div>
+<script type="text/javascript" src="simulation-settings.js"></script>
+<script type="text/javascript" src="simulation-generator.js"></script>
+<script type="text/javascript" src="test.js"></script>
+<script type="text/javascript" src="simulation-player.js"></script>
+</body>
+</html>

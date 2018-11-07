@@ -1,0 +1,99 @@
+#!/usr/bin/python3
+import gradesta
+import os
+
+class Dir(gradesta.ListObj):
+ def load(self):
+  self.list = [(Head, {})]
+  try:
+   self.list += [(Entry, {'e': dir}) for dir in os.listdir(self.id)]
+  except PermissionError as e:
+   self.list += [(Err, {'msg': str(e)})]
+  self.open_files = {}
+
+
+class Head(gradesta.ListCell):
+ obj_type = Dir
+
+ def data(self):
+  return self.obj.id.encode("utf-8")
+
+ def left(self):
+  parent, me = os.path.split(self.obj.id)
+  if me:
+   return Entry.id(
+    obj_id=parent,
+    attrs={"e": me}
+   )
+
+class Entry(gradesta.ListCell):
+ obj_type = Dir
+
+ def data(self):
+  return self.a["e"].encode("utf-8")
+
+ def full_path(self):
+  return os.path.join(self.obj.id, self.a["e"])
+
+ def right(self):
+  if self.full_path() in self.obj.open_files:
+   return File.id(
+    obj=self.obj,
+    attrs={
+     "e":self.a["e"],
+     "full_path":self.full_path(),
+    },
+   )
+  elif os.path.isdir(self.full_path()):
+   return Head.id(
+    obj_id=self.full_path(),
+   )
+
+ def click(self):
+  print(self._r.click_count)
+  if self._r.click_count > 0 and self._r.click_count % 2 == 1:
+    try:
+     try:
+      with open(self.full_path(), "rb") as fd:
+       self.obj.open_files[self.full_path()] = fd.read()
+       self.obj.mark()
+     except IsADirectoryError:
+      pass
+    except PermissionError as e:
+     self.obj.open_files[self.full_path()] = str(e).encode("utf8")
+     self.obj.mark()
+  elif self.full_path() in self.obj.open_files:
+   del self.obj.open_files[self.full_path()]
+   self.obj.mark()
+
+
+class Err(gradesta.ListCell):
+ obj_type = Dir
+
+ def data(self):
+  return self.a["msg"].encode("utf-8")
+
+
+class File(gradesta.Cell):
+ obj_type = Dir
+
+ def data(self):
+  return self.obj.open_files[self.a["full_path"]]
+
+ def left(self):
+   return Entry.id(
+    obj=self.obj,
+    attrs={"e": self.a["e"],},
+   )
+
+gradesta.Server(
+ name="grfs",
+ source_url="http://git.hobbs.cz/?p=tg;a=summary",
+ index=Head.id(obj_id="/"),
+ cell_types=(
+  Head,
+  Entry,
+  File,
+  Err,
+ )
+).serve()

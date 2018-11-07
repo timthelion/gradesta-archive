@@ -3,10 +3,7 @@
  "access-working-directory": true,
  "executable": "/bin/bash",
  "maintainer": "Timothy Hobbs <timothyhobbs@seznam.cz>",
- "gui": {
-  "clipboard": true,
-  "cursors": false,
-  "system-tray": false
- },
- "basic-common-permissions": true
+ "x11": true,
+ "basic-common-permissions": true,
+ "allow-network-access": true
 }

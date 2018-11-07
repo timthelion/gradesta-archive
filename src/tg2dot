@@ -1,0 +1,122 @@
+#!/usr/bin/python3
+#
+# Authors: Timothy Hobbs
+# Copyright years: 2016
+#
+# Description:
+#
+# tg2dot converts tg files to graphviz dot files.
+#
+########################################################################
+#
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <http://www.gnu.org/licenses/>.
+from textgraph import *
+import optparse
+import subprocess
+import sys
+import os
+
+if __name__ == "__main__":
+  parser = optparse.OptionParser(usage = "tg2dot",description = "Translate a text graph file to dot file.")
+  parser.add_option("--display", dest="display",action="store_true",default=False,help="Display the graph using graphviz.")
+  parser.add_option("--horizontal", dest="horizontal",action="store_true",default=False,help="Layout the graph flowing left to right rather than top to bottom.")
+  parser.add_option("--no-output", dest="noOutput",action="store_true",default=False,help="Don't print anything to stdout. To be used with --display")
+  parser.add_option("--just-dots", dest="just_dots",action="store_true",default=False,help="Don't show labels, just the shape of the graph.")
+  parser.add_option("--clip", dest="clip",type="int",default=None,help="Clip square text to a certain length.")
+  parser.add_option("--center", dest="center",type="int",default=None,help="The center square.")
+  parser.add_option("--no-center-highlight", dest="highlightCenter",action="store_false",default=True,help="Don't highlight center")
+  parser.add_option("--no-square-numbers", dest="squareNumbers",action="store_false",default=True,help="Don't include square numbers")
+  parser.add_option("--no-street-numbers", dest="streetNumbers",action="store_false",default=True,help="Don't include street numbers")
+  parser.add_option("--no-street-names", dest="streetNames",action="store_false",default=True,help="Don't include street names")
+  parser.add_option("--neighborhood", dest="neighborhoodLevel",type="int",default=None,help="Only show squares within the neighborhood of the center square. Set to an integer to specify the size of the neighborhood in terms of the maximum distance from the center.")
+  parser.add_option("--downstream", dest="downstream",action="store_true",default=False,help="Only show squares which are downstream of the center.")
+  options,args = parser.parse_args(sys.argv[1:])
+  if "TG_CENTER" in os.environ:
+    try:
+      options.center = int(os.environ["TG_CENTER"])
+    except ValueError:
+      sys.exit("TG_CENTER env var set, but not a valid integer.")
+  tg = TextGraphFile(file=sys.stdin)
+  if options.center is not None and options.highlightCenter:
+    markedSquares = {options.center:{"style":"filled","fillcolor":"black","fontcolor":"white"}}
+  else:
+    markedSquares = {}
+  if options.neighborhoodLevel is None:
+    neighborhood,_ = tg.getNeighborhood(0)
+    edge = []
+  if options.downstream:
+    neighborhood = tg.getDownstream(options.center)
+    edge = []
+  if options.neighborhoodLevel is not None and options.center is not None:
+    neighborhood, edge = tg.getNeighborhood(options.center,options.neighborhoodLevel)
+  elif options.neighborhoodLevel is not None:
+    sys.exit("In order to use the neighborhood option you must set a center for your neighborhood with the --center flag.")
+  dot = "digraph graphname{\n"
+  if options.horizontal:
+    dot += "  rankdir=LR\n"
+  labels = ""
+  edges = ""
+  for square in neighborhood:
+    if square.text is not None:
+      markings = ",fontname = \"courier\""
+      if square.squareId in markedSquares:
+        for attr,value in markedSquares[square.squareId].items():
+          markings += "," + attr + " = " + value
+      if square.squareId in edge:
+        markings += ", color=grey"
+      if options.just_dots:
+        markings += ", shape=circle"
+      if options.clip is not None and len(square.text) > options.clip:
+        text = square.text[0:options.clip] + "\n..."
+      if options.just_dots:
+        text = ""
+      else:
+        text = square.text
+      labelstring = ""
+      if options.just_dots:
+        labelstring += str(square.squareId)
+      else:
+        labelstring += '"' + text.replace('\\','\\\\').replace('\n','\\l').replace('"','\\"') + '\\l'
+        if options.squareNumbers:
+          labelstring += str(square.squareId)
+        labelstring += '\\r\"'
+      labels += str(square.squareId)+"[shape=rect ordering=out"
+      labels += " label="+labelstring
+      labels += markings+"]\n"
+      n = 0
+      for street in square.streets:
+        edgeColoring = ""
+        if street.destination in edge or street.origin in edge:
+          edgeColoring = ",style = dotted, color = grey"
+        if street.destination == options.center and options.highlightCenter:
+          edgeColoring = ",style = bold, color = red"
+        if street.origin == options.center and options.highlightCenter:
+          edgeColoring = ",style = bold, color = green"
+        labelstring = ""
+        if options.streetNumbers:
+          labelstring += str(n)+":"
+        if options.streetNames:
+          labelstring += street.name.replace('\\','\\\\').replace('"','\\"')
+        edges += str(square.squareId)+" -> "+str(street.destination)
+        if not options.just_dots:
+          edges += " [label=\""+labelstring+'" '+edgeColoring+"]"
+        edges += "\n"
+        n += 1
+  dot += labels
+  dot += edges
+  dot += "}"
+  if options.display:
+    stdout,stderr = subprocess.Popen(["dot","-T","xlib","/dev/stdin"],stdin=subprocess.PIPE).communicate(input=dot.encode("utf-8"))
+  if not options.noOutput:
+    sys.stdout.write(dot)
