@@ -1,0 +1,7 @@
+[package]
+name = "gradestalib"
+version = "0.1.0"
+authors = ["subuser"]
+
+[dependencies]
+protobuf = "2.1.4"
