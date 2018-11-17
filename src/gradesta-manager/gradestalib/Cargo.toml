@@ -1,7 +1,13 @@
 [package]
 name = "gradestalib"
 version = "0.1.0"
-authors = ["subuser"]
+authors = ["Timothy Hobbs"]
+build = "build.rs"
 
 [dependencies]
-protobuf = "2.1.4"
+quick-protobuf = "0.6.2"
+zmq = "0.8"
+maplit = "1.0.1"
+
+[build-dependencies]
+pb-rs = "0.7.0"
