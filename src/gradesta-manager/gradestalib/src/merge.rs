@@ -52,6 +52,69 @@ macro_rules! merge_value_maps {
  }
 }
 
+
+/// # Merge set of updates into cell runtime
+///
+/// ```
+/// # #[macro_use] extern crate maplit;
+/// # extern crate gradestalib;
+/// # use gradestalib::merge::merge_cell_runtime;
+/// # use gradestalib::gradesta;
+/// # use gradestalib::defaults;
+///
+/// let input = gradesta::CellRuntime{
+///  update_count: Some(3),
+///  click_count: Some(2),
+///  cell_runtime_modes: hashmap!{
+///   2 => gradesta::Mode{
+///    read: true,
+///    write: false,
+///    executable: false,
+///    dynamic: false,
+///   }
+///  },
+/// ..defaults::blank_cell_runtime()
+/// };
+/// let mut old = gradesta::CellRuntime{
+///  update_count: Some(2),
+///  click_count: Some(1),
+///  creation_id: Some(String::from("foo")),
+///  cell_runtime_modes: hashmap!{
+///   1 => gradesta::Mode{
+///    read: true,
+///    write: true,
+///    executable: false,
+///    dynamic: false,
+///   }
+///  },
+/// ..defaults::blank_cell_runtime()
+/// };
+///
+/// merge_cell_runtime(&input, &mut old);
+/// 
+/// let result = gradesta::CellRuntime{
+///  update_count: Some(3),
+///  click_count: Some(2),
+///  creation_id: Some(String::from("foo")),
+///  cell_runtime_modes: hashmap!{
+///   1 => gradesta::Mode{
+///    read: true,
+///    write: true,
+///    executable: false,
+///    dynamic: false,
+///   },
+///   2 => gradesta::Mode{
+///    read: true,
+///    write: false,
+///    executable: false,
+///    dynamic: false,
+///   }
+///  },
+/// ..defaults::blank_cell_runtime()
+/// };
+///
+/// assert_eq!(old, result);
+/// ```
 pub fn merge_cell_runtime(input: &gradesta::CellRuntime, old: &mut gradesta::CellRuntime) {
  set_if_some![input, old,
   cell,
