@@ -1,7 +1,12 @@
 #[macro_use] extern crate maplit;
-extern crate quick_protobuf;
+extern crate prost;
+#[macro_use] extern crate prost_derive;
+
+pub mod gradesta {
+ include!(concat!(env!("OUT_DIR"), "/gradesta.rs"));
+}
+
 pub mod merge;
-pub mod gradesta;
 
 #[cfg(test)]
 mod tests {

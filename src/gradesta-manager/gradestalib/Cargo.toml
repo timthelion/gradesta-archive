@@ -8,6 +8,9 @@ build = "build.rs"
 quick-protobuf = "0.6.2"
 zmq = "0.8"
 maplit = "1.0.1"
+bytes = "0.4.10"
+prost = "0.4.0"
+prost-derive = "0.4.0"
 
 [build-dependencies]
-pb-rs = "0.7.0"
+prost-build = "0.4.0"

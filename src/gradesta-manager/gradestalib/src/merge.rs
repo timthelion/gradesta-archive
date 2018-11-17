@@ -1,7 +1,6 @@
 use gradesta;
 use std::hash::Hash;
 use std::collections::HashMap;
-use std::borrow::Cow;
 
 /// # Merge input map into another HashMap
 /// ```
@@ -38,8 +37,8 @@ pub fn merge_map<A: Hash + Eq + Clone, B: Clone>(input: &HashMap<A, B>, old: &mu
 macro_rules! set_if_some {
  ($input:ident, $old:ident, $( $x:ident ),* ) => {
    $(
-    if let Some($x) = $input.$x {
-     $old.$x = Some($x);
+    if let Some($x) = &$input.$x {
+     $old.$x = Some($x.clone());
     }
    )*
  }
@@ -55,13 +54,11 @@ macro_rules! merge_value_maps {
 
 pub fn merge_cell_runtime(input: &gradesta::CellRuntime, old: &mut gradesta::CellRuntime) {
  set_if_some![input, old,
+  cell,
   update_count, 
   click_count,
-  deleted];
-
- if let Some(ref creation_id) = input.creation_id{
-  old.creation_id = Some(Cow::from(creation_id.to_string()));
- }
+  deleted,
+  creation_id];
 
  merge_value_maps![input, old,
   cell_runtime_modes,

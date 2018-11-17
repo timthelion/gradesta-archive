@@ -1,16 +1,7 @@
-use std::env;
-use std::process::Command;
+extern crate prost_build;
 
 fn main() {
- match env::var("HOME") {
-  Ok(home) => {
-   Command::new(format!("{}/.cargo/bin/pb-rs", home))
-           .args(&["../../gradesta.proto"])
-           .output()
-           .expect("failed to compile protobuf file with pb-rs");
-           ()
-  },
-  Err(e) =>
-   println!("$HOME not configured correctly {}", e),
- }
+ prost_build::compile_protos(
+  &["../../gradesta.proto"],
+  &["../../"]).unwrap();
 }
