@@ -140,7 +140,7 @@ pub fn merge_cell_runtimes(input: &gradesta::CellRuntime, old: &mut gradesta::Ce
 ///
 /// let input = gradesta::ActorMetadata {
 ///  name: Some(String::from("Bob")),
-///  ..defaults::blank_actor_metadata
+///  ..defaults::blank_actor_metadata()
 /// };
 ///
 /// let mut old = gradesta::ActorMetadata {
@@ -189,8 +189,7 @@ pub fn merge_actor_metadata(input: &gradesta::ActorMetadata, old: &mut gradesta:
 ///    }
 ///  },
 ///  index: Some(String::from("foo")),
-///  round: Some(defaults::blank_round),
-///  capcha_servers: vec![String::from("nop")],
+///  round: Some(defaults::blank_round()),
 ///  ..defaults::blank_service_state()
 /// };
 ///
@@ -206,7 +205,6 @@ pub fn merge_actor_metadata(input: &gradesta::ActorMetadata, old: &mut gradesta:
 ///    }
 ///  },
 ///  index: Some(String::from("bar")),
-///  capcha_servers: vec![String::from("baf")],
 ///  ..defaults::blank_service_state()
 /// };
 ///
@@ -224,7 +222,6 @@ pub fn merge_actor_metadata(input: &gradesta::ActorMetadata, old: &mut gradesta:
 ///    }
 ///  },
 ///  index: Some(String::from("foo")),
-///  capcha_servers: vec![String::from("baf"), String::from("nop")],
 ///  ..defaults::blank_service_state()
 /// };
 ///
@@ -234,9 +231,7 @@ pub fn merge_service_states(input: &gradesta::ServiceState, old: &mut gradesta::
  set_if_some![input, old,
   index,
   on_disk_state,
-  identity_challenge,
-  user_public_key,
-  user_signature
+  user_public_key
  ];
  merge_value_maps![input, old,
   log,
@@ -244,9 +239,6 @@ pub fn merge_service_states(input: &gradesta::ServiceState, old: &mut gradesta::
   user_attrs,
   service_state_modes
  ];
- for capcha_server in input.capcha_servers.clone() {
-  old.capcha_servers.push(capcha_server);
- }
  for (cell_id, cell_runtime) in input.cells.clone() {
   let mut ins = false;
   match old.cells.get_mut(&cell_id) {
@@ -262,4 +254,5 @@ pub fn merge_service_states(input: &gradesta::ServiceState, old: &mut gradesta::
   }
  }
 }
+
 
