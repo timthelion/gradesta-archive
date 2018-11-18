@@ -2,7 +2,7 @@ use gradesta;
 use std::collections::HashMap;
 
 pub fn blank_cell_runtime() -> gradesta::CellRuntime {
- gradesta::CellRuntime{
+ gradesta::CellRuntime {
   cell: None,
   update_count: None,
   click_count: None,
@@ -15,3 +15,9 @@ pub fn blank_cell_runtime() -> gradesta::CellRuntime {
   back_link_modes: HashMap::new(),
  }
 }
+
+pub const blank_actor_metadata: gradesta::ActorMetadata = gradesta::ActorMetadata {
+ name: None,
+ source_url: None,
+ privacy_policy: None,
+};

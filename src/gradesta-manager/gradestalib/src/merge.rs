@@ -92,7 +92,7 @@ macro_rules! merge_value_maps {
 ///
 /// merge_cell_runtime(&input, &mut old);
 /// 
-/// let result = gradesta::CellRuntime{
+/// let expected = gradesta::CellRuntime{
 ///  update_count: Some(3),
 ///  click_count: Some(2),
 ///  creation_id: Some(String::from("foo")),
@@ -113,7 +113,7 @@ macro_rules! merge_value_maps {
 /// ..defaults::blank_cell_runtime()
 /// };
 ///
-/// assert_eq!(old, result);
+/// assert_eq!(old, expected);
 /// ```
 pub fn merge_cell_runtime(input: &gradesta::CellRuntime, old: &mut gradesta::CellRuntime) {
  set_if_some![input, old,
@@ -129,6 +129,41 @@ pub fn merge_cell_runtime(input: &gradesta::CellRuntime, old: &mut gradesta::Cel
   link_modes,
   for_link_modes,
   back_link_modes];
+}
+
+/// # Merge actor metadata
+/// ```
+/// # extern crate gradestalib;
+/// # use gradestalib::merge::merge_actor_metadata;
+/// # use gradestalib::gradesta;
+/// # use gradestalib::defaults;
+///
+/// let input = gradesta::ActorMetadata {
+///  name: Some(String::from("Bob")),
+///  ..defaults::blank_actor_metadata
+/// };
+///
+/// let mut old = gradesta::ActorMetadata {
+///  name: Some(String::from("Alice")),
+///  source_url: Some(String::from("gitlab.com/example/cool-service")),
+///  privacy_policy: Some(String::from("Lol, privacy is so 20th century."))
+/// };
+///
+/// merge_actor_metadata(&input, &mut old);
+///
+/// let expected = gradesta::ActorMetadata {
+///  name: Some(String::from("Bob")),
+///  source_url: Some(String::from("gitlab.com/example/cool-service")),
+///  privacy_policy: Some(String::from("Lol, privacy is so 20th century."))
+/// };
+///
+/// assert_eq!(old, expected);
+///
+pub fn merge_actor_metadata(input: &gradesta::ActorMetadata, old: &mut gradesta::ActorMetadata) {
+ set_if_some![input, old,
+  name,
+  source_url,
+  privacy_policy];
 }
 
 #[cfg(test)]
