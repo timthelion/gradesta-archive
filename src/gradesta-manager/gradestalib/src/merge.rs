@@ -58,7 +58,7 @@ macro_rules! merge_value_maps {
 /// ```
 /// # #[macro_use] extern crate maplit;
 /// # extern crate gradestalib;
-/// # use gradestalib::merge::merge_cell_runtime;
+/// # use gradestalib::merge::merge_cell_runtimes;
 /// # use gradestalib::gradesta;
 /// # use gradestalib::defaults;
 ///
@@ -90,7 +90,7 @@ macro_rules! merge_value_maps {
 /// ..defaults::blank_cell_runtime()
 /// };
 ///
-/// merge_cell_runtime(&input, &mut old);
+/// merge_cell_runtimes(&input, &mut old);
 /// 
 /// let expected = gradesta::CellRuntime{
 ///  update_count: Some(3),
@@ -115,7 +115,7 @@ macro_rules! merge_value_maps {
 ///
 /// assert_eq!(old, expected);
 /// ```
-pub fn merge_cell_runtime(input: &gradesta::CellRuntime, old: &mut gradesta::CellRuntime) {
+pub fn merge_cell_runtimes(input: &gradesta::CellRuntime, old: &mut gradesta::CellRuntime) {
  set_if_some![input, old,
   cell,
   update_count, 
@@ -166,11 +166,100 @@ pub fn merge_actor_metadata(input: &gradesta::ActorMetadata, old: &mut gradesta:
   privacy_policy];
 }
 
-#[cfg(test)]
-mod tests {
-    #[test]
-    fn other_test() {
-        assert_eq!(2 + 2, 4);
-    }
+/// # Merge service state
+///
+/// Merges all but the following fields which are never sent by the service.
+///
+///  - new_cells
+///  - in_view
+///  - round
+///
+/// ```
+/// # #[macro_use] extern crate maplit;
+/// # extern crate gradestalib;
+/// # use gradestalib::merge::merge_service_states;
+/// # use gradestalib::gradesta;
+/// # use gradestalib::defaults;
+/// 
+/// let input = gradesta::ServiceState {
+///  cells: hashmap!{
+///   String::from("id-abc") => gradesta::CellRuntime {
+///      update_count: Some(2),
+///      ..defaults::blank_cell_runtime()
+///    }
+///  },
+///  index: Some(String::from("foo")),
+///  round: Some(defaults::blank_round),
+///  capcha_servers: vec![String::from("nop")],
+///  ..defaults::blank_service_state()
+/// };
+///
+/// let mut old = gradesta::ServiceState {
+///  cells: hashmap!{
+///   String::from("id-abc") => gradesta::CellRuntime {
+///      update_count: Some(1),
+///      ..defaults::blank_cell_runtime()
+///    },
+///   String::from("id-efg") => gradesta::CellRuntime {
+///      update_count: Some(1),
+///      ..defaults::blank_cell_runtime()
+///    }
+///  },
+///  index: Some(String::from("bar")),
+///  capcha_servers: vec![String::from("baf")],
+///  ..defaults::blank_service_state()
+/// };
+///
+/// merge_service_states(&input, &mut old);
+///
+/// let expected = gradesta::ServiceState {
+///  cells: hashmap!{
+///   String::from("id-abc") => gradesta::CellRuntime {
+///      update_count: Some(2),
+///      ..defaults::blank_cell_runtime()
+///    },
+///   String::from("id-efg") => gradesta::CellRuntime {
+///      update_count: Some(1),
+///      ..defaults::blank_cell_runtime()
+///    }
+///  },
+///  index: Some(String::from("foo")),
+///  capcha_servers: vec![String::from("baf"), String::from("nop")],
+///  ..defaults::blank_service_state()
+/// };
+///
+/// assert_eq!(old, expected);
+/// ```
+pub fn merge_service_states(input: &gradesta::ServiceState, old: &mut gradesta::ServiceState) {
+ set_if_some![input, old,
+  index,
+  on_disk_state,
+  identity_challenge,
+  user_public_key,
+  user_signature
+ ];
+ merge_value_maps![input, old,
+  log,
+  requested_user_attrs,
+  user_attrs,
+  service_state_modes
+ ];
+ for capcha_server in input.capcha_servers.clone() {
+  old.capcha_servers.push(capcha_server);
+ }
+ for (cell_id, cell_runtime) in input.cells.clone() {
+  let mut ins = false;
+  match old.cells.get_mut(&cell_id) {
+   Some(mut old_cell_runtime) => {
+    merge_cell_runtimes(&cell_runtime, &mut old_cell_runtime);
+   },
+   None => {
+    ins = true;
+   }
+  }
+  if ins {
+    old.cells.insert(cell_id, cell_runtime);
+  }
+ }
 }
- 
+
