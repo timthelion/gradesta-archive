@@ -70,7 +70,8 @@ pub fn blank_mode() -> gradesta::Mode {
   read: false,
   write: false,
   executable: false,
-  dynamic: false,
+  dynamic: None,
+  emulated: None
  }
 }
 
@@ -167,5 +168,84 @@ pub fn blank_client_state() -> gradesta::ClientState {
   identity_challenge: None,
   user_signature: None,
   capcha_servers: Vec::new(),
+ }
+}
+
+pub fn rw_mode() -> gradesta::Mode {
+ gradesta::Mode {
+  read: true,
+  write: true,
+  ..blank_mode()
+ }
+}
+
+pub fn ro_mode() -> gradesta::Mode {
+ gradesta::Mode {
+  read: true,
+  ..blank_mode()
+ }
+}
+
+pub fn default_cell_runtime_template() -> gradesta::CellRuntime {
+ gradesta::CellRuntime {
+  update_count: Some(0),
+  click_count: Some(0),
+  deleted: Some(false),
+  cell_runtime_modes: hashmap! {
+   1 => rw_mode(),
+   2 => rw_mode(),
+   3 => rw_mode(),
+   4 => rw_mode(),
+   5 => rw_mode(),
+   6 => ro_mode(),
+   7 => ro_mode(),
+   8 => ro_mode(),
+   9 => ro_mode(),
+   10 => ro_mode()
+  },
+  cell_modes: hashmap! {
+   1 => rw_mode(),
+   2 => ro_mode(),
+   3 => ro_mode(),
+   4 => blank_mode(),
+   5 => rw_mode(),
+   6 => rw_mode(),
+   200 => blank_mode()
+  },
+  link_modes: hashmap! {
+   1 => blank_mode(),
+   2 => blank_mode(),
+   3 => rw_mode()
+  },
+  for_link_modes: hashmap! {
+   0 => rw_mode(),
+   1 => rw_mode()
+  },
+  back_link_modes: hashmap! {
+   0 => rw_mode(),
+   1 => rw_mode()
+  },
+  ..blank_cell_runtime()
+ }
+}
+
+pub fn default_service_state() -> gradesta::ServiceState{
+ gradesta::ServiceState {
+  on_disk_state: gradesta::service_state::on_disk_state::SAVED,
+  cell_template: Some(default_cell_runtime_template()),
+  service_state_modes: hashmap! {
+   1 => rw_mode(),
+   2 => rw_mode(),
+   4 => ro_mode(),
+   5 => ro_mode(),
+   7 => ro_mode(),
+   8 => ro_mode(),
+   9 => ro_mode(),
+   10 => blank_mode(),
+   11 => blank_mode(),
+   12 => blank_mode(),
+   13 => ro_mode()
+  },
+  ..blank_service_state()
  }
 }

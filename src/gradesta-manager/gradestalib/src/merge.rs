@@ -66,12 +66,8 @@ macro_rules! merge_value_maps {
 ///  update_count: Some(3),
 ///  click_count: Some(2),
 ///  cell_runtime_modes: hashmap!{
-///   2 => gradesta::Mode{
-///    read: true,
-///    write: false,
-///    executable: false,
-///    dynamic: false,
-///   }
+///   2 => defaults::rw_mode()
+///   3 => defaults::rw_mode()
 ///  },
 /// ..defaults::blank_cell_runtime()
 /// };
@@ -80,12 +76,8 @@ macro_rules! merge_value_maps {
 ///  click_count: Some(1),
 ///  creation_id: Some(String::from("foo")),
 ///  cell_runtime_modes: hashmap!{
-///   1 => gradesta::Mode{
-///    read: true,
-///    write: true,
-///    executable: false,
-///    dynamic: false,
-///   }
+///   1 => defaults::ro_mode()
+///   2 => defaults::ro_mode()
 ///  },
 /// ..defaults::blank_cell_runtime()
 /// };
@@ -97,18 +89,9 @@ macro_rules! merge_value_maps {
 ///  click_count: Some(2),
 ///  creation_id: Some(String::from("foo")),
 ///  cell_runtime_modes: hashmap!{
-///   1 => gradesta::Mode{
-///    read: true,
-///    write: true,
-///    executable: false,
-///    dynamic: false,
-///   },
-///   2 => gradesta::Mode{
-///    read: true,
-///    write: false,
-///    executable: false,
-///    dynamic: false,
-///   }
+///   1 => defaults::ro_mode()
+///   2 => defaults::rw_mode()
+///   3 => defaults::rw_mode()
 ///  },
 /// ..defaults::blank_cell_runtime()
 /// };
