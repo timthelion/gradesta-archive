@@ -19,7 +19,7 @@ use std::collections::HashMap;
 /// };
 ///
 /// merge_map(&input, &mut old);
-/// 
+///
 /// let result = hashmap!{
 ///   "foo" => "bar",
 ///   "bin" => "baz",
@@ -31,7 +31,7 @@ use std::collections::HashMap;
 pub fn merge_map<A: Hash + Eq + Clone, B: Clone>(input: &HashMap<A, B>, old: &mut HashMap<A, B>) {
  for (key, value) in input.iter() {
   old.insert(key.clone(), value.clone());
- } 
+ }
 }
 
 macro_rules! set_if_some {
@@ -83,7 +83,7 @@ macro_rules! merge_value_maps {
 /// };
 ///
 /// merge_cell_runtimes(&input, &mut old);
-/// 
+///
 /// let expected = gradesta::CellRuntime{
 ///  update_count: Some(3),
 ///  click_count: Some(2),
@@ -101,7 +101,7 @@ macro_rules! merge_value_maps {
 pub fn merge_cell_runtimes(input: &gradesta::CellRuntime, old: &mut gradesta::CellRuntime) {
  set_if_some![input, old,
   cell,
-  update_count, 
+  update_count,
   click_count,
   deleted,
   creation_id];
@@ -149,7 +149,7 @@ pub fn merge_actor_metadata(input: &gradesta::ActorMetadata, old: &mut gradesta:
   privacy_policy];
 }
 
-/// # Merge service state
+/// # Merge service states
 ///
 /// Merges all but the following fields which are never sent by the service.
 ///
@@ -163,7 +163,7 @@ pub fn merge_actor_metadata(input: &gradesta::ActorMetadata, old: &mut gradesta:
 /// # use gradestalib::merge::merge_service_states;
 /// # use gradestalib::gradesta;
 /// # use gradestalib::defaults;
-/// 
+///
 /// let input = gradesta::ServiceState {
 ///  cells: hashmap!{
 ///   String::from("id-abc") => gradesta::CellRuntime {
@@ -238,4 +238,139 @@ pub fn merge_service_states(input: &gradesta::ServiceState, old: &mut gradesta::
  }
 }
 
+/// #Merge Clients
+///
+/// ```
+/// # extern crate gradestalib;
+/// # use gradestalib::merge::merge_client;
+/// # use gradestalib::gradesta;
+///
+/// let input = gradesta::Client {
+///  status: gradesta::Client::Status::Normal,
+///  metadata: gradesta::ActorMetadata {
+///   name: from::String("Henry")
+///  }
+/// };
+/// let mut old = gradesta::Client {
+///  status: gradesta::Client::Status::INITIALIZING,
+///  metadata: gradesta::ActorMetadata {
+///   source_url: from::String("example.com/src")
+///  }
+/// };
+///
+/// merge_clients(&input, &mut old);
+///
+/// let expected = gradesta::Client {
+///  status: gradesta::Client::Status::Normal,
+///  metadata: gradesta::ActorMetadata {
+///   name: from::String("Henry"),
+///   source_url: from::String("example.com/src")
+///  }
+/// };
+///
+/// assert_eq!(old, expected);
+/// ```
+pub fn merge_clients(input: &gradesta::Client, old: &mut gradesta::Client) {
+ set_if_some!(input, old,
+  status
+ );
+ if let Some(metadata) = input.metadata{
+  merge_actor_metadata(&metadata, &mut old.metadata);
+ }
+}
+
+/// #Merge Managers
+///
+/// ```
+/// # extern crate gradestalib;
+/// # use gradestalib::merge::merge_managers;
+/// # use gradestalib::gradesta;
+/// let input = gradesta::Manager {
+///  metadata: gradesta::ActorMetadata {
+///   name: from::String("Henry")
+///  }
+/// };
+/// let mut old = gradesta::Manager {
+///  metadata: gradesta::ActorMetadata {
+///   source_url: from::String("example.com/src")
+///  }
+/// };
+///
+/// merge_managers(&input, &mut old);
+///
+/// let expected = gradesta::Manager {
+///  status: gradesta::Client::Status::Normal,
+///  metadata: gradesta::ActorMetadata {
+///   name: from::String("Henry"),
+///   source_url: from::String("example.com/src")
+///  }
+/// };
+///
+/// assert_eq!(old, expected);
+/// ```
+pub fn merge_managers(input: &gradesta::Manager, old: &mut gradesta::Manager) {
+ if let Some(metadata) = input.metadata{
+  merge_actor_metadata(&metadata, &mut old.metadata);
+ }
+}
+
+/// # Merge selections
+///
+/// ```
+/// # #[macro_use] extern crate maplit;
+/// # extern crate gradestalib;
+/// # use gradestalib::merge::merge_selecitons;
+/// # use gradestalib::gradesta;
+/// # use gradestalib::defaults;
+///
+/// let input = gradesta::Selection {
+///  name: from::String("Lary"),
+///  update_count: 3,
+///  cells: hashmap!{
+///   String::from("id-abc") => gradesta::CellRuntime {
+///      update_count: Some(2),
+///      ..defaults::blank_cell_runtime()
+///    }
+///  },
+///  index: Some(String::from("foo")),
+///  round: Some(defaults::blank_round()),
+///  ..defaults::blank_service_state()
+/// };
+///
+/// let mut old = gradesta::ServiceState {
+///  cells: hashmap!{
+///   String::from("id-abc") => gradesta::CellRuntime {
+///      update_count: Some(1),
+///      ..defaults::blank_cell_runtime()
+///    },
+///   String::from("id-efg") => gradesta::CellRuntime {
+///      update_count: Some(1),
+///      ..defaults::blank_cell_runtime()
+///    }
+///  },
+///  index: Some(String::from("bar")),
+///  ..defaults::blank_service_state()
+/// };
+///
+/// merge_service_states(&input, &mut old);
+///
+/// let expected = gradesta::ServiceState {
+///  cells: hashmap!{
+///   String::from("id-abc") => gradesta::CellRuntime {
+///      update_count: Some(2),
+///      ..defaults::blank_cell_runtime()
+///    },
+///   String::from("id-efg") => gradesta::CellRuntime {
+///      update_count: Some(1),
+///      ..defaults::blank_cell_runtime()
+///    }
+///  },
+///  index: Some(String::from("foo")),
+///  ..defaults::blank_service_state()
+/// };
+///
+/// assert_eq!(old, expected);
+/// ```
+pub fn merge_service_states(input: &gradesta::ServiceState, old: &mut gradesta::ServiceState) {
+ set_if_some![input, old,
 
