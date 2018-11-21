@@ -69,7 +69,7 @@ macro_rules! merge_value_maps {
 ///   2 => defaults::rw_mode(),
 ///   3 => defaults::rw_mode()
 ///  },
-/// ..defaults::blank_cell_runtime()
+/// ..Default::default()
 /// };
 /// let mut old = gradesta::CellRuntime{
 ///  update_count: 2,
@@ -79,7 +79,7 @@ macro_rules! merge_value_maps {
 ///   1 => defaults::ro_mode(),
 ///   2 => defaults::ro_mode()
 ///  },
-/// ..defaults::blank_cell_runtime()
+/// ..Default::default()
 /// };
 ///
 /// merge_cell_runtimes(&input, &mut old);
@@ -93,7 +93,7 @@ macro_rules! merge_value_maps {
 ///   2 => defaults::rw_mode(),
 ///   3 => defaults::rw_mode()
 ///  },
-/// ..defaults::blank_cell_runtime()
+/// ..Default::default()
 /// };
 ///
 /// assert_eq!(old, expected);
@@ -125,7 +125,7 @@ pub fn merge_cell_runtimes(input: &gradesta::CellRuntime, old: &mut gradesta::Ce
 ///
 /// let input = gradesta::ActorMetadata {
 ///  name: Some(String::from("Bob")),
-///  ..defaults::blank_actor_metadata()
+///  ..Default::default()
 /// };
 ///
 /// let mut old = gradesta::ActorMetadata {
@@ -170,27 +170,27 @@ pub fn merge_actor_metadata(input: &gradesta::ActorMetadata, old: &mut gradesta:
 ///  cells: hashmap!{
 ///   String::from("id-abc") => gradesta::CellRuntime {
 ///      update_count: 2,
-///      ..defaults::blank_cell_runtime()
+///      ..Default::default()
 ///    }
 ///  },
 ///  index: Some(String::from("foo")),
-///  round: Some(defaults::blank_round()),
-///  ..defaults::blank_service_state()
+///  round: Some(Default::default()),
+///  ..Default::default()
 /// };
 ///
 /// let mut old = gradesta::ServiceState {
 ///  cells: hashmap!{
 ///   String::from("id-abc") => gradesta::CellRuntime {
 ///      update_count: 1,
-///      ..defaults::blank_cell_runtime()
+///      ..Default::default()
 ///    },
 ///   String::from("id-efg") => gradesta::CellRuntime {
 ///      update_count: 1,
-///      ..defaults::blank_cell_runtime()
+///      ..Default::default()
 ///    }
 ///  },
 ///  index: Some(String::from("bar")),
-///  ..defaults::blank_service_state()
+///  ..Default::default()
 /// };
 ///
 /// merge_service_states(&input, &mut old);
@@ -199,15 +199,15 @@ pub fn merge_actor_metadata(input: &gradesta::ActorMetadata, old: &mut gradesta:
 ///  cells: hashmap!{
 ///   String::from("id-abc") => gradesta::CellRuntime {
 ///      update_count: 2,
-///      ..defaults::blank_cell_runtime()
+///      ..Default::default()
 ///    },
 ///   String::from("id-efg") => gradesta::CellRuntime {
 ///      update_count: 1,
-///      ..defaults::blank_cell_runtime()
+///      ..Default::default()
 ///    }
 ///  },
 ///  index: Some(String::from("foo")),
-///  ..defaults::blank_service_state()
+///  ..Default::default()
 /// };
 ///
 /// assert_eq!(old, expected);
