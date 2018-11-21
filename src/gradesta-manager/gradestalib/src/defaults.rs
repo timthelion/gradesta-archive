@@ -4,7 +4,7 @@ use std::collections::HashMap;
 
 pub fn blank_cell_runtime() -> gradesta::CellRuntime {
  gradesta::CellRuntime {
-  ..default::Default()
+  ..Default::default()
  }
 }
 
@@ -17,30 +17,11 @@ pub fn blank_actor_metadata() -> gradesta::ActorMetadata {
 }
 
 pub fn blank_round() -> gradesta::Round{
- gradesta::Round {
-  client_of_origin: None,
-  errors: None,
-  request: None,
-  full_sync: None,
- }
+ Default::default()
 }
 
 pub fn blank_service_state() -> gradesta::ServiceState {
- gradesta::ServiceState {
-  cells: HashMap::new(),
-  new_cells: Vec::new(),
-  in_view: HashMap::new(),
-  index: None,
-  on_disk_state: None,
-  round: None,
-  log: HashMap::new(),
-  metadata: None,
-  cell_template: None,
-  user_public_key: None,
-  requested_user_attrs: HashMap::new(),
-  user_attrs: HashMap::new(),
-  service_state_modes: HashMap::new(),
- }
+ Default::default()
 }
 
 pub fn blank_client() -> gradesta::Client {
@@ -57,40 +38,19 @@ pub fn blank_manager() -> gradesta::Manager {
 }
 
 pub fn blank_mode() -> gradesta::Mode {
- gradesta::Mode {
-  read: false,
-  write: false,
-  executable: false,
-  dynamic: None,
-  emulated: None
- }
+ Default::default()
 }
 
 pub fn blank_cell() -> gradesta::Cell {
- gradesta::Cell {
-  data: None,
-  encoding: None,
-  mime: None,
-  tags: Vec::new(),
-  forth: HashMap::new(),
-  back: HashMap::new(),
-  coords: HashMap::new()
- }
+ Default::default()
 }
 
 pub fn blank_link() -> gradesta::Link {
- gradesta::Link {
-  service_id: None,
-  path: None,
-  cell_id: String::from(""),
- }
+ Default::default()
 }
 
 pub fn blank_placed_symbol() -> gradesta::PlacedSymbol {
- gradesta::PlacedSymbol {
-  vars: Vec::new(),
-  symbol_id: None
- }
+ Default::default()
 }
 
 pub fn blank_placed_symbols() -> gradesta::PlacedSymbols {
@@ -101,33 +61,15 @@ pub fn blank_placed_symbols() -> gradesta::PlacedSymbols {
 }
 
 pub fn blank_op() -> gradesta::Op {
- gradesta::Op {
-  index: None,
-  op: None,
-  checks: HashMap::new()
- }
+ Default::default()
 }
 
 pub fn blank_cursor() -> gradesta::Cursor{
- gradesta::Cursor {
-  los: None,
-  var_overrides: HashMap::new(),
-  selections: HashMap::new(),
-  cursor: None,
-  code_completions: None,
-  order: None,
-  deleted: None,
-  placed_symbols: HashMap::new()
- }
+ Default::default()
 }
 
 pub fn blank_selection() -> gradesta::Selection {
- gradesta::Selection {
-  name: None,
-  update_count: None,
-  clients: HashMap::new(),
-  cursors: HashMap::new()
- }
+ Default::default()
 }
 
 pub fn blank_symbol() -> gradesta::Symbol {
@@ -142,11 +84,7 @@ pub fn blank_symbol() -> gradesta::Symbol {
 }
 
 pub fn blank_walk_tree() -> gradesta::WalkTree {
- gradesta::WalkTree {
-  symbols: Vec::new(),
-  vars: Vec::new(),
-  deleted: None
- }
+ Default::default()
 }
 
 pub fn blank_client_state() -> gradesta::ClientState {
@@ -164,22 +102,22 @@ pub fn blank_client_state() -> gradesta::ClientState {
 
 pub fn rw_mode() -> gradesta::Mode {
  gradesta::Mode {
-  read: true,
-  write: true,
+  read: Some(true),
+  write: Some(true),
   ..blank_mode()
  }
 }
 
 pub fn ro_mode() -> gradesta::Mode {
  gradesta::Mode {
-  read: true,
+  read: Some(true),
   ..blank_mode()
  }
 }
 
 pub fn default_cell_runtime_template() -> gradesta::CellRuntime {
  gradesta::CellRuntime {
-  update_count: Some(0),
+  update_count: 0,
   click_count: Some(0),
   deleted: Some(false),
   cell_runtime_modes: hashmap! {
@@ -222,7 +160,7 @@ pub fn default_cell_runtime_template() -> gradesta::CellRuntime {
 
 pub fn default_service_state() -> gradesta::ServiceState{
  gradesta::ServiceState {
-  on_disk_state: gradesta::service_state::on_disk_state::SAVED,
+  on_disk_state: Some(gradesta::service_state::OnDiskState::Saved as i32),
   cell_template: Some(default_cell_runtime_template()),
   service_state_modes: hashmap! {
    1 => rw_mode(),
