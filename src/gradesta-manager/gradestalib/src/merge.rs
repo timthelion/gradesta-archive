@@ -304,7 +304,6 @@ pub fn merge_service_states(input: &gradesta::ServiceState, old: &mut gradesta::
  merge_object_map(&input.cells, &mut old.cells, merge_cell_runtimes, |cell_runtime| Some(true) == cell_runtime.deleted); 
 }
 
-/*
 /// #Merge Clients
 ///
 /// ```
@@ -350,6 +349,7 @@ pub fn merge_clients(input: &gradesta::Client, old: &mut gradesta::Client) {
  merge_objects!(input, old, metadata, merge_actor_metadata);
 }
 
+/*
 /// #Merge Managers
 ///
 /// ```
