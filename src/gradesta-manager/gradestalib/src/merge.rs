@@ -202,7 +202,6 @@ pub fn merge_cell_runtimes(input: &gradesta::CellRuntime, old: &mut gradesta::Ce
  ];
 }
 
-/*
 /// # Merge actor metadata
 /// ```
 /// # extern crate gradestalib;
@@ -237,6 +236,7 @@ pub fn merge_actor_metadata(input: &gradesta::ActorMetadata, old: &mut gradesta:
   privacy_policy];
 }
 
+/*
 /// # Merge service states
 ///
 /// Merges all but the following fields which are never sent by the service.
