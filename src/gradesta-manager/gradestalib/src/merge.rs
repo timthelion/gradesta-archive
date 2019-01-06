@@ -349,7 +349,6 @@ pub fn merge_clients(input: &gradesta::Client, old: &mut gradesta::Client) {
  merge_objects!(input, old, metadata, merge_actor_metadata);
 }
 
-/*
 /// #Merge Managers
 ///
 /// ```
@@ -391,6 +390,7 @@ pub fn merge_managers(input: &gradesta::Manager, old: &mut gradesta::Manager) {
  }
 }
 
+/*
 /// # Merge selections
 ///
 /// ```
