@@ -49,15 +49,14 @@ pub fn default_cell_runtime_template() -> gradesta::CellRuntime {
   link_modes: hashmap! {
    1 => no_access_mode(),
    2 => no_access_mode(),
-   3 => rw_mode()
+   3 => rw_mode(),
+   4 => no_access_mode()
   },
-  for_link_modes: hashmap! {
-   0 => rw_mode(),
-   1 => rw_mode()
-  },
-  back_link_modes: hashmap! {
-   0 => rw_mode(),
-   1 => rw_mode()
+  link_direction_modes: hashmap! {
+   1 => rw_mode(),
+   -1 => rw_mode(),
+   2 => rw_mode(),
+   -2 => rw_mode()
   },
   ..Default::default()
  }

@@ -34,6 +34,31 @@ pub fn merge_map<A: Hash + Eq + Clone, B: Clone>(input: &HashMap<A, B>, old: &mu
  }
 }
 
+pub fn merge_object_map<A: Hash + Eq + Clone, B: Clone> (
+ input: &HashMap<A, B>,
+ old: &mut HashMap<A, B>,
+ merge_fn: fn(*const B, *mut B),
+ should_delete: fn(*const B) -> bool ) {
+ for (key, obj) in input.clone() {
+  let mut ins = false;
+  if should_delete(&obj) {
+   old.remove(&key);
+  } else {
+   match old.get_mut(&key) {
+    Some(mut old_obj) => {
+     merge_fn(&obj, old_obj);
+    },
+    None => {
+     ins = true;
+    }
+   }
+   if ins {
+     old.insert(key, obj);
+   }
+  }
+ }
+}
+
 macro_rules! set_if_some {
  ($input:ident, $old:ident, $( $x:ident ),* ) => {
    $(
@@ -52,7 +77,64 @@ macro_rules! merge_value_maps {
  }
 }
 
+macro_rules! merge_objects {
+ ($input:ident, $old:ident, $field:ident, $merge_fn:ident ) => {
+  if let Some(field) = $input.$field.clone() {
+   if let Some(ref mut old_field) = $old.$field {
+    $merge_fn(&field, old_field);
+   } else {
+    $old.$field = $input.$field.clone();
+   }
+  }
+ }
+}
 
+/// # Merge Cells
+///
+/// ```
+/// # #[macro_use] extern crate maplit;
+/// # extern crate gradestalib;
+/// # use gradestalib::merge::merge_cells;
+/// # use gradestalib::gradesta;
+/// # use gradestalib::defaults;
+///
+/// let input = gradesta::Cell{
+///  data: hashmap!{ 0 => vec!(1) },
+///  mime: Some(String::from("txt")),
+/// ..Default::default()
+/// };
+/// let mut old = gradesta::Cell{
+///  data: hashmap!{ 0 => vec!(2), 1 => vec!(3) },
+/// ..Default::default()
+/// };
+///
+/// merge_cells(&input, &mut old);
+///
+/// let expected = gradesta::Cell{
+///  data: hashmap!{ 0 => vec!(1), 1 => vec!(3) },
+///  mime: Some(String::from("txt")),
+/// ..Default::default()
+/// };
+///
+/// assert_eq!(old, expected);
+/// ```
+pub fn merge_cells(input: &gradesta::Cell, old: &mut gradesta::Cell) {
+ set_if_some![input, old,
+  mime,
+  encoding
+ ];
+
+ merge_value_maps![input, old,
+  data,
+  links,
+  coords,
+  tags
+ ];
+ // TODO clear empty links, tags, and coords
+}
+
+
+/*
 /// # Merge set of updates into cell runtime
 ///
 /// ```
@@ -103,17 +185,19 @@ pub fn merge_cell_runtimes(input: &gradesta::CellRuntime, old: &mut gradesta::Ce
  old.update_count = input.update_count;
 
  set_if_some![input, old,
-  cell,
   click_count,
   deleted,
-  creation_id];
+  creation_id
+ ];
 
  merge_value_maps![input, old,
   cell_runtime_modes,
   cell_modes,
   link_modes,
-  for_link_modes,
-  back_link_modes];
+  link_direction_modes
+ ];
+
+ merge_objects!(input, old, cell, merge_cells);
 }
 
 /// # Merge actor metadata
@@ -121,7 +205,6 @@ pub fn merge_cell_runtimes(input: &gradesta::CellRuntime, old: &mut gradesta::Ce
 /// # extern crate gradestalib;
 /// # use gradestalib::merge::merge_actor_metadata;
 /// # use gradestalib::gradesta;
-/// # use gradestalib::defaults;
 ///
 /// let input = gradesta::ActorMetadata {
 ///  name: Some(String::from("Bob")),
@@ -164,7 +247,6 @@ pub fn merge_actor_metadata(input: &gradesta::ActorMetadata, old: &mut gradesta:
 /// # extern crate gradestalib;
 /// # use gradestalib::merge::merge_service_states;
 /// # use gradestalib::gradesta;
-/// # use gradestalib::defaults;
 ///
 /// let input = gradesta::ServiceState {
 ///  cells: hashmap!{
@@ -214,30 +296,13 @@ pub fn merge_actor_metadata(input: &gradesta::ActorMetadata, old: &mut gradesta:
 /// ```
 pub fn merge_service_states(input: &gradesta::ServiceState, old: &mut gradesta::ServiceState) {
  set_if_some![input, old,
-  index,
-  on_disk_state,
-  user_public_key
+  on_disk_state
  ];
  merge_value_maps![input, old,
   log,
-  requested_user_attrs,
-  user_attrs,
   service_state_modes
  ];
- for (cell_id, cell_runtime) in input.cells.clone() {
-  let mut ins = false;
-  match old.cells.get_mut(&cell_id) {
-   Some(mut old_cell_runtime) => {
-    merge_cell_runtimes(&cell_runtime, &mut old_cell_runtime);
-   },
-   None => {
-    ins = true;
-   }
-  }
-  if ins {
-    old.cells.insert(cell_id, cell_runtime);
-  }
- }
+ merge_objects!(input, old, service_metadata, merge_actor_metadata);
 }
 
 /// #Merge Clients
@@ -282,13 +347,7 @@ pub fn merge_clients(input: &gradesta::Client, old: &mut gradesta::Client) {
  set_if_some!(input, old,
   status
  );
- if let Some(metadata) = input.metadata.clone() {
-  if let Some(ref mut old_metadata) = old.metadata {
-   merge_actor_metadata(&metadata, old_metadata);
-  } else {
-   old.metadata = input.metadata.clone();
-  }
- }
+ merge_objects!(input, old, metadata, merge_actor_metadata);
 }
 
 /// #Merge Managers
@@ -339,7 +398,6 @@ pub fn merge_managers(input: &gradesta::Manager, old: &mut gradesta::Manager) {
 /// # extern crate gradestalib;
 /// # use gradestalib::merge::merge_selections;
 /// # use gradestalib::gradesta;
-/// # use gradestalib::defaults;
 ///
 /// let input = gradesta::Selection {
 ///  name: Some(String::from("Lary")),
@@ -347,9 +405,12 @@ pub fn merge_managers(input: &gradesta::Manager, old: &mut gradesta::Manager) {
 ///  clients: hashmap!{
 ///   String::from("client-abc") => gradesta::selection::Status::Primary as i32
 ///  },
-///  cursors: hashmap!{
-///   String::from("id-abc") => gradesta::Cursor {
-///      walk_tree: Some(String::from("xyz")),
+///  cursors: {
+///   gradesta::Cursor {
+///      walk_tree: Some(gradesta::WalkTreeInstance{
+///        walk_tree: Some(String::from("xyz")),
+///        ..Default::default()
+///       }),
 ///      ..Default::default()
 ///    }
 ///  },
@@ -358,13 +419,19 @@ pub fn merge_managers(input: &gradesta::Manager, old: &mut gradesta::Manager) {
 ///
 /// let mut old = gradesta::Selection {
 ///  update_count: 2,
-///  cursors: hashmap!{
-///   String::from("id-abc") => gradesta::Cursor {
-///      walk_tree: Some(String::from("lmnop")),
+///  cursors: {
+///   gradesta::Cursor {
+///      walk_tree: Some(gradesta::WalkTreeInstance{
+///        walk_tree: Some(String::from("lmnop")),
+///        ..Default::default()
+///       }),
 ///      ..Default::default()
 ///    },
-///   String::from("id-efg") => gradesta::Cursor {
-///      walk_tree: Some(String::from("abc")),
+///   gradesta::Cursor {
+///      walk_tree: Some(gradesta::WalkTreeInstance{
+///        walk_tree: Some(String::from("abc")),
+///        ..Default::default()
+///       }),
 ///      ..Default::default()
 ///    }
 ///  },
@@ -379,13 +446,19 @@ pub fn merge_managers(input: &gradesta::Manager, old: &mut gradesta::Manager) {
 ///  clients: hashmap!{
 ///   String::from("client-abc") => gradesta::selection::Status::Primary as i32
 ///  },
-///  cursors: hashmap!{
-///   String::from("id-abc") => gradesta::Cursor {
-///      walk_tree: Some(String::from("xyz")),
+///  cursors: {
+///   gradesta::Cursor {
+///      walk_tree: Some(gradesta::WalkTreeInstance{
+///        walk_tree: Some(String::from("xyz")),
+///        ..Default::default()
+///       }),
 ///      ..Default::default()
 ///    },
-///   String::from("id-efg") => gradesta::Cursor {
-///      walk_tree: Some(String::from("abc")),
+///   gradesta::Cursor {
+///      walk_tree: Some(gradesta::WalkTreeInstance{
+///        walk_tree: Some(String::from("abc")),
+///        ..Default::default()
+///       }),
 ///      ..Default::default()
 ///    }
 ///  },
@@ -403,34 +476,116 @@ pub fn merge_selections(input: &gradesta::Selection, old: &mut gradesta::Selecti
  merge_value_maps![input, old,
   clients
  ];
- for (cell_id, cursor) in input.cursors.clone() {
-  let mut ins = false;
-  match old.cursors.get_mut(&cell_id) {
-   Some(mut old_cursor) => {
-    merge_cursors(&cursor, &mut old_cursor);
-   },
-   None => {
-    ins = true;
-   }
-  }
-  if ins {
-    old.cursors.insert(cell_id, cursor);
-  }
+ if input.cursors.len() > 0 {
+    let mut merged_cursor = old.cursors[0].clone();
+    merge_cursors(&input.cursors[0], &mut merged_cursor);
+    input.cursors[0] = merged_cursor;
+    old.cursors = input.cursors;
  }
 }
 
 
+/// # Merge cursors
+///
+/// ```
+/// # #[macro_use] extern crate maplit;
+/// # extern crate gradestalib;
+/// # use gradestalib::merge::merge_cursors;
+/// # use gradestalib::gradesta;
+///
+/// let input = gradesta::Cursor {
+///  walk_tree: Some(gradesta::WalkTreeInstance{
+///   walk_tree: Some(String::from("xyz")),
+///   ..Default::default()
+///  }),
+///  selections: hashmap!{
+///   3 => 0,
+///   4 => 3 
+///  },
+///  ..Default::default()
+/// };
+///
+/// let mut old = gradesta::Cursor {
+///  walk_tree: Some(gradesta::WalkTreeInstance{
+///   walk_tree: Some(String::from("lmnop")),
+///   ..Default::default()
+///  }),
+///  selections: hashmap!{
+///   3 => 4,
+///  },
+///  ..Default::default()
+/// };
+///
+/// merge_cursors(&input, &mut old);
+///
+/// let expected = gradesta::Cursor {
+///  walk_tree: Some(gradesta::WalkTreeInstance{
+///   walk_tree: Some(String::from("xyz")),
+///   ..Default::default()
+///  }),
+///  selections: hashmap!{
+///   4 => 3 
+///  },
+///  ..Default::default()
+/// };
+///
+/// assert_eq!(old, expected);
+/// ```
 pub fn merge_cursors(input: &gradesta::Cursor, old: &mut gradesta::Cursor) {
  set_if_some![input, old,
   walk_tree,
   cursor,
   code_completions,
-  order,
   deleted
  ];
  merge_value_maps![input, old,
-  var_overrides,
-  selections,
-  placed_symbols
+  selections
  ];
+ // Remove empty selections
+ let mut empty: Vec<u64> = Vec::new();
+ for (k, v) in old.selections.iter() {
+  if *v == 0 {
+   empty.push(*k);
+  }
+ }
+ for v in empty {
+  old.selections.remove(&v);
+ }
 }
+
+
+/// # Merge manager states
+///
+/// ```
+/// # #[macro_use] extern crate maplit;
+/// # extern crate gradestalib;
+/// # use gradestalib::merge::merge_manager_states;
+/// # use gradestalib::gradesta;
+///
+/// let input = gradesta::ManagerState{
+///  ..Default::default()
+/// };
+///
+/// let mut old = gradesta::ManagerState{
+///  ..Default::default()
+/// };
+///
+/// let expected = gradesta::ManagerState{
+///  ..Default::default()
+/// };
+///
+/// merge_manager_states(&input, &mut old);
+///
+/// assert_eq!(old, expected);
+/// ```
+pub fn merge_manager_states(input: &gradesta::ManagerState, old: &mut gradesta::ManagerState) {
+ for (client_id, client) in input.clients.iter() {
+ } 
+ merge_objects!(input, old, manager, merge_managers);
+ set_if_some![input, old,
+  identity_challenge,
+  user_signature
+ ];
+ old.capcha_servers.append(&mut input.capcha_servers.clone());
+}
+*/
