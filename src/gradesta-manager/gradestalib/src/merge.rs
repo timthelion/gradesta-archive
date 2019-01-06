@@ -390,7 +390,6 @@ pub fn merge_managers(input: &gradesta::Manager, old: &mut gradesta::Manager) {
  }
 }
 
-/*
 /// # Merge selections
 ///
 /// ```
@@ -405,21 +404,28 @@ pub fn merge_managers(input: &gradesta::Manager, old: &mut gradesta::Manager) {
 ///  clients: hashmap!{
 ///   String::from("client-abc") => gradesta::selection::Status::Primary as i32
 ///  },
-///  cursors: {
+///  cursors: vec![
 ///   gradesta::Cursor {
 ///      walk_tree: Some(gradesta::WalkTreeInstance{
 ///        walk_tree: Some(String::from("xyz")),
 ///        ..Default::default()
 ///       }),
 ///      ..Default::default()
+///    },
+///   gradesta::Cursor {
+///      walk_tree: Some(gradesta::WalkTreeInstance{
+///        walk_tree: Some(String::from("efg")),
+///        ..Default::default()
+///       }),
+///      ..Default::default()
 ///    }
-///  },
+///  ],
 ///  ..Default::default()
 /// };
 ///
 /// let mut old = gradesta::Selection {
 ///  update_count: 2,
-///  cursors: {
+///  cursors: vec![
 ///   gradesta::Cursor {
 ///      walk_tree: Some(gradesta::WalkTreeInstance{
 ///        walk_tree: Some(String::from("lmnop")),
@@ -432,9 +438,10 @@ pub fn merge_managers(input: &gradesta::Manager, old: &mut gradesta::Manager) {
 ///        walk_tree: Some(String::from("abc")),
 ///        ..Default::default()
 ///       }),
+///      cursor: Some(22),
 ///      ..Default::default()
 ///    }
-///  },
+///  ],
 ///  ..Default::default()
 /// };
 ///
@@ -446,7 +453,7 @@ pub fn merge_managers(input: &gradesta::Manager, old: &mut gradesta::Manager) {
 ///  clients: hashmap!{
 ///   String::from("client-abc") => gradesta::selection::Status::Primary as i32
 ///  },
-///  cursors: {
+///  cursors: vec![ 
 ///   gradesta::Cursor {
 ///      walk_tree: Some(gradesta::WalkTreeInstance{
 ///        walk_tree: Some(String::from("xyz")),
@@ -456,12 +463,12 @@ pub fn merge_managers(input: &gradesta::Manager, old: &mut gradesta::Manager) {
 ///    },
 ///   gradesta::Cursor {
 ///      walk_tree: Some(gradesta::WalkTreeInstance{
-///        walk_tree: Some(String::from("abc")),
+///        walk_tree: Some(String::from("efg")),
 ///        ..Default::default()
 ///       }),
 ///      ..Default::default()
 ///    }
-///  },
+///  ],
 ///  ..Default::default()
 /// };
 ///
@@ -477,10 +484,9 @@ pub fn merge_selections(input: &gradesta::Selection, old: &mut gradesta::Selecti
   clients
  ];
  if input.cursors.len() > 0 {
-    let mut merged_cursor = old.cursors[0].clone();
-    merge_cursors(&input.cursors[0], &mut merged_cursor);
-    input.cursors[0] = merged_cursor;
-    old.cursors = input.cursors;
+    let mut merged_cursors = input.cursors.clone();
+    merge_cursors(&input.cursors[0], &mut merged_cursors[0]);
+    old.cursors = merged_cursors;
  }
 }
 
@@ -554,6 +560,7 @@ pub fn merge_cursors(input: &gradesta::Cursor, old: &mut gradesta::Cursor) {
 }
 
 
+/*
 /// # Merge manager states
 ///
 /// ```
