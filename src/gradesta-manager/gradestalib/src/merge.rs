@@ -134,7 +134,6 @@ pub fn merge_cells(input: &gradesta::Cell, old: &mut gradesta::Cell) {
 }
 
 
-/*
 /// # Merge set of updates into cell runtime
 ///
 /// ```
@@ -156,7 +155,6 @@ pub fn merge_cells(input: &gradesta::Cell, old: &mut gradesta::Cell) {
 /// let mut old = gradesta::CellRuntime{
 ///  update_count: 2,
 ///  click_count: Some(1),
-///  creation_id: Some(String::from("foo")),
 ///  cell_runtime_modes: hashmap!{
 ///   1 => defaults::ro_mode(),
 ///   2 => defaults::ro_mode()
@@ -169,7 +167,6 @@ pub fn merge_cells(input: &gradesta::Cell, old: &mut gradesta::Cell) {
 /// let expected = gradesta::CellRuntime{
 ///  update_count: 3,
 ///  click_count: Some(2),
-///  creation_id: Some(String::from("foo")),
 ///  cell_runtime_modes: hashmap!{
 ///   1 => defaults::ro_mode(),
 ///   2 => defaults::rw_mode(),
@@ -183,11 +180,18 @@ pub fn merge_cells(input: &gradesta::Cell, old: &mut gradesta::Cell) {
 pub fn merge_cell_runtimes(input: &gradesta::CellRuntime, old: &mut gradesta::CellRuntime) {
 
  old.update_count = input.update_count;
+ if input.parameters.is_empty() {
+  old.parameters = input.parameters.clone();
+ }
+ if input.patch_parameters.is_empty() {
+  old.patch_parameters = input.patch_parameters.clone();
+ }
+
+ merge_objects!(input, old, cell, merge_cells);
 
  set_if_some![input, old,
   click_count,
-  deleted,
-  creation_id
+  deleted
  ];
 
  merge_value_maps![input, old,
@@ -196,10 +200,9 @@ pub fn merge_cell_runtimes(input: &gradesta::CellRuntime, old: &mut gradesta::Ce
   link_modes,
   link_direction_modes
  ];
-
- merge_objects!(input, old, cell, merge_cells);
 }
 
+/*
 /// # Merge actor metadata
 /// ```
 /// # extern crate gradestalib;
