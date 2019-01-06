@@ -37,8 +37,8 @@ pub fn merge_map<A: Hash + Eq + Clone, B: Clone>(input: &HashMap<A, B>, old: &mu
 pub fn merge_object_map<A: Hash + Eq + Clone, B: Clone> (
  input: &HashMap<A, B>,
  old: &mut HashMap<A, B>,
- merge_fn: fn(*const B, *mut B),
- should_delete: fn(*const B) -> bool ) {
+ merge_fn: fn(&B, &mut B),
+ should_delete: fn(&B) -> bool ) {
  for (key, obj) in input.clone() {
   let mut ins = false;
   if should_delete(&obj) {
@@ -236,7 +236,6 @@ pub fn merge_actor_metadata(input: &gradesta::ActorMetadata, old: &mut gradesta:
   privacy_policy];
 }
 
-/*
 /// # Merge service states
 ///
 /// Merges all but the following fields which are never sent by the service.
@@ -253,28 +252,25 @@ pub fn merge_actor_metadata(input: &gradesta::ActorMetadata, old: &mut gradesta:
 ///
 /// let input = gradesta::ServiceState {
 ///  cells: hashmap!{
-///   String::from("id-abc") => gradesta::CellRuntime {
+///   1 => gradesta::CellRuntime {
 ///      update_count: 2,
 ///      ..Default::default()
 ///    }
 ///  },
-///  index: Some(String::from("foo")),
-///  round: Some(Default::default()),
 ///  ..Default::default()
 /// };
 ///
 /// let mut old = gradesta::ServiceState {
 ///  cells: hashmap!{
-///   String::from("id-abc") => gradesta::CellRuntime {
+///   1 => gradesta::CellRuntime {
 ///      update_count: 1,
 ///      ..Default::default()
 ///    },
-///   String::from("id-efg") => gradesta::CellRuntime {
+///   2 => gradesta::CellRuntime {
 ///      update_count: 1,
 ///      ..Default::default()
 ///    }
 ///  },
-///  index: Some(String::from("bar")),
 ///  ..Default::default()
 /// };
 ///
@@ -282,16 +278,15 @@ pub fn merge_actor_metadata(input: &gradesta::ActorMetadata, old: &mut gradesta:
 ///
 /// let expected = gradesta::ServiceState {
 ///  cells: hashmap!{
-///   String::from("id-abc") => gradesta::CellRuntime {
+///   1 => gradesta::CellRuntime {
 ///      update_count: 2,
 ///      ..Default::default()
 ///    },
-///   String::from("id-efg") => gradesta::CellRuntime {
+///   2 => gradesta::CellRuntime {
 ///      update_count: 1,
 ///      ..Default::default()
 ///    }
 ///  },
-///  index: Some(String::from("foo")),
 ///  ..Default::default()
 /// };
 ///
@@ -306,8 +301,10 @@ pub fn merge_service_states(input: &gradesta::ServiceState, old: &mut gradesta::
   service_state_modes
  ];
  merge_objects!(input, old, service_metadata, merge_actor_metadata);
+ merge_object_map(&input.cells, &mut old.cells, merge_cell_runtimes, |cell_runtime| Some(true) == cell_runtime.deleted); 
 }
 
+/*
 /// #Merge Clients
 ///
 /// ```
