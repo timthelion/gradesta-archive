@@ -560,7 +560,6 @@ pub fn merge_cursors(input: &gradesta::Cursor, old: &mut gradesta::Cursor) {
 }
 
 
-/*
 /// # Merge manager states
 ///
 /// ```
@@ -586,13 +585,14 @@ pub fn merge_cursors(input: &gradesta::Cursor, old: &mut gradesta::Cursor) {
 /// assert_eq!(old, expected);
 /// ```
 pub fn merge_manager_states(input: &gradesta::ManagerState, old: &mut gradesta::ManagerState) {
- for (client_id, client) in input.clients.iter() {
- } 
+ merge_object_map(&input.clients, &mut old.clients, merge_clients, |client| client.status == Some(gradesta::client::Status::Disconnected as i32));
  merge_objects!(input, old, manager, merge_managers);
+ merge_object_map(&input.selections, &mut old.selections, merge_selections, |selection| selection.clients.is_empty());
+ merge_value_maps!(input, old, walk_trees, identity_servers);
+
  set_if_some![input, old,
   identity_challenge,
-  user_signature
+  user_signature,
+  user_public_key
  ];
- old.capcha_servers.append(&mut input.capcha_servers.clone());
 }
-*/
