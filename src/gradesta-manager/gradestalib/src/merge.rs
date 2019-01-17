@@ -1,3 +1,10 @@
+/// This module is used to merge gradesta objects.
+/// The protocol functions by sending "Delta" objects back and forth.
+///
+/// These Delta objects are then overlayed utop eachother to calculate the shared state.
+/// This overlay is, for the most part, a simple act of overwritting only those values which have been set.
+/// Newer Delta's are overlayed utop older ones.
+///
 use gradesta;
 use std::hash::Hash;
 use std::collections::HashMap;
