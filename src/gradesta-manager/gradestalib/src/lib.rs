@@ -7,6 +7,7 @@ pub mod gradesta {
 }
 
 pub mod merge;
+pub mod state_machine;
 pub mod defaults;
 
 #[cfg(test)]
