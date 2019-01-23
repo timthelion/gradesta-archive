@@ -1,0 +1,30 @@
+#!/usr/bin/python3
+
+import os
+import sys
+import json
+
+out_dir = os.environ["OUT_DIR"]
+state_machine_rust = os.path.join(out_dir, "state-machine.rs")
+state_machine_tg = sys.argv[1]
+state_machine_graph = {}
+
+with open(state_machine_tg) as fd:
+    while True:
+        line = fd.readline()
+        if not line:
+            break
+        if line.startswith("#"):
+            continue
+        (node_id, text, streets) = json.loads(line)
+        state_machine_graph[node_id] = {
+                "text": text,
+                "streets": streets,
+        }
+
+with open(state_machine_rust, "w") as fd:
+    scopes = {}
+    states = {}
+    events = {}
+    fd.writeline("enum States {")
+

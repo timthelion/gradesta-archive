@@ -6,6 +6,10 @@ pub mod gradesta {
  include!(concat!(env!("OUT_DIR"), "/gradesta.rs"));
 }
 
+pub mod state_machine {
+ include!(concat!(env!("OUT_DIR"), "/state-machine.rs"));
+}
+
 pub mod merge;
 pub mod state_machine;
 pub mod defaults;
