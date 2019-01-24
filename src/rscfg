@@ -4,7 +4,7 @@ import os
 import sys
 import json
 
-out_dir = os.environ["OUT_DIR"]
+out_dir = os.environ.get("OUT_DIR", os.environ.get("PWD", "."))
 state_machine_rust = os.path.join(out_dir, "state-machine.rs")
 state_machine_tg = sys.argv[1]
 state_machine_graph = {}
@@ -18,13 +18,71 @@ with open(state_machine_tg) as fd:
             continue
         (node_id, text, streets) = json.loads(line)
         state_machine_graph[node_id] = {
+                "id": node_id,
                 "text": text,
                 "streets": streets,
         }
 
-with open(state_machine_rust, "w") as fd:
-    scopes = {}
-    states = {}
-    events = {}
-    fd.writeline("enum States {")
+scopes = {}
+states = {}
+events = {}
+states_by_id = {}
+for node in state_machine_graph.values():
+    # Load scopes
+    scope_err = "Failed to parse scopes for node %d. " % node["id"]
+    toks = node["text"].split("{")
+    toks2 = toks[0].split()
+    state = toks2[0]
+    states[state] = toks2[1:]
+    states_by_id[node["id"]] = state
+    if len(toks) == 2:
+        if len(toks2) > 1:
+            scopes[toks2[-1]] = "{" + toks[1]
+        else:
+            sys.exit(scope_err + "Expected a scope name before scope declaration.")
+    elif len(toks) not in (1, 2):
+        sys.exit(scope_err + "Unexpected {.")
+    # Load events
+    for street in node["streets"]:
+        events[street[0]] = events.get(street[0], set())
+        events[street[0]].add(street[1])
+# Check that all events have consistent types
+for event, listener in events.items():
+    dest_states = [states_by_id[state_id] for state_id in listener]
+    dest_scopes = [set(states[state]) for state in dest_states]
+    
+    # Check that all scopes for a given event are equal
+    # https://stackoverflow.com/questions/3844801/check-if-all-elements-in-a-list-are-identical
+    if not dest_scopes[1:] == dest_scopes[:-1]:
 
+        sys.exit("Scopes for event %s don't match. " % event)
+# Check that all scopes are declared and lower case
+scopes_referenced_by_states = set()
+for state, states_scopes in states.items():
+    scopes_referenced_by_states.update(set(states_scopes))
+for scope in scopes_referenced_by_states:
+    if not scope in scopes:
+        sys.exit("The scope %s is undeclaired." % scope)
+    if not scope[0].islower():
+        sys.exit("Scopes must be lower case. %s is not." % scope)
+
+with open(state_machine_rust, "w") as fd:
+    # Generate code 
+    for scope, declaration in scopes.items():
+        fd.writelines("struct %s %s\n\n" % (scope.capitalize(), declaration))
+    fd.writelines("enum States {\n")
+    for state, scopes in states.items():
+        declaration = ", ".join(["%s: %s" % (scope, scope.capitalize()) for scope in scopes])
+        fd.writelines("    %s {%s},\n" % (state, declaration))
+    fd.writelines("}\n\n")
+    fd.writelines("enum Event {\n")
+    for event, listeners in events.items():
+        arbitrary_listener = states_by_id[next(iter(listeners))]
+        event_scopes = ", ".join(["%s: %s" % (scope, scope.capitalize()) for scope in states[arbitrary_listener]])
+        fd.writelines("    %s {%s},\n" % (event, event_scopes))
+    fd.writelines("}\n\n")
+
+    fd.writelines("""
+fn run(events_rx: Receiver<Event>) {
+}
+""")
